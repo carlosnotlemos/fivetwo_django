@@ -292,14 +292,14 @@
       <!--SEGUNDA SEÇÃO (CHAMADA DE AÇÃO)-->
       <section class="py-5">
         <!--TITULO DA CHAMADA DE AÇÃO-->
-        <div class="container carousel slide" id="carouselExampleIndicators">
+        <div class="container carousel slide" id="carouselSugestions">
           <div class="carousel-indicators bg-dark d-md-none">
-            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
-            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
+            <button type="button" data-bs-target="#carouselSugestions" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+            <button type="button" data-bs-target="#carouselSugestions" data-bs-slide-to="1" aria-label="Slide 2"></button>
+            <button type="button" data-bs-target="#carouselSugestions" data-bs-slide-to="2" aria-label="Slide 3"></button>
           </div>
           <ul class="row list-unstyled text-center py-5 carousel-inner">
-            <li class="col-lg-4 carousel-item active">
+            <li class="col-lg-4 active">
               <i class="fa-regular fa-truck fa-lg"></i>
               <h5 class="fw-bold my-3">FRETE GRÁTIS</h5>
               <p>
@@ -307,7 +307,7 @@
                 <strong>Frete Grátis</strong> até para o Acre 🇧🇷
               </p>
             </li>
-            <li class="col-lg-4 carousel-item">
+            <li class="col-lg-4">
               <i class="fa-regular fa-share-from-square fa-lg"></i>
               <h5 class="fw-bold my-3">TROCA GRÁTIS</h5>
               <p>
@@ -315,7 +315,7 @@
                 personalizado
               </p>
             </li>
-            <li class="col-lg-4 carousel-item">
+            <li class="col-lg-4">
               <i class="fa-regular fa-hand-back-fist fa-lg"></i>
               <h5 class="fw-bold my-3">COMPRA SEGURA</h5>
               <p>
@@ -616,6 +616,26 @@
         }
       }
     </style>
+
+    <!--AJUSTA O CAROUSELSUGESTION PARA MOBILE-->
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const items = document.querySelectorAll('#carouselSugestions .row > li');
+        const mediaQuery = window.matchMedia('(max-width: 767px)');
+
+        function updateCarouselClasses(e) {
+          items.forEach((item, index) => {
+            item.classList.toggle('carousel-item', e.matches);
+          });
+        }
+
+        // Inicializa
+        updateCarouselClasses(mediaQuery);
+
+        // Escuta mudanças de tamanho
+        mediaQuery.addEventListener('change', updateCarouselClasses);
+      });
+    </script>
 
     <!--AÇÃO DO BOTÃO QUE FAZ ROLAR PAGINA-->
     <script>
