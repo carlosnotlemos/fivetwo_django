@@ -293,13 +293,13 @@
       <section class="py-5">
         <!--TITULO DA CHAMADA DE AÇÃO-->
         <div class="container carousel slide" id="carouselSugestions">
-          <div class="carousel-indicators bg-dark d-md-none">
+          <div class="carousel-indicators d-md-none">
             <button type="button" data-bs-target="#carouselSugestions" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
             <button type="button" data-bs-target="#carouselSugestions" data-bs-slide-to="1" aria-label="Slide 2"></button>
             <button type="button" data-bs-target="#carouselSugestions" data-bs-slide-to="2" aria-label="Slide 3"></button>
           </div>
-          <ul class="row list-unstyled text-center py-5 carousel-inner">
-            <li class="col-lg-4 active">
+          <ul class="row list-unstyled text-center py-5">
+            <li class="col-md-4 active">
               <i class="fa-regular fa-truck fa-lg"></i>
               <h5 class="fw-bold my-3">FRETE GRÁTIS</h5>
               <p>
@@ -307,7 +307,7 @@
                 <strong>Frete Grátis</strong> até para o Acre 🇧🇷
               </p>
             </li>
-            <li class="col-lg-4">
+            <li class="col-md-4">
               <i class="fa-regular fa-share-from-square fa-lg"></i>
               <h5 class="fw-bold my-3">TROCA GRÁTIS</h5>
               <p>
@@ -315,7 +315,7 @@
                 personalizado
               </p>
             </li>
-            <li class="col-lg-4">
+            <li class="col-md-4">
               <i class="fa-regular fa-hand-back-fist fa-lg"></i>
               <h5 class="fw-bold my-3">COMPRA SEGURA</h5>
               <p>
@@ -326,7 +326,7 @@
           </ul>
         </div>
         <!--CARDS DA CHAMADA DE AÇÃO-->
-        <div class="container-fluid pb-5">
+        <div class="container-fluid pb-5" id="cardSugestions">
           <ul class="list-unstyled row gy-4 text-center justify-content-center">
             <li class="col-6 col-lg-3" style="max-width: 350px; height: 600px;">
               <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExYmFoN2VkcnBqcjJsdzgxemcwemNzZHJ4dGR2YXE3NWR1c2N5b294MyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3fc52GuMe4IYGKHkPz/giphy.gif" 
@@ -519,6 +519,40 @@
          </div>
       </section>
 
+      <div class="my-5">
+        <div class="bounce mx-auto">
+          <p class="display-4 fw-bold">
+            Esse texto desliza da direita para a esquerda e volta! 🚀
+          </p>
+        </div>
+      </div>
+
+      <style>
+        .bounce {
+          position: relative;
+          height: 50px;
+          overflow: hidden;
+        }
+
+        .bounce p {
+          position: absolute;
+          white-space: nowrap;
+          margin: 0;
+          line-height: 50px;
+          animation: bounce-scroll 10s ease-in-out infinite alternate;
+        }
+
+        @keyframes bounce-scroll {
+          0% {
+            transform: translateX(100%);
+          }
+          100% {
+            transform: translateX(-50%);
+          }
+        }
+      </style>
+
+
     </main>
 
     <!--Ajeitar depois esse footer-->
@@ -600,23 +634,50 @@
 
     {% block content %}{% endblock content %}
 
-    <!--CSS MOBILE FRIENDLY E SCROLL-->
+    <!--CSS MOBILE FRIENDLY-->
     <style>
+      /* MOBILE */
       @media (max-width: 768px){
+        /* SCROLL DA CATEGORIAS PROMO*/
         #scroll-container .card {
           min-width: 250px !important;
         }
         #scroll-container {
           overflow-x: auto;
         }
+
+        /* CARDSUGESTIONS */
+        #cardSugestions ul li {
+          height: 310px !important;
+        }
+
+        /* BOTÕES DE CAROUSELSUGESTIONS */
+        .carousel-indicators [data-bs-target] {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          background-color: transparent;
+          border: 1px solid #000;
+          opacity: 0.7;
+        }
+
+        .carousel-indicators .active {
+          background-color: #000;
+        }
+
+        /* */
       }
+    </style>
+
+    <!--DESKTOP MEDIA-->
+    <style>
+      /* DESKTOP */
       @media (min-width: 992px){
         #scroll-container {
           overflow-x: hidden;
         }
       }
     </style>
-
     <!--AJUSTA O CAROUSELSUGESTION PARA MOBILE-->
     <script>
       document.addEventListener('DOMContentLoaded', () => {
