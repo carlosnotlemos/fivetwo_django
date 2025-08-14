@@ -6,6 +6,7 @@
     <title>{% block title %}FiveTwo{% endblock title %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
     <script src="https://kit.fontawesome.com/19f637e07e.js" crossorigin="anonymous"></script>
+    {% load static %}
   </head>
 
   <body>
@@ -519,39 +520,18 @@
          </div>
       </section>
 
-      <div class="my-5">
-        <div class="bounce mx-auto">
-          <p class="display-4 fw-bold">
-            Esse texto desliza da direita para a esquerda e volta! 🚀
-          </p>
+      <section class="py-5 bg-body-tertiary">
+        <div class="container text-center">
+          <img src="{% static 'landing/assets/img/insta.png'%}" alt="Instagram Icone"
+            style="max-width: 52px; height: 52px;">
+          <h1>Nos siga no instagram</h1>
+          <div class="d-flex justify-content-center">
+            <h3 class="fw-bold">@fivetwo_tshirt</h3>
+            <img src="{% static 'landing/assets/img/insta_verify.png'%}" alt="Instagram Icone Verificado"
+              style="max-width: 28px; height: 28px;">
+          </div>
         </div>
-      </div>
-
-      <style>
-        .bounce {
-          position: relative;
-          height: 50px;
-          overflow: hidden;
-        }
-
-        .bounce p {
-          position: absolute;
-          white-space: nowrap;
-          margin: 0;
-          line-height: 50px;
-          animation: bounce-scroll 10s ease-in-out infinite alternate;
-        }
-
-        @keyframes bounce-scroll {
-          0% {
-            transform: translateX(100%);
-          }
-          100% {
-            transform: translateX(-50%);
-          }
-        }
-      </style>
-
+      </section>
 
     </main>
 
