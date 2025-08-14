@@ -1,0 +1,29 @@
+@media (max-width: 768px){
+  /* SCROLL DA CATEGORIAS PROMO*/
+  #scroll-container .card {
+    min-width: 250px !important;
+  }
+  #scroll-container {
+    overflow-x: auto;
+  }
+
+  /* CARDSUGESTIONS */
+  #cardSugestions ul li {
+    height: 310px !important;
+  }
+
+  /* BOTÕES DE CAROUSELSUGESTIONS */
+  .carousel-indicators [data-bs-target] {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: transparent;
+    border: 1px solid #000;
+    opacity: 0.7;
+  }
+
+  .carousel-indicators .active {
+    background-color: #000;
+  }
+
+}

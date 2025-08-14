@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}FiveTwo{% endblock title %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
-    <script src="https://kit.fontawesome.com/19f637e07e.js" crossorigin="anonymous"></script>
     {% load static %}
+    <link rel="stylesheet" href="{% static 'landing/assets/css/landing.css' %}">
+    <script type="module" src="{% static 'landing/js/landing.js' %}"></script>
+    <script src="https://kit.fontawesome.com/19f637e07e.js" crossorigin="anonymous"></script>
   </head>
 
   <body>
@@ -519,20 +521,26 @@
            </button>
          </div>
       </section>
-
+      
+      <!--CHAMADA DE AÇÃO SIGA NOS-->
       <section class="py-5 bg-body-tertiary">
-        <div class="container text-center">
-          <img src="{% static 'landing/assets/img/insta.png'%}" alt="Instagram Icone"
-            style="max-width: 52px; height: 52px;">
-          <h1>Nos siga no instagram</h1>
-          <div class="d-flex justify-content-center">
-            <h3 class="fw-bold">@fivetwo_tshirt</h3>
-            <img src="{% static 'landing/assets/img/insta_verify.png'%}" alt="Instagram Icone Verificado"
-              style="max-width: 28px; height: 28px;">
+        <a href="https://www.instagram.com/fivetwo.tshirt/" class="text-decoration-none text-body" target="_blank">
+          <div class="container text-center">
+            <img src="{% static 'landing/assets/img/insta.png'%}" alt="Instagram Icone"
+              style="max-width: 52px; height: 52px;">
+            <h1>Nos siga no instagram</h1>
+            <div class="d-flex justify-content-center">
+              <h3 class="fw-bold">@fivetwo_tshirt</h3>
+              <img src="{% static 'landing/assets/img/insta_verify.png'%}" alt="Instagram Icone Verificado"
+                style="max-width: 28px; height: 28px;">
+            </div>
           </div>
-        </div>
+        </a>
       </section>
 
+      <section>
+        teste
+      </section>
     </main>
 
     <!--Ajeitar depois esse footer-->
@@ -614,94 +622,6 @@
 
     {% block content %}{% endblock content %}
 
-    <!--CSS MOBILE FRIENDLY-->
-    <style>
-      /* MOBILE */
-      @media (max-width: 768px){
-        /* SCROLL DA CATEGORIAS PROMO*/
-        #scroll-container .card {
-          min-width: 250px !important;
-        }
-        #scroll-container {
-          overflow-x: auto;
-        }
-
-        /* CARDSUGESTIONS */
-        #cardSugestions ul li {
-          height: 310px !important;
-        }
-
-        /* BOTÕES DE CAROUSELSUGESTIONS */
-        .carousel-indicators [data-bs-target] {
-          width: 10px;
-          height: 10px;
-          border-radius: 50%;
-          background-color: transparent;
-          border: 1px solid #000;
-          opacity: 0.7;
-        }
-
-        .carousel-indicators .active {
-          background-color: #000;
-        }
-
-        /* */
-      }
-    </style>
-
-    <!--DESKTOP MEDIA-->
-    <style>
-      /* DESKTOP */
-      @media (min-width: 992px){
-        #scroll-container {
-          overflow-x: hidden;
-        }
-      }
-    </style>
-    <!--AJUSTA O CAROUSELSUGESTION PARA MOBILE-->
-    <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        const items = document.querySelectorAll('#carouselSugestions .row > li');
-        const mediaQuery = window.matchMedia('(max-width: 767px)');
-
-        function updateCarouselClasses(e) {
-          items.forEach((item, index) => {
-            item.classList.toggle('carousel-item', e.matches);
-          });
-        }
-
-        // Inicializa
-        updateCarouselClasses(mediaQuery);
-
-        // Escuta mudanças de tamanho
-        mediaQuery.addEventListener('change', updateCarouselClasses);
-      });
-    </script>
-
-    <!--AÇÃO DO BOTÃO QUE FAZ ROLAR PAGINA-->
-    <script>
-      const scrollContainer = document.getElementById('scroll-container');
-      const btnPrev = document.getElementById('btnPrev');
-      const btnNext = document.getElementById('btnNext');
-
-      // Quanto de pixels você quer que a rolagem avance a cada clique
-      const scrollAmount = 250;
-
-      btnPrev.addEventListener('click', () => {
-        scrollContainer.scrollBy({
-          left: -scrollAmount,
-          behavior: 'smooth'
-        });
-      });
-
-      btnNext.addEventListener('click', () => {
-        scrollContainer.scrollBy({
-          left: scrollAmount,
-          behavior: 'smooth'
-        });
-      });
-    </script>
-    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
   </body>
 </html>

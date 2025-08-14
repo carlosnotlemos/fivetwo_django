@@ -1,0 +1,7 @@
+
+@media (min-width: 992px){
+  /* SCROLL DA CATEGORIAS PROMO*/
+  #scroll-container {
+    overflow-x: hidden;
+  }
+}
