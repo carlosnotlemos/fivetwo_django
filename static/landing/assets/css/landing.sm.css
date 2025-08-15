@@ -1,9 +1,9 @@
 @media (max-width: 768px){
   /* SCROLL DA CATEGORIAS PROMO*/
-  #scroll-container .card {
+  .carousel-items .card {
     min-width: 250px !important;
   }
-  #scroll-container {
+  .carousel-items {
     overflow-x: auto;
   }
 
