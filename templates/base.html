@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}FiveTwo{% endblock title %}</title>
     {% load static %}
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
     <link rel="stylesheet" href="{% static 'landing/assets/css/landing.css' %}">
     <script type="module" src="{% static 'landing/js/landing.js' %}"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
     <script src="https://kit.fontawesome.com/19f637e07e.js" crossorigin="anonymous"></script>
   </head>
 
@@ -16,14 +16,15 @@
       <!--BARRA DE NAVEGAÇÃO SUPERIOR-->
       <nav class="navbar bg-body-tertiary fixed-top pt-0">
         <!--CARROSEL TOPBAR-->
-        <div id="topBarCarousel" class="text-center bg-dark text-white w-100 py-2 carousel-fade" data-bs-ride="carousel">
+        <div id="topBarCarousel" class="text-center bg-topbar w-100 py-2 carousel-fade" data-bs-ride="carousel">
           <div class="carousel-inner">
-            <div class="carousel-item active">🛒 Promo relâmpago! Só hoje com frete grátis 🚀</div>
-            <div class="carousel-item ">🎯 Ache seu produto favorito e leve agora 🏆</div>
-            <div class="carousel-item ">🔥 Descontos que somem rápido… aproveite! ⏳</div>
+            <div class="carousel-item active">🛍️ Promo relâmpago! Só hoje com frete grátis ✈️</div>
+            <div class="carousel-item ">🎯 Ache seu produto favorito e leve agora 🏅</div>
+            <div class="carousel-item ">⚡ Descontos que somem rápido… aproveite! ⏰</div>
           </div>
         </div>
-
+        
+        <!--TOPBAR CATEGORIAS-->
         <div class="container-fluid justify-content-center pt-2">
           <div class="row w-100">
             <!-- ICONES DA ESQUERDA -->
@@ -67,7 +68,7 @@
       </nav>
       <!--IMAGEM BANNER PRINCIPAL DO HEADER-->
       <section class="w-100" style="padding-top: 85px;">
-        <img src="https://i.postimg.cc/t4K4GjgX/banner2.jpg" alt="banner principal" style="width: 100%; display: block;">
+        <img src="{% static 'landing/assets/img/BANNER.png' %}" alt="banner principal" style="width: 100%; display: block;">
       </section>
 
     </header>
@@ -136,7 +137,7 @@
       </section>
 
       <!--PRIMEIRA SEÇÃO (CATEGORIAS PROMO)-->
-      <section class="">
+      <section>
         <!--TITULO CATEGORIAS-->
         <div class="container py-5">
           <h1>DIA DOS PAIS</h1>
@@ -366,7 +367,7 @@
       </section>
 
       <!--TERCEIRA SEÇÃO (CATEGORIAS PROMO)-->
-      <section class="">
+      <section>
         <!--TITULO CATEGORIAS-->
         <div class="container py-5">
           <h1>DIA DOS PAIS</h1>
@@ -545,10 +546,6 @@
             </div>
           </a>
         </div>
-      </section>
-
-      <section>
-        teste
       </section>
     </main>
 
