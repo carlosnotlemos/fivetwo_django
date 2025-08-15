@@ -3,11 +3,22 @@
 @import './landing.md.css';
 
 :root {
-  --orange-topbar: #FF7518;
+  --default-white: #F5F5F5;
   --white-topbar: #FFFFFF;
+  --orange-topbar: #FF7518;
+  --yellow-star: #ffa800;
+}
+
+html body{
+  background-color: var(--default-white);
 }
 
 .bg-topbar {
   background-color: var(--orange-topbar);
   color: var(--white-topbar);
+  font-weight: bold;
+}
+
+.star-color {
+  color: var(--yellow-star);
 }
