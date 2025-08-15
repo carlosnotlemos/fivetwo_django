@@ -1,20 +1,20 @@
-const scrollContainer = document.getElementById('scroll-container');
-const btnPrev = document.getElementById('btnPrev');
-const btnNext = document.getElementById('btnNext');
-
-// Quanto de pixels você quer que a rolagem avance a cada clique
 const scrollAmount = 250;
 
-btnPrev.addEventListener('click', () => {
-  scrollContainer.scrollBy({
-    left: -scrollAmount,
-    behavior: 'smooth'
-  });
-});
+// Seleciona todos os blocos de carrossel
+document.querySelectorAll('.carousel-block').forEach(block => {
+  const carouselId = block.dataset.carousel; // pega o valor do data-carousel
 
-btnNext.addEventListener('click', () => {
-  scrollContainer.scrollBy({
-    left: scrollAmount,
-    behavior: 'smooth'
+  // Seleciona os elementos correspondentes com o mesmo data-carousel
+  const scrollContainer = document.querySelector(`.carousel-items[data-carousel="${carouselId}"]`);
+  const btnPrev = block.querySelector('.btnPrev');
+  const btnNext = block.querySelector('.btnNext');
+
+  // Adiciona os eventos de scroll
+  btnPrev.addEventListener('click', () => {
+    scrollContainer.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+  });
+
+  btnNext.addEventListener('click', () => {
+    scrollContainer.scrollBy({ left: scrollAmount, behavior: 'smooth' });
   });
 });
