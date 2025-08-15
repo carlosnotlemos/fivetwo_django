@@ -26,4 +26,8 @@
     background-color: #000;
   }
 
+  /* TOPBARCAROUSEL*/
+  #topBarCarousel .carousel-item {
+    font-size: small;
+  }
 }

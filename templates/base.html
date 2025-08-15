@@ -15,13 +15,15 @@
     <header>
       <!--BARRA DE NAVEGAÇÃO SUPERIOR-->
       <nav class="navbar bg-body-tertiary fixed-top pt-0">
-        <div id="TopBarCarousel" class="bg-dark text-white text-center w-100 py-2 carousel-fade" data-bs-ride="carousel">
+        <!--CARROSEL TOPBAR-->
+        <div id="topBarCarousel" class="bg-dark text-white text-center w-100 py-2 carousel-fade" data-bs-ride="carousel">
           <div class="carousel-inner">
             <div class="carousel-item active">🛒 Promo relâmpago! Só hoje com frete grátis 🚀</div>
             <div class="carousel-item ">🎯 Ache seu produto favorito e leve agora 🏆</div>
             <div class="carousel-item ">🔥 Descontos que somem rápido… aproveite! ⏳</div>
           </div>
         </div>
+
         <div class="container-fluid justify-content-center pt-1">
           <div class="row w-100 align-items-center">
             <!-- ICONES DA ESQUERDA -->
@@ -64,7 +66,7 @@
         </div>
       </nav>
       <!--IMAGEM BANNER PRINCIPAL DO HEADER-->
-      <section class="w-100" style="padding-top: 56px;">
+      <section class="w-100" style="padding-top: 85px;">
         <img src="https://i.postimg.cc/t4K4GjgX/banner2.jpg" alt="banner principal" style="width: 100%; display: block;">
       </section>
 
@@ -531,8 +533,8 @@
       
       <!--CHAMADA DE AÇÃO SIGA NOS-->
       <section class="py-5 bg-body-tertiary">
-        <a href="https://www.instagram.com/fivetwo.tshirt/" class="text-decoration-none text-body" target="_blank">
-          <div class="container text-center">
+        <div class="container text-center">
+          <a href="https://www.instagram.com/fivetwo.tshirt/" class="text-decoration-none text-body" target="_blank">
             <img src="{% static 'landing/assets/img/insta.png'%}" alt="Instagram Icone"
               style="max-width: 52px; height: 52px;">
             <h1>Nos siga no instagram</h1>
@@ -541,8 +543,8 @@
               <img src="{% static 'landing/assets/img/insta_verify.png'%}" alt="Instagram Icone Verificado"
                 style="max-width: 28px; height: 28px;">
             </div>
-          </div>
-        </a>
+          </a>
+        </div>
       </section>
 
       <section>
