@@ -4,8 +4,7 @@
 
 :root {
   --default-white: #F5F5F5;
-  --white-topbar: #FFFFFF;
-  --orange-topbar: #FF7518;
+  --orange-default: #FF7518;
   --yellow-star: #ffa800;
 }
 
@@ -13,12 +12,20 @@ html body{
   background-color: var(--default-white);
 }
 
-.bg-topbar {
-  background-color: var(--orange-topbar);
-  color: var(--white-topbar);
+.bg-carousel {
+  background-color: var(--orange-default);
+  color: var(--default-white);
   font-weight: bold;
 }
 
 .star-color {
   color: var(--yellow-star);
+}
+
+.bg-faq {
+  background-color: var(--orange-topbar);
+}
+
+.bg-topbar{
+  background-color: var(--default-white);
 }

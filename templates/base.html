@@ -14,9 +14,9 @@
   <body>
     <header>
       <!--BARRA DE NAVEGAÇÃO SUPERIOR-->
-      <nav class="navbar bg-body-tertiary fixed-top pt-0">
+      <nav class="navbar bg-topbar fixed-top pt-0">
         <!--CARROSEL TOPBAR-->
-        <div id="topBarCarousel" class="text-center bg-topbar w-100 py-2 carousel-fade" data-bs-ride="carousel">
+        <div id="topBarCarousel" class="text-center bg-carousel w-100 py-2 carousel-fade" data-bs-ride="carousel">
           <div class="carousel-inner">
             <div class="carousel-item active">🛍️ Promo relâmpago! Só hoje com frete grátis ✈️</div>
             <div class="carousel-item ">🎯 Ache seu produto favorito e leve agora! 🏴</div>
@@ -598,7 +598,7 @@
       </section>
       
       <!--Banner informativo-->
-      <section>
+      <section class="py-5">
         <picture>
           <source media="(max-width: 768px)" srcset="{% static 'landing/assets/img/BANNERINFOMOBILE.png' %}">
           <img src="{% static 'landing/assets/img/BANNERINFO.png'%}" 
