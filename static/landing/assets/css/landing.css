@@ -26,12 +26,18 @@ a { text-decoration: none; color: inherit; }
   font-weight: bold;
 }
 
-/* TEXT COLOR */
+/* COLOR */
 .star-color { color: var(--yellow-amber); }
 .text-soft { color: var(--gray-white-soft); }
 footer a:hover { color: var(--default-white); }
 
-/*BOTÃO DE SUPORTE*/
+/* SOBREPOR BOOTSTRAP */
+.no-focus:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+/* BOTÕES */
 .btn-suport {
   background-color: #9a5de4;
   border: 2px solid #9a5de4;
@@ -42,10 +48,8 @@ footer a:hover { color: var(--default-white); }
   border: 2px solid #9a5de4;
   color: #9a5de4;
 }
-/* END BOTÃO */
 
-/*RETIRANDO FOCO DO BOOTSTRAP*/
-.no-focus:focus {
-  outline: none;
-  box-shadow: none;
+.accordion-button {
+  border-bottom: 1px solid var(--gray-dark-soft);
 }
+/* END BOTÕES */
