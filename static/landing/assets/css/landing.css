@@ -11,14 +11,14 @@
   --gray-white-soft: #CBD5E0;
 }
 
-body{
-  background-color: var(--default-white);
-}
+/* TAGS GLOBAIS*/
+body{ background-color: var(--default-white); }
+a { text-decoration: none; color: inherit; }
 
-a {
-  text-decoration: none;
-  color: inherit;
-}
+/* BACKGROUNDS */
+.bg-faq { background-color: var(--yellow-golden); }
+.bg-topbar{ background-color: var(--default-white); }
+.bg-footer { background-color: var(--gray-dark-soft); }
 
 .bg-carousel {
   background-color: var(--orange-default);
@@ -26,25 +26,10 @@ a {
   font-weight: bold;
 }
 
-.star-color {
-  color: var(--yellow-amber);
-}
-
-.bg-faq {
-  background-color: var(--yellow-golden);
-}
-
-.bg-topbar{
-  background-color: var(--default-white);
-}
-
-.bg-footer {
-  background-color: var(--gray-dark-soft);
-}
-
-.text-soft {
-  color: var(--gray-white-soft);
-}
+/* TEXT COLOR */
+.star-color { color: var(--yellow-amber); }
+.text-soft { color: var(--gray-white-soft); }
+footer a:hover { color: var(--default-white); }
 
 /*BOTÃO DE SUPORTE*/
 .btn-suport {
