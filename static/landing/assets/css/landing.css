@@ -5,11 +5,18 @@
 :root {
   --default-white: #F5F5F5;
   --orange-default: #FF7518;
-  --yellow-star: #ffa800;
+  --yellow-amber: #ffa800;
+  --yellow-golden: #fdd34d;
+  --gray-dark-soft: #2D3748;
+  --gray-white-soft: #CBD5E0;
 }
 
-html body{
+body{
   background-color: var(--default-white);
+}
+
+a {
+  text-decoration: none;
 }
 
 .bg-carousel {
@@ -19,13 +26,40 @@ html body{
 }
 
 .star-color {
-  color: var(--yellow-star);
+  color: var(--yellow-amber);
 }
 
 .bg-faq {
-  background-color: var(--orange-topbar);
+  background-color: var(--yellow-golden);
 }
 
 .bg-topbar{
   background-color: var(--default-white);
+}
+
+.bg-footer {
+  background-color: var(--gray-dark-soft);
+}
+
+.text-soft {
+  color: var(--gray-white-soft);
+}
+
+/*BOTÃO DE SUPORTE*/
+.btn-suport {
+  background-color: #9a5de4;
+  border: 2px solid #9a5de4;
+  color: #fff;
+}
+
+.btn-suport:hover {
+  border: 2px solid #9a5de4;
+  color: #9a5de4;
+}
+/* END BOTÃO */
+
+/*RETIRANDO FOCO DO BOOTSTRAP*/
+.no-focus:focus {
+  outline: none;
+  box-shadow: none;
 }

@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}FiveTwo{% endblock title %}</title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'landing/assets/css/landing.css' %}">
     <script type="module" src="{% static 'landing/js/landing.js' %}"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'landing/assets/css/landing.css' %}">
     <script src="https://kit.fontawesome.com/19f637e07e.js" crossorigin="anonymous"></script>
   </head>
 
@@ -375,22 +375,22 @@
         <!--CARDS DA CHAMADA DE AÇÃO-->
         <div class="container-fluid pb-5" id="cardSugestions">
           <ul class="list-unstyled row gy-4 text-center justify-content-center">
-            <li class="col-6 col-lg-3" style="max-width: 350px; height: 600px;">
+            <li class="col-6 col-lg-3 cardSugestionsItems">
               <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExYmFoN2VkcnBqcjJsdzgxemcwemNzZHJ4dGR2YXE3NWR1c2N5b294MyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3fc52GuMe4IYGKHkPz/giphy.gif" 
                     alt="teste teste" 
                     class="rounded object-fit-cover w-100 h-100 ">
             </li>
-            <li class="col-6 col-lg-3" style="max-width: 350px; height: 600px;">
+            <li class="col-6 col-lg-3 cardSugestionsItems">
               <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExYmFoN2VkcnBqcjJsdzgxemcwemNzZHJ4dGR2YXE3NWR1c2N5b294MyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3fc52GuMe4IYGKHkPz/giphy.gif" 
                     alt="teste teste" 
                     class="rounded object-fit-cover w-100 h-100">
             </li>
-            <li class="col-6 col-lg-3" style="max-width: 350px; height: 600px;">
+            <li class="col-6 col-lg-3 cardSugestionsItems">
               <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExYmFoN2VkcnBqcjJsdzgxemcwemNzZHJ4dGR2YXE3NWR1c2N5b294MyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3fc52GuMe4IYGKHkPz/giphy.gif" 
                     alt="teste teste" 
                     class="rounded object-fit-cover w-100 h-100">
             </li>
-            <li class="col-6 col-lg-3" style="max-width: 350px; height: 600px;">
+            <li class="col-6 col-lg-3 cardSugestionsItems">
               <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExYmFoN2VkcnBqcjJsdzgxemcwemNzZHJ4dGR2YXE3NWR1c2N5b294MyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3fc52GuMe4IYGKHkPz/giphy.gif" 
                     alt="teste teste" 
                     class="rounded object-fit-cover w-100 h-100">
@@ -609,16 +609,16 @@
 
       <!--FAQ-->
       <section class="faq container my-3">
-        <h2 class="text-center mb-2 fw-bold">FAQ</h2>
+        <h1 class="text-center mb-2 fw-bold">FAQ</h1>
         <p class="text-center mb-4">Veja as perguntas mais frequentes de nossos clientes.</p>
 
-        <!-- Container mais estreito -->
-        <div class="accordion-wrapper" style="max-width: 800px; margin: 0 auto;">
+        <!-- ITENS DO FAQ -->
+        <div class="accordion-wrapper" style="max-width: 900px; margin: 0 auto;">
           <div class="accordion" id="faqAccordion">
             <!-- Item 1 -->
-            <div class="accordion-item mb-2 rounded-3" style="background-color: #FFD84D;">
+            <div class="accordion-item mb-2 rounded-3 bg-faq">
               <h2 class="accordion-header" id="headingOne">
-                <button class="accordion-button collapsed bg-transparent fw-bold" type="button" 
+                <button class="accordion-button collapsed bg-transparent fw-bold no-focus" type="button" 
                         data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" 
                         aria-controls="collapseOne">
                   Qual o tempo de entrega?
@@ -633,9 +633,9 @@
             </div>
 
             <!-- Item 2 -->
-            <div class="accordion-item mb-2 rounded-3" style="background-color: #FFD84D;">
+            <div class="accordion-item mb-2 rounded-3 bg-faq">
               <h2 class="accordion-header" id="headingTwo">
-                <button class="accordion-button collapsed bg-transparent fw-bold" type="button" 
+                <button class="accordion-button collapsed bg-transparent fw-bold no-focus" type="button" 
                         data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" 
                         aria-controls="collapseTwo">
                   Posso trocar produto personalizado?
@@ -650,64 +650,67 @@
             </div>
           </div>
         </div>
+
+        <div class="py-5 d-flex flex-column align-items-center">
+          <p class="text-center">Nosso suporte está disponível de segunda a sexta das: 9:00 às 18:00.</p>
+          <a href="#" class="btn btn-suport py-3 px-5 fw-bold">Suporte</a>
+        </div>
       </section>
     </main>
 
     <!--Ajeitar depois esse footer-->
-    <footer class="w-100 bg-light">
-      <div class="container pt-5 pt-lg-5 pb-lg-3">
+    <footer class="bg-footer text-white">
+      <div class="container py-5">
+        <!-- Newsletter -->
         <div class="row">
-          <div class="col-12 col-md-3 col-lg-4 mb-3 mb-md-0 mb-lg-0">
-            <h4 class="fs-4 fw-bold text-uppercase mb-2 mb-md-4 mb-lg-4">Hotel Samurai</h4>
-            <p class="text-muted">
-              Somos uma empresa que nasceu no ano de 1998, cuja missão é entregar
-              aos nossos clientes e parceiros os melhores lugares para ter um lazer e um 
-              descanso excelente e merecido.
-            </p>
-            <p>
-              <a href="" title="facebook" class="text-decoration-none text-muted me-1 me-md-1 me-lg-2">
-                <i class="fa fa-facebook" aria-hidden="true"></i>
-              </a>
-              <a href="" title="twitter" class="text-decoration-none text-muted me-1 me-md-1 me-lg-2">
-                <i class="fa fa-twitter" aria-hidden="true"></i>
-              </a>
-              <a href="" title="instagram" class="text-decoration-none text-muted me-1 me-md-1 me-lg-2">
-                <i class="fa fa-instagram" aria-hidden="true"></i>
-              </a>
+          <div class="col-md-4">
+            <h2 class="fw-bold text-uppercase mb-3">Fique por dentro das promoções!</h2>
+            <p class="mb-4 text-soft">
+              Fale diretamente com nosso suporte pelo WhatsApp e receba novidades e descontos exclusivos.
             </p>
           </div>
-          <div class="col-12 col-md-3 col-lg-4 pe-lg-0 ps-lg-5 mb-3 mb-md-0 mb-lg-0">
-            <h4 class="fs-4 fw-bold mb-2 mb-md-4 mb-lg-4">Minha Conta</h4>
-            <p class="mb-0">
-              <a href="" class="text-decoration-none text-muted">Minhas Viagens</a>
-            </p>
-            <p class="mb-0">
-              <a href="" class="text-decoration-none text-muted">Meu Perfil</a>
-            </p>
+
+          <!-- Menu de Políticas -->
+          <div class="col-md-4 d-flex justify-content-center">
+            <div>
+              <h4 class="fw-bold mb-3">Políticas da Loja</h4>
+              <ul class="list-unstyled d-flex flex-column gap-2">
+                <li><a href="/suporte/rastreio" class="text-soft">Rastrear Pedido</a></li>
+                <li><a href="/suporte/estampas-e-direitos-autorais" class="text-soft">Estampas e Direitos Autorais</a></li>
+                <li><a href="/suporte/quero-trocar" class="text-soft">Sobre como trocar</a></li>
+                <li><a href="/policies/refund-policy" class="text-soft">Sobre Devolução e Reembolso</a></li>
+                <li><a href="/policies/shipping-policy" class="text-soft">Fretes e Prazos de Entrega</a></li>
+                <li><a href="/policies/terms-of-service" class="text-soft">Termos de Uso</a></li>
+                <li><a href="/policies/privacy-policy" class="text-soft">Políticas de Privacidade</a></li>
+                <li><a href="/policies/legal-notice" class="text-soft">Aviso Legal</a></li>
+                <li><a href="/policies/contact-information" class="text-soft">Sobre nós</a></li>
+              </ul>
+            </div>
           </div>
-          <div class="col-12 col-md-3 col-lg-4 mb-3 mb-md-0 mb-lg-0">
-            <h4 class="fs-4 fw-bold mb-2 mb-md-4 mb-lg-4">Informações Adicionais</h4>
-            <p class="mb-0">
-              <a href="" class="text-decoration-none text-muted">Termos e condições</a>
-            </p>
-            <p class="mb-0">
-              <a href="" class="text-decoration-none text-muted">Politica de privacidade</a>
-            </p>
-            <p class="mb-0">
-              <a href="" class="text-decoration-none text-muted">Central de ajuda</a>
-            </p>
-            <p class="mb-0">
-              <a href="" class="text-decoration-none text-muted">Condições de uso</a>
-            </p>
+
+          <!-- Informações da empresa -->
+          <div class="col-md-4 small d-flex justify-content-center">
+            <div>
+              <h4 class="fw-bold">FiveTwo Tshirteria</h4>
+              <p class="text-soft">
+                Transformando ideias em camisetas<br> exclusivas feitas para você.<br><br>
+                <strong>Sede:</strong> Rua Antonio Arruda 786<br>
+                Fortaleza / Ceará - CE<br>
+                CEP 60335-095<br><br>
+  
+                👤 <strong>SAC</strong><br>
+                ✉️ fivetwotshirteria@gmail.com<br><br>
+                📲 <a href="https://wa.me/85986540523" target="_blank" class="text-soft">(85) 98654-0523</a><br><br>
+                <em>Suporte via WhatsApp<br>Não atendemos ligação.</em><br><br>
+                🕗 <strong>Atendimento:</strong><br>
+                Seg à Sex: 09:00 às 18:00
+              </p>
+            </div>
           </div>
         </div>
       </div>
-      <div class="w-100 bg-color-orange d-flex justify-content-center align-items-center">
-        <p class="mb-0 pt-1 pb-1">
-          &copy; Todos os direitos reservados
-        </p>
-      </div>
     </footer>
+
 
     <!--ABAIXO UM MODAL PARA MOBILE COM FULLSCREEN-->
     <div class="modal fade" id="menuModal" tabindex="-1" aria-labelledby="menuModalLabel" aria-hidden="true">

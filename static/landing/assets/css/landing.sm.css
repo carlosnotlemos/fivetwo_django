@@ -1,29 +1,29 @@
 @media (max-width: 768px){
   /* SCROLL DA CATEGORIAS PROMO*/
   .carousel-items .card {
-    min-width: 250px !important;
+    min-width: 250px;
   }
   .carousel-items {
     overflow-x: auto;
   }
 
   /* CARDSUGESTIONS */
-  #cardSugestions ul li {
-    height: 310px !important;
+  .cardSugestions {
+    height: 310px;
   }
 
   /* BOTÕES DE CAROUSELSUGESTIONS */
   .carousel-indicators [data-bs-target] {
-    width: 10px !important;
-    height: 10px !important;
-    border-radius: 50% !important;
-    background-color: transparent !important;
-    border: 1px solid #000 !important;
-    opacity: 0.7 !important;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: transparent;
+    border: 1px solid #000;
+    opacity: 0.7;
   }
 
   .carousel-indicators .active {
-    background-color: #000 !important;
+    background-color: #000;
   }
 
   /* TOPBARCAROUSEL*/

@@ -3,4 +3,8 @@
   .carousel-items {
     overflow-x: hidden;
   }
+
+  .cardSugestionsItems{
+    max-width: 350px; height: 600px;
+  }
 }
