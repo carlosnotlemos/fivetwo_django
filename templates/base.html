@@ -66,9 +66,12 @@
           </div>
         </div>
       </nav>
-      <!--IMAGEM BANNER PRINCIPAL DO HEADER-->
+      <!--BANNER PRINCIPAL DE PROPAGANDA-->
       <section class="w-100" style="padding-top: 85px;">
-        <img src="{% static 'landing/assets/img/BANNER.png' %}" alt="banner principal" style="width: 100%; display: block;">
+        <picture>
+          <source media="(max-width: 768px)" srcset="{% static 'landing/assets/img/BANNERMOBILE.png'%}">
+          <img src="{% static 'landing/assets/img/BANNER.png' %}" alt="banner principal" style="width: 100%; display: block;">
+        </picture>
       </section>
 
     </header>
@@ -594,20 +597,14 @@
          </div>
       </section>
       
-      <!--CHAMADA DE AÇÃO SIGA NOS-->
-      <section class="py-5">
-        <div class="container text-center">
-          <a href="https://www.instagram.com/fivetwo.tshirt/" class="text-decoration-none text-body" target="_blank">
-            <img src="{% static 'landing/assets/img/insta.png'%}" alt="Instagram Icone"
-              style="max-width: 52px; height: 52px;">
-            <h1>Nos siga no instagram</h1>
-            <div class="d-flex justify-content-center">
-              <h3 class="fw-bold">@fivetwo_tshirt</h3>
-              <img src="{% static 'landing/assets/img/insta_verify.png'%}" alt="Instagram Icone Verificado"
-                style="max-width: 28px; height: 28px;">
-            </div>
-          </a>
-        </div>
+      <!--Banner informativo-->
+      <section>
+        <picture>
+          <source media="(max-width: 768px)" srcset="{% static 'landing/assets/img/BANNERINFOMOBILE.png' %}">
+          <img src="{% static 'landing/assets/img/BANNERINFO.png'%}" 
+          alt="Imagem Informativa"
+          class="w-100 h-50">
+        </picture>
       </section>
     </main>
 
