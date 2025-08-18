@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Bowlby+One&family=Caveat+Brush&family=Funnel+Sans:wght@500&family=Lilita+One&display=swap');
 @import './landing.lg.css';
 @import './landing.sm.css';
 @import './landing.md.css';
@@ -12,6 +13,10 @@
 }
 
 /* TAGS GLOBAIS*/
+h1{ font-family: 'Bowlby One', sans-serif;}
+h4, h2{ font-family: "Lilita One", sans-serif;}
+p, a{ font-family: 'Funnel Sans', sans-serif;}
+nav a{ font-family: 'Caveat Brush', sans-serif; }
 body{ background-color: var(--default-white); }
 a { text-decoration: none; color: inherit; }
 
