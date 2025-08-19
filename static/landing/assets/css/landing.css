@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Bowlby+One&family=Caveat+Brush&family=Funnel+Sans:wght@500&family=Lilita+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bowlby+One&family=Lilita+One&family=Rubik:wght@500&display=swap');
 @import './landing.lg.css';
 @import './landing.sm.css';
 @import './landing.md.css';
@@ -12,11 +12,13 @@
   --gray-white-soft: #CBD5E0;
 }
 
-/* TAGS GLOBAIS*/
+/* FONTS */
 h1{ font-family: 'Bowlby One', sans-serif;}
 h4, h2{ font-family: "Lilita One", sans-serif;}
-p, a{ font-family: 'Funnel Sans', sans-serif;}
-nav a{ font-family: 'Caveat Brush', sans-serif; }
+p, a{ font-family: 'Rubik', sans-serif;}
+.link-nav{ font-size: 0.85rem;}
+
+/* TAGS GLOBAIS*/
 body{ background-color: var(--default-white); }
 a { text-decoration: none; color: inherit; }
 
@@ -57,4 +59,3 @@ footer a:hover { color: var(--default-white); }
 .accordion-button {
   border-bottom: 1px solid var(--gray-dark-soft);
 }
-/* END BOTÕES */
