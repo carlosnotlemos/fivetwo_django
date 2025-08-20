@@ -40,11 +40,16 @@ footer a:hover { color: var(--default-white); }
 
 /* SOBREPOR BOOTSTRAP */
 .no-focus:focus {
+  /* RETIRAR FOCO */
   outline: none;
   box-shadow: none;
 }
+.accordion-button {
+  /* LINHA DO ACCORDION */
+  border-bottom: 1px solid var(--gray-dark-soft);
+}
 
-/* BOTÕES */
+/* BOTÃO SUPORTE */
 .btn-suport {
   background-color: #9a5de4;
   border: 2px solid #9a5de4;
@@ -56,22 +61,20 @@ footer a:hover { color: var(--default-white); }
   color: #9a5de4;
 }
 
-.accordion-button {
-  border-bottom: 1px solid var(--gray-dark-soft);
-}
+
 
 /* BARRA DE PROGRESSO */
 .carousel-progress {
   height: 3px;
-  background: var(--gray-white-soft);   /* cor de fundo */
+  background: var(--gray-white-soft);
   border-radius: 999px;
   overflow: hidden;
 }
 
 .carousel-progress-bar {
   height: 100%;
-  width: 0%;             /* inicia zerada */
-  background: var(--gray-dark-soft);      /* cor da barra ativa */
+  width: 0%;
+  background: var(--gray-dark-soft);
   border-radius: 999px;
   transition: width 0.3s ease;
 }
