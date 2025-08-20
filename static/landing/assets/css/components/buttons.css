@@ -1,0 +1,45 @@
+/* BOTÃO SUPORTE */
+
+/* BOTÃO SUPORTE (FAQ) */
+.support-button {
+  background-color: var(--purple-soft);
+  border: 2px solid var(--purple-soft);
+  color: var(--default-white);
+  font-weight: bold;
+  padding: 1rem 2.5rem;
+  text-decoration: none;
+  display: inline-block;
+  border-radius: 5px;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.support-button:hover {
+  background-color: transparent;
+  color: var(--purple-soft);
+}
+
+
+/* BOTÃO REDONDO CARDS*/
+.circle-btn {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: none;
+  background-color: var(--gray-white-soft);
+  color: var(--gray-dark-soft);
+  display: flex;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+  font-size: 20px;
+}
+
+.circle-btn:hover {
+  background-color: var(--gray-dark-soft);
+  color: var(--gray-white-soft);
+  transform: scale(1.1);
+}
+
+.circle-btn:active {
+  transform: scale(0.95);
+}

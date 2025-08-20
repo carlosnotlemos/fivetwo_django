@@ -1,0 +1,11 @@
+/* SOBREPOR BOOTSTRAP */
+
+.no-focus:focus {
+  /* RETIRAR FOCO */
+  outline: none;
+  box-shadow: none;
+}
+.accordion-button {
+  /* LINHA DO ACCORDION */
+  border-bottom: 1px solid var(--gray-dark-soft);
+}

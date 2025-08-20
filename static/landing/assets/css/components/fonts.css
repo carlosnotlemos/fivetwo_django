@@ -1,0 +1,6 @@
+/* FONTS */
+h1{ font-family: var(--font-title)}
+h4, h2{ font-family: var(--font-subtitle)}
+p, a{ font-family: var(--font-default)}
+
+.link-nav{ font-size: 0.85rem;}

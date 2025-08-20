@@ -1,7 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Bowlby+One&family=Lilita+One&family=Rubik:wght@500&display=swap');
-@import './landing.lg.css';
-@import './landing.sm.css';
-@import './landing.md.css';
+@import './mobile/landing.lg.css';
+@import './mobile/landing.sm.css';
+@import './components/backgrounds.css';
+@import './components/buttons.css';
+@import './components/colors.css';
+@import './components/fonts.css';
+@import './components/custom-bootstrap.css';
+@import './components/carousel.css';
+
 
 :root {
   --default-white: #F5F5F5;
@@ -10,71 +16,14 @@
   --yellow-golden: #fdd34d;
   --gray-dark-soft: #2D3748;
   --gray-white-soft: #CBD5E0;
+  --purple-soft: #9a5de4;
+
+
+  --font-title: 'Bowlby One', sans-serif;
+  --font-subtitle: "Lilita One", sans-serif;
+  --font-default: 'Rubik', sans-serif;
 }
 
-/* FONTS */
-h1{ font-family: 'Bowlby One', sans-serif;}
-h4, h2{ font-family: "Lilita One", sans-serif;}
-p, a{ font-family: 'Rubik', sans-serif;}
-.link-nav{ font-size: 0.85rem;}
 
 /* TAGS GLOBAIS*/
-body{ background-color: var(--default-white); }
 a { text-decoration: none; color: inherit; }
-
-/* BACKGROUNDS */
-.bg-faq { background-color: var(--yellow-golden); }
-.bg-topbar{ background-color: var(--default-white); }
-.bg-footer { background-color: var(--gray-dark-soft); }
-
-.bg-carousel {
-  background-color: var(--orange-default);
-  color: var(--default-white);
-  font-weight: bold;
-}
-
-/* COLOR */
-.star-color { color: var(--yellow-amber); }
-.text-soft { color: var(--gray-white-soft); }
-footer a:hover { color: var(--default-white); }
-
-/* SOBREPOR BOOTSTRAP */
-.no-focus:focus {
-  /* RETIRAR FOCO */
-  outline: none;
-  box-shadow: none;
-}
-.accordion-button {
-  /* LINHA DO ACCORDION */
-  border-bottom: 1px solid var(--gray-dark-soft);
-}
-
-/* BOTÃO SUPORTE */
-.btn-suport {
-  background-color: #9a5de4;
-  border: 2px solid #9a5de4;
-  color: #fff;
-}
-
-.btn-suport:hover {
-  border: 2px solid #9a5de4;
-  color: #9a5de4;
-}
-
-
-
-/* BARRA DE PROGRESSO */
-.carousel-progress {
-  height: 3px;
-  background: var(--gray-white-soft);
-  border-radius: 999px;
-  overflow: hidden;
-}
-
-.carousel-progress-bar {
-  height: 100%;
-  width: 0%;
-  background: var(--gray-dark-soft);
-  border-radius: 999px;
-  transition: width 0.3s ease;
-}

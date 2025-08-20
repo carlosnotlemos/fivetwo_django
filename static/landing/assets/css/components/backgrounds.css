@@ -1,0 +1,11 @@
+/* BACKGROUNDS */
+body{ background-color: var(--default-white); }
+.bg-faq { background-color: var(--yellow-golden); }
+.bg-topbar{ background-color: var(--default-white); }
+.bg-footer { background-color: var(--gray-dark-soft); }
+
+.bg-carousel {
+  background-color: var(--orange-default);
+  color: var(--default-white);
+  font-weight: bold;
+}
