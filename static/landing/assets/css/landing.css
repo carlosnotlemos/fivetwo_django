@@ -59,3 +59,19 @@ footer a:hover { color: var(--default-white); }
 .accordion-button {
   border-bottom: 1px solid var(--gray-dark-soft);
 }
+
+/* BARRA DE PROGRESSO */
+.carousel-progress {
+  height: 3px;
+  background: var(--gray-white-soft);   /* cor de fundo */
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.carousel-progress-bar {
+  height: 100%;
+  width: 0%;             /* inicia zerada */
+  background: var(--gray-dark-soft);      /* cor da barra ativa */
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
