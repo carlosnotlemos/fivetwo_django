@@ -7,6 +7,15 @@
     overflow-x: auto;
   }
 
+  /* MARGEM APENAS NO PRIMEIRO E ULTIMO CARD */
+  .carousel-items .card:first-child{
+    margin-left: 20px;
+  }
+
+  .carousel-items .card:last-child {
+    margin-right: 20px;
+  }
+
   /* CARDSUGESTIONS */
   .cardSugestions {
     height: 310px;

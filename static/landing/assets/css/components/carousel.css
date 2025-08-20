@@ -13,12 +13,3 @@
   border-radius: 999px;
   transition: width 0.3s ease;
 }
-
-/* MARGEM APENAS NO PRIMEIRO E ULTIMO CARD */
-.carousel-items .card:first-child {
-  margin-left: 150px; /* afasta o primeiro card da borda esquerda */
-}
-
-.carousel-items .card:last-child {
-  margin-right: 150px; /* afasta o último card da borda direita */
-}
