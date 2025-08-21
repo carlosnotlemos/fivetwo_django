@@ -11,6 +11,7 @@
 
 :root {
   --default-white: #F5F5F5;
+  --default-black: #000;
   --orange-default: #FF7518;
   --yellow-amber: #ffa800;
   --yellow-golden: #fdd34d;
@@ -27,3 +28,6 @@
 
 /* TAGS GLOBAIS*/
 a { text-decoration: none; color: inherit; }
+
+/* LINKS DO MODAL */
+.modal-link a { margin: 7px; }

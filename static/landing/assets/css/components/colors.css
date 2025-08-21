@@ -2,3 +2,4 @@
 .star-color { color: var(--yellow-amber); }
 .text-soft { color: var(--gray-white-soft); }
 footer a:hover { color: var(--default-white); }
+.modal-link { color: var(--default-black); }
