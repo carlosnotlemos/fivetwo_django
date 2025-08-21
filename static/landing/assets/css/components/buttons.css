@@ -4,7 +4,7 @@
 .support-button {
   background-color: var(--purple-soft);
   border: 2px solid var(--purple-soft);
-  color: var(--default-white);
+  color: var(--white-default);
   font-weight: bold;
   padding: 1rem 2.5rem;
   text-decoration: none;

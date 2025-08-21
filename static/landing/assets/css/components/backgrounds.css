@@ -1,11 +1,11 @@
 /* BACKGROUNDS */
-body{ background-color: var(--default-white); }
+body{ background-color: var(--white-default); }
 .bg-faq { background-color: var(--yellow-golden); }
-.bg-topbar{ background-color: var(--default-white); }
+.bg-topbar{ background-color: var(--white-default); }
 .bg-footer { background-color: var(--gray-dark-soft); }
 
 .bg-carousel {
   background-color: var(--orange-default);
-  color: var(--default-white);
+  color: var(--white-default);
   font-weight: bold;
 }

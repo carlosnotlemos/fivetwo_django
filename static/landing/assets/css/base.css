@@ -1,17 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Bowlby+One&family=Lilita+One&family=Rubik:wght@500&display=swap');
-@import './mobile/landing.lg.css';
-@import './mobile/landing.sm.css';
-@import './components/backgrounds.css';
-@import './components/buttons.css';
-@import './components/colors.css';
-@import './components/fonts.css';
-@import './components/custom-bootstrap.css';
-@import './components/carousel.css';
+@import './mobile/base-mobile.css';
+@import './components/base-components.css';
+
 
 
 :root {
-  --default-white: #F5F5F5;
-  --default-black: #000;
+  --white-default: #F5F5F5;
+  --black-default: #000;
   --orange-default: #FF7518;
   --yellow-amber: #ffa800;
   --yellow-golden: #fdd34d;
@@ -28,6 +23,3 @@
 
 /* TAGS GLOBAIS*/
 a { text-decoration: none; color: inherit; }
-
-/* LINKS DO MODAL */
-.modal-link a { margin: 7px; }
