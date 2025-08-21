@@ -39,4 +39,51 @@
   #topBarCarousel .carousel-item {
     font-size: small;
   }
+
+  /* LINKS DO MODAL */
+  .modal-link a { 
+    font-family: var(--font-title);
+    margin: 15px;
+    color: var(--black-default);
+    position: relative;
+    transition: color 0.3s ease, transform 0.2s ease;
+  }
+
+  .modal-link a:hover {
+    color: var(--gray-dark-soft);
+    transform: scale(1.05);
+  }
+
+  /* CLICK NOS LINKS MODAL */
+  .modal-link a:active {
+    color: var(--gray-dark-soft);
+    transform: scale(1.05);
+  }
+
+  /* MODAL BACKGROUND*/
+  #menuModal .modal-content {
+    background: linear-gradient(135deg, var(--gray-white-soft) 0%, var(--white-default) 100%);
+  }
+
+  /* REDES SOCIAIS MODAL*/
+  .social-icons a {
+    margin: 10px;
+    font-size: 22px;
+    transition: transform 0.3s ease;
+  }
+
+  .social-icons a:hover {
+    transform: scale(1.1);
+  }
+
+  /* REDES SOCIAIS CLICK */
+  .social-icons a:active {
+    transform: scale(1.1);
+  }
+
+  .circle-btn.btn-modal-size:active {
+    transform: scale(1.1);
+    background-color: var(--gray-dark-soft);
+    color: var(--gray-white-soft);
+  }
 }

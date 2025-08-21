@@ -37,10 +37,6 @@
   transform: scale(1.1);
 }
 
-.circle-btn:active {
-  transform: scale(0.95);
-}
-
 /* TAMANHO BOTÃO CARD */
 .btn-card-size {
   width: 50px;
