@@ -86,4 +86,8 @@
     background-color: var(--gray-dark-soft);
     color: var(--gray-white-soft);
   }
+  /* UPSCALE PARA MOBILE*/
+  .upscale a:active {
+    transform: scale(1.1);
+  }
 }

@@ -1,0 +1,6 @@
+.upscale a{
+  transition: transform 0.2s;
+}
+.upscale a:hover {
+  transform: scale(1.1);
+}
