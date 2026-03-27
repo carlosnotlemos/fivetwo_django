@@ -1,13 +1,32 @@
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    carregarListaClientes();
+    // Carregamento inicial único para máxima performance
+    google.script.run
+      .withSuccessHandler(inicializarApp)
+      .withFailureHandler(err => showToast("Erro no carregamento inicial: " + err, false))
+      .getAppState();
   });
+
+  function inicializarApp(state) {
+    clientesGlobais = state.clientes;
+    produtosGlobais = state.produtos;
+    vendasGlobais = state.vendas;
+
+    // Renderiza todas as tabelas em segundo plano
+    renderizarTabelaClientes(clientesGlobais);
+    renderizarTabelaProdutos(produtosGlobais);
+    renderizarTabelaVendas(vendasGlobais);
+
+    // Esconde possíveis esqueletos ou spinners iniciais
+    console.log("App Inicializado com sucesso.");
+  }
 
   // =========================================================
   // 1. VARIÁVEIS GLOBAIS
   // =========================================================
   let produtosGlobais = [];
   let clientesGlobais = [];
+  let vendasGlobais = [];
   let carrinhoDeCompras = [];
 
   // =========================================================
@@ -21,10 +40,9 @@
     document.getElementById(pageId).classList.add('active');
     btnElement.classList.add('active');
 
-    // Gatilhos de carregamento ao trocar de tela
+    // Os dados agora são pré-carregados, então as trocas são instantâneas
     if (pageId === 'page-envio') carregarCampanhas();
-    if (pageId === 'page-compra') carregarListaVendas();
-    if (pageId === 'page-produto') carregarListaProdutos();
+    // Vendas e Produtos não precisam recarregar do servidor aqui
   }
 
   function showToast(msg, isSuccess) {
@@ -317,38 +335,40 @@
   }
 
   function carregarListaProdutos() {
-    const tbody = document.getElementById('corpo-tabela-produtos');
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;"><div class="spinner" style="display:inline-block; border-top-color: var(--primary);"></div> Carregando catálogo...</td></tr>';
-
     google.script.run.withSuccessHandler(produtos => {
       produtosGlobais = produtos;
-
-      if (produtos.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--text-muted); padding: 30px;">Nenhum produto cadastrado ainda.</td></tr>';
-        return;
-      }
-
-      let html = '';
-      produtos.forEach((p, index) => {
-        html += `
-          <tr>
-            <td><strong style="color: var(--text-main);">${p[0]}</strong></td>
-            <td>R$ ${p[1]}</td>
-            <td style="font-size: 13px; color: var(--text-muted);">${p[2]}</td>
-            <td>
-              <button class="btn-icon-action" onclick="abrirEdicaoProduto(${index})" title="Editar">
-                <i class="fa-solid fa-pen-to-square"></i>
-              </button>
-              <button class="btn-icon-action" onclick="confirmarExcluirProduto('${p[0]}')" title="Excluir" style="color: var(--error); margin-left: 10px;">
-                <i class="fa-solid fa-trash"></i>
-              </button>
-            </td>
-          </tr>
-        `;
-      });
-
-      tbody.innerHTML = html;
+      renderizarTabelaProdutos(produtos);
     }).getProdutos();
+  }
+
+  function renderizarTabelaProdutos(produtos) {
+    const tbody = document.getElementById('corpo-tabela-produtos');
+    if (!tbody) return;
+
+    if (produtos.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--text-muted); padding: 30px;">Nenhum produto cadastrado ainda.</td></tr>';
+      return;
+    }
+
+    let html = '';
+    produtos.forEach((p, index) => {
+      html += `
+        <tr>
+          <td><strong style="color: var(--text-main);">${p[0]}</strong></td>
+          <td>R$ ${p[1]}</td>
+          <td style="font-size: 13px; color: var(--text-muted);">${p[2]}</td>
+          <td>
+            <button class="btn-icon-action" onclick="abrirEdicaoProduto(${index})" title="Editar">
+              <i class="fa-solid fa-pen-to-square"></i>
+            </button>
+            <button class="btn-icon-action" onclick="confirmarExcluirProduto('${p[0]}')" title="Excluir" style="color: var(--error); margin-left: 10px;">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `;
+    });
+    tbody.innerHTML = html;
   }
 
   function processarCarrinho() {
@@ -372,36 +392,42 @@
   }
 
   function carregarListaVendas() {
-    const tbody = document.getElementById('corpo-tabela-vendas');
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;"><div class="spinner" style="display:inline-block; border-top-color: var(--primary);"></div> Carregando histórico...</td></tr>';
-
     google.script.run.withSuccessHandler(vendas => {
-      if (vendas.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted); padding: 30px;">Nenhuma venda registrada ainda.</td></tr>';
-        return;
-      }
-
-      let html = '';
-      vendas.reverse().forEach(v => {
-        html += `
-          <tr>
-            <td><strong style="color: var(--cyan);">${v[0]}</strong></td>
-            <td>${v[1]}</td>
-            <td>${v[2]}</td>
-            <td style="font-weight: 600; color: var(--success);">R$ ${v[3]}</td>
-            <td>
-              <button class="btn-icon-action" onclick="abrirDetalhesVenda('${v[0]}')" title="Ver Itens">
-                <i class="fa-solid fa-eye"></i>
-              </button>
-              <button class="btn-icon-action" onclick="confirmarExcluirVenda('${v[0]}')" title="Excluir" style="color: var(--error); margin-left: 10px;">
-                <i class="fa-solid fa-trash"></i>
-              </button>
-            </td>
-          </tr>
-        `;
-      });
-      tbody.innerHTML = html;
+      vendasGlobais = vendas;
+      renderizarTabelaVendas(vendas);
     }).getVendas();
+  }
+
+  function renderizarTabelaVendas(vendas) {
+    const tbody = document.getElementById('corpo-tabela-vendas');
+    if (!tbody) return;
+
+    if (vendas.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted); padding: 30px;">Nenhuma venda registrada ainda.</td></tr>';
+      return;
+    }
+
+    let html = '';
+    // Copia e inverte para mostrar as mais recentes primeiro sem alterar o original
+    [...vendas].reverse().forEach(v => {
+      html += `
+        <tr>
+          <td><strong style="color: var(--cyan);">${v[0]}</strong></td>
+          <td>${v[1]}</td>
+          <td>${v[2]}</td>
+          <td style="font-weight: 600; color: var(--success);">R$ ${v[3]}</td>
+          <td>
+            <button class="btn-icon-action" onclick="abrirDetalhesVenda('${v[0]}')" title="Ver Itens">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+            <button class="btn-icon-action" onclick="confirmarExcluirVenda('${v[0]}')" title="Excluir" style="color: var(--error); margin-left: 10px;">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `;
+    });
+    tbody.innerHTML = html;
   }
 
   function mostrarFormVenda() {
@@ -514,40 +540,40 @@
   }
 
   function carregarListaClientes() {
-    const tbody = document.getElementById('corpo-tabela-clientes');
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;"><div class="spinner" style="display:inline-block; border-top-color: var(--primary);"></div> Carregando...</td></tr>';
-
     google.script.run.withSuccessHandler(clientes => {
-      clientesGlobais = clientes; // Salva na memória para podermos editar depois
-
-      if (clientes.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted); padding: 30px;">Nenhum cliente cadastrado ainda.</td></tr>';
-        return;
-      }
-
-      let html = '';
-
-      // --- É AQUI QUE ENTRA O SEU BLOCO DE CÓDIGO ---
-      clientes.forEach((c, index) => {
-        html += `
-          <tr>
-            <td><strong style="color: var(--text-main);">${c[0]}</strong></td>
-            <td>${c[1]}</td>
-            <td>${c[2]}</td>
-            <td>${c[3]}</td>
-            <td>
-              <button class="btn-icon-action" onclick="abrirEdicaoCliente(${index})" title="Editar">
-                <i class="fa-solid fa-pen-to-square"></i>
-              </button>
-              <button class="btn-icon-action" onclick="confirmarExclusao('${c[1]}')" title="Excluir" style="color: var(--error); margin-left: 10px;">
-                <i class="fa-solid fa-trash"></i>
-              </button>
-            </td>
-          </tr>
-        `;
-      });
-
-      tbody.innerHTML = html;
+      clientesGlobais = clientes;
+      renderizarTabelaClientes(clientes);
     }).getClientes();
+  }
+
+  function renderizarTabelaClientes(clientes) {
+    const tbody = document.getElementById('corpo-tabela-clientes');
+    if (!tbody) return;
+
+    if (clientes.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted); padding: 30px;">Nenhum cliente cadastrado ainda.</td></tr>';
+      return;
+    }
+
+    let html = '';
+    clientes.forEach((c, index) => {
+      html += `
+        <tr>
+          <td><strong style="color: var(--text-main);">${c[0]}</strong></td>
+          <td>${c[1]}</td>
+          <td>${c[2]}</td>
+          <td>${c[3]}</td>
+          <td>
+            <button class="btn-icon-action" onclick="abrirEdicaoCliente(${index})" title="Editar">
+              <i class="fa-solid fa-pen-to-square"></i>
+            </button>
+            <button class="btn-icon-action" onclick="confirmarExclusao('${c[1]}')" title="Excluir" style="color: var(--error); margin-left: 10px;">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `;
+    });
+    tbody.innerHTML = html;
   }
 </script>

@@ -101,6 +101,15 @@ function getDadosParaCompra() {
   return { clientes: clientes, produtos: produtos };
 }
 
+// 4. OTIMIZAÇÃO: Carregamento Único
+function getAppState() {
+  return {
+    clientes: getClientes(),
+    produtos: getProdutos(),
+    vendas: getVendas()
+  };
+}
+
 function agendarEnvio(campanhaNome, segmento) {
   const ss = getDb();
   const clientesSheet = ss.getSheetByName("Clientes");
