@@ -30,7 +30,7 @@ function abrirPainel() {
 
 // 1. Configuração Inicial
 function configurarPlanilhas() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ss = getDb();
 
   // Nova estrutura NORMALIZADA
   const abas = {
@@ -61,7 +61,7 @@ function salvarCliente(dados) {
     return { sucesso: false, mensagem: "Erro: E-mail inválido." };
   }
 
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Clientes");
+  const sheet = getDb().getSheetByName("Clientes");
 
   // O '|| 2' garante que não dê erro se a planilha estiver vazia (só com cabeçalho)
   const emails = sheet.getRange(2, 2, Math.max(sheet.getLastRow() - 1, 1), 1).getValues().flat();
@@ -77,21 +77,21 @@ function salvarCliente(dados) {
 }
 
 function salvarCampanha(dados) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Campanhas");
+  const sheet = getDb().getSheetByName("Campanhas");
   sheet.appendRow([dados.nome, dados.assunto, dados.conteudo]);
 
   return { sucesso: true, mensagem: "Campanha salva com sucesso!" };
 }
 
 function salvarProduto(dados) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Produtos");
+  const sheet = getDb().getSheetByName("Produtos");
   sheet.appendRow([dados.nome, dados.preco, dados.descricao]);
 
   return { sucesso: true, mensagem: "Produto catalogado com sucesso!" };
 }
 
 function salvarCompra(dados) {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ss = getDb();
   const sheetCompras = ss.getSheetByName("Compras");
   const sheetItens = ss.getSheetByName("Compra_Itens");
 
@@ -126,7 +126,7 @@ function validarEmail(email) {
 
 // 3. Lógica de Envio e Fila
 function getCampanhas() {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Campanhas");
+  const sheet = getDb().getSheetByName("Campanhas");
   if (sheet.getLastRow() < 2) return [];
   return sheet.getRange(2, 1, sheet.getLastRow() - 1, 3).getValues();
 }
@@ -134,7 +134,7 @@ function getCampanhas() {
 // --- FUNÇÃO PARA ALIMENTAR OS MENUS SUSPENSOS ---
 // Busca clientes e produtos para preencher o formulário de compras
 function getDadosParaCompra() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ss = getDb();
 
   const sheetClientes = ss.getSheetByName("Clientes");
   let clientes = [];
@@ -154,7 +154,7 @@ function getDadosParaCompra() {
 }
 
 function agendarEnvio(campanhaNome, segmento) {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ss = getDb();
   const clientesSheet = ss.getSheetByName("Clientes");
   const comprasSheet = ss.getSheetByName("Compras");
   const campanhasSheet = ss.getSheetByName("Campanhas");
@@ -238,7 +238,7 @@ function agendarEnvio(campanhaNome, segmento) {
 
 // 4. Processamento de Lotes (Executado via Trigger)
 function processarFilaEnvio() {
-  const filaSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Fila_Envio");
+  const filaSheet = getDb().getSheetByName("Fila_Envio");
   if (filaSheet.getLastRow() < 2) return;
 
   const dadosFila = filaSheet.getRange(2, 1, filaSheet.getLastRow() - 1, 5).getValues();
