@@ -1,0 +1,246 @@
+<script>
+  // =========================================================
+  // 1. VARIÁVEIS GLOBAIS
+  // =========================================================
+  let produtosGlobais = [];
+  let carrinhoDeCompras = [];
+
+  // =========================================================
+  // 2. CONTROLE DE INTERFACE (UI) & NAVEGAÇÃO
+  // =========================================================
+
+  function showPage(pageId, btnElement) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+
+    document.getElementById(pageId).classList.add('active');
+    btnElement.classList.add('active');
+
+    // Gatilhos de carregamento ao trocar de tela
+    if (pageId === 'page-envio') carregarCampanhas();
+    if (pageId === 'page-compra') carregarDadosCompra();
+  }
+
+  function showToast(msg, isSuccess) {
+    const panel = document.getElementById('status-panel');
+    const toast = document.createElement('div');
+    toast.className = `toast ${isSuccess ? 'success' : 'error'}`;
+
+    const icon = isSuccess ? 'fa-circle-check' : 'fa-circle-exclamation';
+
+    toast.innerHTML = `<i class="fa-solid ${icon}"></i><span>${msg}</span>`;
+
+    panel.appendChild(toast);
+
+    setTimeout(() => toast.classList.add('show'), 100);
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 300);
+    }, 6000);
+  }
+
+  function setLoading(btnId, isLoading, defaultText) {
+    const btn = document.getElementById(btnId);
+    const textSpan = btn.querySelector('.btn-text');
+
+    if (isLoading) {
+      btn.disabled = true;
+      btn.classList.add('loading');
+      textSpan.textContent = 'Processando...';
+    } else {
+      btn.disabled = false;
+      btn.classList.remove('loading');
+      textSpan.textContent = defaultText;
+    }
+  }
+
+  // =========================================================
+  // 3. LÓGICA DO CARRINHO DE COMPRAS & FORMATAÇÃO
+  // =========================================================
+
+  function aplicarMascaraMoeda(event) {
+    let elemento = event.target;
+    let valor = elemento.value.replace(/\D/g, '');
+    if (valor === '') { elemento.value = ''; return; }
+
+    valor = (parseInt(valor) / 100).toFixed(2) + '';
+    valor = valor.replace('.', ',');
+    valor = valor.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
+    elemento.value = valor;
+  }
+
+  function calcularSubtotal() {
+    const nomeProduto = document.getElementById('compra-produto').value;
+    const qtd = document.getElementById('compra-qtd').value;
+    const produto = produtosGlobais.find(p => p[0] === nomeProduto);
+
+    if (produto && qtd) {
+      const subtotal = parseFloat(produto[1]) * parseInt(qtd);
+      document.getElementById('compra-subtotal').value = subtotal.toFixed(2);
+    }
+  }
+
+  function adicionarAoCarrinho() {
+    const produtoNome = document.getElementById('compra-produto').value;
+    const qtd = parseInt(document.getElementById('compra-qtd').value);
+    const subtotalStr = document.getElementById('compra-subtotal').value;
+    const subtotal = parseFloat(subtotalStr);
+
+    if (!produtoNome || produtoNome === "") return showToast("Por favor, selecione um produto primeiro.", false);
+    if (isNaN(subtotal) || subtotal <= 0) return showToast("Quantidade ou valor inválido.", false);
+
+    carrinhoDeCompras.push({ produto: produtoNome, quantidade: qtd, valorTotal: subtotal });
+    atualizarInterfaceCarrinho();
+
+    document.getElementById('compra-produto').selectedIndex = 0;
+    document.getElementById('compra-qtd').value = 1;
+    document.getElementById('compra-subtotal').value = '';
+  }
+
+  function removerDoCarrinho(index) {
+    carrinhoDeCompras.splice(index, 1);
+    atualizarInterfaceCarrinho();
+  }
+
+  function atualizarInterfaceCarrinho() {
+    const lista = document.getElementById('lista-carrinho');
+    const totalGeralSpan = document.getElementById('carrinho-total-geral');
+
+    if (carrinhoDeCompras.length === 0) {
+      lista.innerHTML = '<li style="color: var(--text-muted); font-style: italic;">Nenhum item adicionado ainda.</li>';
+      totalGeralSpan.textContent = '0.00';
+      return;
+    }
+
+    let html = '';
+    let totalGeral = 0;
+
+    carrinhoDeCompras.forEach((item, index) => {
+      totalGeral += item.valorTotal;
+      html += `
+        <li style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed rgba(255,255,255,0.1);">
+          <span><strong style="color: var(--cyan);">${item.quantidade}x</strong> ${item.produto}</span>
+          <span>R$ ${item.valorTotal.toFixed(2)} <i class="fa-solid fa-trash" style="color: var(--error); cursor: pointer; margin-left: 15px;" onclick="removerDoCarrinho(${index})"></i></span>
+        </li>`;
+    });
+
+    lista.innerHTML = html;
+    totalGeralSpan.textContent = totalGeral.toFixed(2);
+  }
+
+  // =========================================================
+  // 4. COMUNICAÇÃO COM O BACK-END (Google Apps Script)
+  // =========================================================
+
+  function carregarDadosCompra() {
+    google.script.run.withSuccessHandler(dados => {
+      const selCliente = document.getElementById('compra-cliente');
+      selCliente.innerHTML = dados.clientes.length
+        ? '<option disabled selected value="">Selecione um cliente...</option>' + dados.clientes.map(c => `<option value="${c[1]}">${c[0]} (${c[1]})</option>`).join('')
+        : '<option disabled selected>Nenhum cliente cadastrado</option>';
+
+      produtosGlobais = dados.produtos;
+      const selProduto = document.getElementById('compra-produto');
+      selProduto.innerHTML = dados.produtos.length
+        ? '<option disabled selected value="">Selecione um produto...</option>' + dados.produtos.map(p => `<option value="${p[0]}">${p[0]} - R$ ${p[1]}</option>`).join('')
+        : '<option disabled selected>Nenhum produto cadastrado</option>';
+
+      document.getElementById('compra-subtotal').value = '';
+    }).getDadosParaCompra();
+  }
+
+  function carregarCampanhas() {
+    const select = document.getElementById('env-campanha');
+    select.innerHTML = '<option disabled selected>Sincronizando pipelines...</option>';
+
+    google.script.run.withSuccessHandler(campanhas => {
+      if (campanhas.length > 0) {
+        select.innerHTML = campanhas.map(c => `<option value="${c[0]}">${c[0]}</option>`).join('');
+      } else {
+        select.innerHTML = '<option disabled selected>Nenhuma campanha provisionada</option>';
+      }
+    }).getCampanhas();
+  }
+
+  function salvarCliente() {
+    setLoading('btn-cliente', true, 'Provisionar Cliente');
+    const dados = {
+      nome: document.getElementById('c-nome').value,
+      email: document.getElementById('c-email').value,
+      telefone: document.getElementById('c-tel').value
+    };
+
+    google.script.run.withSuccessHandler(res => {
+      showToast(res.mensagem, res.sucesso);
+      setLoading('btn-cliente', false, 'Provisionar Cliente');
+      if (res.sucesso === true) document.querySelectorAll('#page-cliente input').forEach(input => input.value = '');
+    }).salvarCliente(dados);
+  }
+
+  function salvarProduto() {
+    const precoTexto = document.getElementById('p-preco').value;
+    const precoLimpo = precoTexto.replace(/\./g, '').replace(',', '.');
+    const precoNumerico = parseFloat(precoLimpo);
+
+    if (isNaN(precoNumerico) || precoNumerico <= 0) return showToast('Por favor, informe um preço válido.', false);
+
+    setLoading('btn-produto', true, 'Catalogar Produto');
+    const dados = {
+      nome: document.getElementById('p-nome').value,
+      preco: precoNumerico,
+      descricao: document.getElementById('p-desc').value
+    };
+
+    google.script.run.withSuccessHandler(res => {
+      showToast(res.mensagem, res.sucesso);
+      setLoading('btn-produto', false, 'Catalogar Produto');
+      if (res.sucesso === true) document.querySelectorAll('#page-produto input').forEach(input => input.value = '');
+    }).salvarProduto(dados);
+  }
+
+  function processarCarrinho() {
+    const cliente = document.getElementById('compra-cliente').value;
+
+    if (!cliente || cliente.includes("Carregando")) return showToast("Selecione um cliente para a compra.", false);
+    if (carrinhoDeCompras.length === 0) return showToast("Adicione pelo menos um item ao carrinho.", false);
+
+    setLoading('btn-compra', true, 'Finalizar Compra Completa');
+
+    google.script.run.withSuccessHandler(res => {
+      showToast(res.mensagem, res.sucesso);
+      setLoading('btn-compra', false, 'Finalizar Compra Completa');
+      if (res.sucesso === true) {
+        carrinhoDeCompras = [];
+        atualizarInterfaceCarrinho();
+        document.getElementById('compra-cliente').selectedIndex = 0;
+      }
+    }).salvarCompra({ emailCliente: cliente, itens: carrinhoDeCompras });
+  }
+
+  function salvarCampanha() {
+    setLoading('btn-campanha', true, 'Gravar Campanha');
+    const dados = {
+      nome: document.getElementById('camp-nome').value,
+      assunto: document.getElementById('camp-assunto').value,
+      conteudo: document.getElementById('camp-conteudo').value
+    };
+
+    google.script.run.withSuccessHandler(res => {
+      showToast(res.mensagem, res.sucesso);
+      setLoading('btn-campanha', false, 'Gravar Campanha');
+      if (res.sucesso === true) document.querySelectorAll('#page-campanha input, #page-campanha textarea').forEach(input => input.value = '');
+    }).salvarCampanha(dados);
+  }
+
+  function agendarEnvio() {
+    setLoading('btn-envio', true, 'Iniciar Pipeline de Envio');
+    const campanha = document.getElementById('env-campanha').value;
+    const segmento = document.getElementById('env-segmento').value;
+
+    google.script.run.withSuccessHandler(res => {
+      // Já preparado para o novo padrão que faremos no back-end
+      showToast(res.mensagem || res, res.sucesso !== undefined ? res.sucesso : true);
+      setLoading('btn-envio', false, 'Iniciar Pipeline de Envio');
+    }).agendarEnvio(campanha, segmento);
+  }
+</script>

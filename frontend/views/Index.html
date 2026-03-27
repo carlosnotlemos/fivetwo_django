@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PostlyMail | Premium Email Marketing</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <?!= include('frontend/css/Estilos'); ?>
+</head>
+
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-top">
+      <div class="brand">
+        <i class="fa-solid fa-paper-plane brand-icon"></i>
+        <span>PostlyMail</span>
+      </div>
+
+      <nav class="nav-group">
+        <button class="nav-btn active" onclick="showPage('page-cliente', this)">
+          <i class="fa-solid fa-user-plus"></i> Novo Cliente
+        </button>
+        <button class="nav-btn" onclick="showPage('page-produto', this)">
+          <i class="fa-solid fa-box-open"></i> Novo Produto
+        </button>
+        <button class="nav-btn" onclick="showPage('page-compra', this)">
+          <i class="fa-solid fa-cart-shopping"></i> Registrar Compra
+        </button>
+        <button class="nav-btn" onclick="showPage('page-campanha', this)">
+          <i class="fa-solid fa-pen-nib"></i> Criar Campanha
+        </button>
+        <button class="nav-btn" onclick="showPage('page-envio', this)">
+          <i class="fa-solid fa-rocket"></i> Agendar Disparo
+        </button>
+      </nav>
+    </div>
+
+    <div class="sidebar-footer">
+      PostlyMail v1.0 | Premium
+    </div>
+  </aside>
+
+  <main class="main-content">
+
+    <div id="status-panel" class="status-panel"></div>
+
+    <div id="page-cliente" class="tab-content active">
+      <header class="page-header">
+        <h1>Cadastrar Cliente</h1>
+        <p class="page-subtitle">Adicione os dados de contato do cliente</p>
+      </header>
+      <div class="glass-card">
+        <div class="form-grid">
+          <div class="form-group full-width"><label>Nome Completo</label><input type="text" id="c-nome"
+              placeholder="Ex: Ada Lovelace"></div>
+          <div class="form-group"><label>E-mail Direct</label><input type="email" id="c-email"
+              placeholder="ada@tech.com"></div>
+          <div class="form-group"><label>Telefone</label><input type="text" id="c-tel" placeholder="+55 11 ..."></div>
+        </div>
+        <div class="btn-container">
+          <button id="btn-cliente" class="prime-btn" onclick="salvarCliente()">
+            <div class="spinner"></div><i class="fa-solid fa-disk-shadow btn-icon"></i> <span
+              class="btn-text">Provisionar Cliente</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="page-produto" class="tab-content">
+      <header class="page-header">
+        <h1>Catálogo de Produtos</h1>
+        <p class="page-subtitle">Cadastre os itens disponíveis para venda</p>
+      </header>
+      <div class="glass-card">
+        <div class="form-grid">
+          <div class="form-group"><label>Nome do Produto</label><input type="text" id="p-nome"
+              placeholder="Ex: Curso de Marketing"></div>
+          <div class="form-group"><label>Preço Base (R$)</label><input type="text" id="p-preco" placeholder="0,00"
+              oninput="aplicarMascaraMoeda(event)"></div>
+          <div class="form-group full-width"><label>Descrição Curta</label><input type="text" id="p-desc"
+              placeholder="Detalhes do produto..."></div>
+        </div>
+        <div class="btn-container">
+          <button id="btn-produto" class="prime-btn" onclick="salvarProduto()">
+            <div class="spinner"></div><i class="fa-solid fa-box btn-icon"></i> <span class="btn-text">Catalogar
+              Produto</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="page-compra" class="tab-content">
+      <header class="page-header">
+        <h1>Registrar Compra</h1>
+        <p class="page-subtitle">Adicione múltiplos itens ao carrinho do cliente</p>
+      </header>
+
+      <div class="glass-card">
+        <div class="form-group full-width">
+          <label>Selecione o Cliente (Dono da Compra)</label>
+          <select id="compra-cliente">
+            <option disabled selected>Carregando clientes...</option>
+          </select>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid var(--border); margin: 25px 0;">
+
+        <div class="form-grid" style="align-items: end;">
+          <div class="form-group">
+            <label>Produto</label>
+            <select id="compra-produto" onchange="calcularSubtotal()">
+              <option disabled selected>Carregando...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Qtd</label>
+            <input type="number" id="compra-qtd" value="1" min="1" onchange="calcularSubtotal()">
+          </div>
+          <div class="form-group">
+            <label>Subtotal (R$)</label>
+            <input type="number" id="compra-subtotal" readonly
+              style="background: rgba(34, 211, 238, 0.05); border-color: var(--cyan);">
+          </div>
+          <div class="form-group">
+            <button class="prime-btn" onclick="adicionarAoCarrinho()"
+              style="width: 100%; padding: 14px; background: rgba(139, 92, 246, 0.2); border: 1px solid var(--primary); color: var(--primary);">
+              <i class="fa-solid fa-plus"></i> Add
+            </button>
+          </div>
+        </div>
+
+        <div
+          style="background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-top: 15px;">
+          <h3 style="margin-top: 0; font-size: 14px; color: var(--text-muted); text-transform: uppercase;">Itens no
+            Carrinho</h3>
+
+          <ul id="lista-carrinho"
+            style="list-style: none; padding: 0; margin: 0 0 15px 0; font-size: 14px; min-height: 50px;">
+            <li style="color: var(--text-muted); font-style: italic;">Nenhum item adicionado ainda.</li>
+          </ul>
+
+          <div
+            style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 15px;">
+            <span style="font-size: 16px; font-weight: 500;">Total da Compra:</span>
+            <span style="font-size: 22px; font-weight: 700; color: var(--success);">R$ <span
+                id="carrinho-total-geral">0.00</span></span>
+          </div>
+        </div>
+
+        <div class="btn-container">
+          <button id="btn-compra" class="prime-btn" onclick="processarCarrinho()"
+            style="background: linear-gradient(135deg, var(--success) 0%, #047857 100%); width: 100%; max-width: 100%;">
+            <div class="spinner"></div><i class="fa-solid fa-cart-arrow-down btn-icon"></i> <span
+              class="btn-text">Finalizar Compra Completa</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="page-campanha" class="tab-content">
+      <header class="page-header">
+        <h1>Nova Campanha</h1>
+        <p class="page-subtitle">Desenvolva o conteúdo e assunto do seu e-mail marketing</p>
+      </header>
+
+      <div class="glass-card">
+        <div class="form-group full-width">
+          <label>ID da Campanha (Uso Interno)</label>
+          <input type="text" id="camp-nome" placeholder="Ex: Black_Friday_2026_Launch">
+        </div>
+        <div class="form-group full-width">
+          <label>Assunto do E-mail</label>
+          <input type="text" id="camp-assunto" placeholder="Uma oferta irrecusável aguarda você...">
+        </div>
+        <div class="form-group full-width">
+          <label>Conteúdo HTML (Use {{nome}} para personalização)</label>
+          <textarea id="camp-conteudo" rows="12"
+            placeholder="<h1>Olá, {{nome}}!</h1><p>Seu próximo passo começa aqui...</p>"></textarea>
+        </div>
+        <div class="btn-container">
+          <button id="btn-campanha" class="prime-btn" onclick="salvarCampanha()">
+            <div class="spinner"></div><i class="fa-solid fa-feather btn-icon"></i> <span class="btn-text">Gravar
+              Campanha</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="page-envio" class="tab-content">
+      <header class="page-header">
+        <h1>Agendar Disparo</h1>
+        <p class="page-subtitle">Selecione o público e a campanha para envio em lote</p>
+      </header>
+
+      <div class="glass-card">
+        <div class="form-group full-width">
+          <label>Selecionar Campanha Ativa</label>
+          <select id="env-campanha">
+            <option disabled selected>Aguarde, sincronizando...</option>
+          </select>
+        </div>
+        <div class="form-group full-width">
+          <label>Pipeline de Público (Segmento)</label>
+          <select id="env-segmento">
+            <option value="Todos">Base Completa de Clientes</option>
+            <option value="Recentes">Engajados Recentemente (< 30 dias)</option>
+            <option value="Inativos">Reengajamento Inativos (> 90 dias)</option>
+          </select>
+        </div>
+        <div class="btn-container">
+          <button id="btn-envio" class="prime-btn" onclick="agendarEnvio()"
+            style="background: linear-gradient(135deg, var(--cyan) 0%, #0891b2 100%); color: #000;">
+            <div class="spinner" style="border-top-color: #000;"></div><i
+              class="fa-solid fa-rocket-launch btn-icon"></i> <span class="btn-text">Iniciar Pipeline de Envio</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <?!= include('frontend/js/Scripts'); ?>
+</body>
+
+</html>
