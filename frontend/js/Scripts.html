@@ -1,4 +1,8 @@
 <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    carregarListaClientes();
+  });
+
   // =========================================================
   // 1. VARIÁVEIS GLOBAIS
   // =========================================================
@@ -163,18 +167,69 @@
   }
 
   function salvarCliente() {
-    setLoading('btn-cliente', true, 'Provisionar Cliente');
+    setLoading('btn-cliente', true, 'Salvar Cliente');
+
+    const emailOriginal = document.getElementById('c-email-original').value;
     const dados = {
       nome: document.getElementById('c-nome').value,
       email: document.getElementById('c-email').value,
-      telefone: document.getElementById('c-tel').value
+      telefone: document.getElementById('c-tel').value,
+      emailOriginal: emailOriginal
     };
+
+    const nomeFuncaoBackend = emailOriginal ? 'atualizarCliente' : 'salvarCliente';
 
     google.script.run.withSuccessHandler(res => {
       showToast(res.mensagem, res.sucesso);
-      setLoading('btn-cliente', false, 'Provisionar Cliente');
-      if (res.sucesso === true) document.querySelectorAll('#page-cliente input').forEach(input => input.value = '');
-    }).salvarCliente(dados);
+      setLoading('btn-cliente', false, 'Salvar Cliente');
+
+      if (res.sucesso === true) {
+        voltarParaListaClientes(); // Volta para a tabela após salvar
+      }
+    })[nomeFuncaoBackend](dados);
+  }
+
+  function mostrarFormCliente(isEdit = false) {
+    document.getElementById('view-lista-cliente').style.display = 'none';
+    document.getElementById('view-form-cliente').style.display = 'block';
+    document.getElementById('btn-novo-cliente').style.display = 'none';
+
+    if (isEdit) {
+      document.getElementById('titulo-pagina-cliente').innerHTML = 'Editar Cliente';
+      document.getElementById('subtitulo-pagina-cliente').innerHTML = 'Atualize os dados de contato abaixo';
+    } else {
+      document.getElementById('titulo-pagina-cliente').innerHTML = 'Cadastrar Cliente';
+      document.getElementById('subtitulo-pagina-cliente').innerHTML = 'Adicione um novo contato à base';
+
+      // Limpa os campos para um novo cadastro
+      document.getElementById('c-email-original').value = '';
+      document.getElementById('c-nome').value = '';
+      document.getElementById('c-email').value = '';
+      document.getElementById('c-tel').value = '';
+    }
+  }
+
+  function voltarParaListaClientes() {
+    document.getElementById('view-lista-cliente').style.display = 'block';
+    document.getElementById('view-form-cliente').style.display = 'none';
+    document.getElementById('btn-novo-cliente').style.display = 'block';
+
+    document.getElementById('titulo-pagina-cliente').innerHTML = 'Clientes';
+    document.getElementById('subtitulo-pagina-cliente').innerHTML = 'Gerencie sua base de contatos';
+
+    carregarListaClientes(); // Atualiza a tabela para garantir dados frescos
+  }
+
+  function abrirEdicaoCliente(index) {
+    const c = clientesGlobais[index];
+
+    // Preenche os campos do formulário com os dados da tabela
+    document.getElementById('c-email-original').value = c[1]; // Campo oculto com e-mail antigo
+    document.getElementById('c-nome').value = c[0];
+    document.getElementById('c-email').value = c[1];
+    document.getElementById('c-tel').value = c[2];
+
+    mostrarFormCliente(true); // Chama a função dizendo que é modo Edição
   }
 
   function salvarProduto() {
@@ -242,5 +297,57 @@
       showToast(res.mensagem || res, res.sucesso !== undefined ? res.sucesso : true);
       setLoading('btn-envio', false, 'Iniciar Pipeline de Envio');
     }).agendarEnvio(campanha, segmento);
+  }
+
+  function confirmarExclusao(email) {
+    // Cria um alerta nativo do navegador para evitar exclusões acidentais
+    if (confirm(`Tem certeza que deseja excluir permanentemente o cliente com e-mail: ${email}?`)) {
+
+      // Coloca a tabela em estado de carregamento
+      document.getElementById('corpo-tabela-clientes').innerHTML = '<tr><td colspan="5" style="text-align:center;"><div class="spinner" style="display:inline-block; border-top-color: var(--error);"></div> Excluindo...</td></tr>';
+
+      google.script.run.withSuccessHandler(res => {
+        showToast(res.mensagem, res.sucesso);
+        carregarListaClientes(); // Recarrega a tabela limpa
+      }).excluirCliente(email);
+    }
+  }
+
+  function carregarListaClientes() {
+    const tbody = document.getElementById('corpo-tabela-clientes');
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;"><div class="spinner" style="display:inline-block; border-top-color: var(--primary);"></div> Carregando...</td></tr>';
+
+    google.script.run.withSuccessHandler(clientes => {
+      clientesGlobais = clientes; // Salva na memória para podermos editar depois
+
+      if (clientes.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted); padding: 30px;">Nenhum cliente cadastrado ainda.</td></tr>';
+        return;
+      }
+
+      let html = '';
+
+      // --- É AQUI QUE ENTRA O SEU BLOCO DE CÓDIGO ---
+      clientes.forEach((c, index) => {
+        html += `
+          <tr>
+            <td><strong style="color: var(--text-main);">${c[0]}</strong></td>
+            <td>${c[1]}</td>
+            <td>${c[2]}</td>
+            <td>${c[3]}</td>
+            <td>
+              <button class="btn-icon-action" onclick="abrirEdicaoCliente(${index})" title="Editar">
+                <i class="fa-solid fa-pen-to-square"></i>
+              </button>
+              <button class="btn-icon-action" onclick="confirmarExclusao('${c[1]}')" title="Excluir" style="color: var(--error); margin-left: 10px;">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+    }).getClientes();
   }
 </script>

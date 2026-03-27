@@ -50,11 +50,41 @@
     <div id="status-panel" class="status-panel"></div>
 
     <div id="page-cliente" class="tab-content active">
-      <header class="page-header">
-        <h1>Cadastrar Cliente</h1>
-        <p class="page-subtitle">Adicione os dados de contato do cliente</p>
+      <header class="page-header" style="display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+          <h1 id="titulo-pagina-cliente">Clientes</h1>
+          <p class="page-subtitle" id="subtitulo-pagina-cliente">Gerencie sua base de contatos</p>
+        </div>
+        <button id="btn-novo-cliente" class="prime-btn" onclick="mostrarFormCliente()"
+          style="padding: 10px 20px; font-size: 14px;">
+          <i class="fa-solid fa-plus"></i> Novo Cliente
+        </button>
       </header>
-      <div class="glass-card">
+
+      <div class="glass-card" id="view-lista-cliente">
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>E-mail</th>
+                <th>Telefone</th>
+                <th>Data Cadastro</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="corpo-tabela-clientes">
+              <tr>
+                <td colspan="5" style="text-align:center;">Carregando dados...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="glass-card" id="view-form-cliente" style="display: none;">
+        <input type="hidden" id="c-email-original">
+
         <div class="form-grid">
           <div class="form-group full-width"><label>Nome Completo</label><input type="text" id="c-nome"
               placeholder="Ex: Ada Lovelace"></div>
@@ -62,10 +92,13 @@
               placeholder="ada@tech.com"></div>
           <div class="form-group"><label>Telefone</label><input type="text" id="c-tel" placeholder="+55 11 ..."></div>
         </div>
-        <div class="btn-container">
+
+        <div class="btn-container" style="justify-content: space-between; margin-top: 10px;">
+          <button class="nav-btn" onclick="voltarParaListaClientes()"
+            style="border: 1px solid var(--border); color: var(--text-main); max-width: 150px; text-align: center;">Cancelar</button>
           <button id="btn-cliente" class="prime-btn" onclick="salvarCliente()">
-            <div class="spinner"></div><i class="fa-solid fa-disk-shadow btn-icon"></i> <span
-              class="btn-text">Provisionar Cliente</span>
+            <div class="spinner"></div><i class="fa-solid fa-disk-shadow btn-icon"></i> <span class="btn-text">Salvar
+              Cliente</span>
           </button>
         </div>
       </div>

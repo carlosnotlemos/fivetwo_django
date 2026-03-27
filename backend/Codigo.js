@@ -2,12 +2,11 @@ const BATCH_SIZE = 40; // Limite de e-mails por lote
 
 // Esta função transforma o script em um Web App
 function doGet(e) {
-  return HtmlService.createTemplateFromFile('frontend/views/Index') // Mudou de createHtmlOutput para createTemplate
-    .evaluate() // O evaluate é obrigatório para processar os includes <?!= ?>
+  return HtmlService.createTemplateFromFile('frontend/views/Index')
+    .evaluate()
     .setTitle('PostlyMail | CRM & Marketing')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1');
 }
-
 
 function onOpen() {
   SpreadsheetApp.getUi()
@@ -32,7 +31,6 @@ function abrirPainel() {
 function configurarPlanilhas() {
   const ss = getDb();
 
-  // Nova estrutura NORMALIZADA
   const abas = {
     "Clientes": ["Nome", "E-mail", "Telefone", "Data Cadastro"],
     "Produtos": ["Nome do Produto", "Preço Base (R$)", "Descrição"],
@@ -55,25 +53,10 @@ function configurarPlanilhas() {
   return "Banco de dados relacional atualizado com sucesso!";
 }
 
-// 2. Validação e Salvamento
-function salvarCliente(dados) {
-  if (!validarEmail(dados.email)) {
-    return { sucesso: false, mensagem: "Erro: E-mail inválido." };
-  }
-
-  const sheet = getDb().getSheetByName("Clientes");
-
-  // O '|| 2' garante que não dê erro se a planilha estiver vazia (só com cabeçalho)
-  const emails = sheet.getRange(2, 2, Math.max(sheet.getLastRow() - 1, 1), 1).getValues().flat();
-
-  if (emails.includes(dados.email)) {
-    return { sucesso: false, mensagem: "Erro: E-mail já cadastrado." };
-  }
-
-  const hoje = new Date().toLocaleDateString('pt-BR');
-  sheet.appendRow([dados.nome, dados.email, dados.telefone, hoje]);
-
-  return { sucesso: true, mensagem: "Cliente provisionado com sucesso!" };
+// 2. Validação e Salvamento (Clientes foi movido para models/cliente.js)
+function validarEmail(email) {
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return re.test(email);
 }
 
 function salvarCampanha(dados) {
@@ -191,8 +174,7 @@ function agendarEnvio(campanhaNome, segmento) {
 
     if (!validarEmail(email)) return;
 
-    // Achar a compra mais recente deste cliente cruzando com a aba 'Compras'
-    let diasDesdeCompra = Infinity; // Começa como infinito caso ele nunca tenha comprado
+    let diasDesdeCompra = Infinity;
     const comprasDoCliente = historicoCompras.filter(compra => compra[1] === email);
 
     if (comprasDoCliente.length > 0) {
@@ -203,7 +185,7 @@ function agendarEnvio(campanhaNome, segmento) {
           const partes = d.split('/');
           return new Date(partes[2], partes[1] - 1, partes[0]);
         }
-        return new Date(d); // Fallback caso já seja objeto Date
+        return new Date(d);
       });
       const ultimaData = new Date(Math.max.apply(null, datas));
       diasDesdeCompra = (hoje - ultimaData) / (1000 * 60 * 60 * 24);
@@ -236,7 +218,7 @@ function agendarEnvio(campanhaNome, segmento) {
   return { sucesso: true, mensagem: `${alvos.length} e-mails encaminhados para a fila de disparo!` };
 }
 
-// 4. Processamento de Lotes (Executado via Trigger)
+// 4. Processamento de Lotes
 function processarFilaEnvio() {
   const filaSheet = getDb().getSheetByName("Fila_Envio");
   if (filaSheet.getLastRow() < 2) return;
