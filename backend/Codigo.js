@@ -66,34 +66,6 @@ function salvarCampanha(dados) {
   return { sucesso: true, mensagem: "Campanha salva com sucesso!" };
 }
 
-function salvarCompra(dados) {
-  const ss = getDb();
-  const sheetCompras = ss.getSheetByName("Compras");
-  const sheetItens = ss.getSheetByName("Compra_Itens");
-
-  // Retornando objeto de ERRO
-  if (!dados.itens || dados.itens.length === 0) {
-    return { sucesso: false, mensagem: "O carrinho está vazio." };
-  }
-
-  const idPedido = "PED-" + new Date().getTime();
-  const dataCompra = new Date().toLocaleDateString('pt-BR');
-
-  let valorTotalPedido = 0;
-
-  const linhasItens = dados.itens.map(item => {
-    valorTotalPedido += item.valorTotal;
-    return [idPedido, item.produto, item.quantidade, item.valorTotal];
-  });
-
-  sheetCompras.appendRow([idPedido, dataCompra, dados.emailCliente, valorTotalPedido]);
-
-  const startRow = sheetItens.getLastRow() + 1;
-  sheetItens.getRange(startRow, 1, linhasItens.length, 4).setValues(linhasItens);
-
-  // Retornando objeto de SUCESSO
-  return { sucesso: true, mensagem: `Pedido ${idPedido} registrado com sucesso!` };
-}
 
 function validarEmail(email) {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

@@ -23,7 +23,7 @@
 
     // Gatilhos de carregamento ao trocar de tela
     if (pageId === 'page-envio') carregarCampanhas();
-    if (pageId === 'page-compra') carregarDadosCompra();
+    if (pageId === 'page-compra') carregarListaVendas();
     if (pageId === 'page-produto') carregarListaProdutos();
   }
 
@@ -366,8 +366,110 @@
         carrinhoDeCompras = [];
         atualizarInterfaceCarrinho();
         document.getElementById('compra-cliente').selectedIndex = 0;
+        voltarParaListaVendas();
       }
     }).salvarCompra({ emailCliente: cliente, itens: carrinhoDeCompras });
+  }
+
+  function carregarListaVendas() {
+    const tbody = document.getElementById('corpo-tabela-vendas');
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;"><div class="spinner" style="display:inline-block; border-top-color: var(--primary);"></div> Carregando histórico...</td></tr>';
+
+    google.script.run.withSuccessHandler(vendas => {
+      if (vendas.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted); padding: 30px;">Nenhuma venda registrada ainda.</td></tr>';
+        return;
+      }
+
+      let html = '';
+      vendas.reverse().forEach(v => {
+        html += `
+          <tr>
+            <td><strong style="color: var(--cyan);">${v[0]}</strong></td>
+            <td>${v[1]}</td>
+            <td>${v[2]}</td>
+            <td style="font-weight: 600; color: var(--success);">R$ ${v[3]}</td>
+            <td>
+              <button class="btn-icon-action" onclick="abrirDetalhesVenda('${v[0]}')" title="Ver Itens">
+                <i class="fa-solid fa-eye"></i>
+              </button>
+              <button class="btn-icon-action" onclick="confirmarExcluirVenda('${v[0]}')" title="Excluir" style="color: var(--error); margin-left: 10px;">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+      tbody.innerHTML = html;
+    }).getVendas();
+  }
+
+  function mostrarFormVenda() {
+    document.getElementById('view-lista-venda').style.display = 'none';
+    document.getElementById('view-form-venda').style.display = 'block';
+    document.getElementById('btn-nova-venda').style.display = 'none';
+    document.getElementById('view-detalhes-venda').style.display = 'none';
+
+    document.getElementById('titulo-pagina-venda').innerHTML = 'Registrar Venda';
+    document.getElementById('subtitulo-pagina-venda').innerHTML = 'Adicione múltiplos itens ao carrinho do cliente';
+
+    carregarDadosCompra(); // Carrega selects de clientes/produtos
+  }
+
+  function voltarParaListaVendas() {
+    document.getElementById('view-lista-venda').style.display = 'block';
+    document.getElementById('view-form-venda').style.display = 'none';
+    document.getElementById('btn-nova-venda').style.display = 'block';
+    document.getElementById('view-detalhes-venda').style.display = 'none';
+
+    document.getElementById('titulo-pagina-venda').innerHTML = 'Histórico de Vendas';
+    document.getElementById('subtitulo-pagina-venda').innerHTML = 'Acompanhe e gerencie as transações da sua base';
+
+    carregarListaVendas();
+  }
+
+  function abrirDetalhesVenda(idPedido) {
+    document.getElementById('detalhes-venda-titulo').innerHTML = `Itens do Pedido: <span style="color: var(--cyan);">${idPedido}</span>`;
+    const tbody = document.getElementById('corpo-tabela-detalhes-venda');
+    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;"><div class="spinner" style="display:inline-block;"></div></td></tr>';
+    
+    document.getElementById('view-detalhes-venda').style.display = 'block';
+    // Rola para baixo para ver os detalhes se necessário
+    document.getElementById('view-detalhes-venda').scrollIntoView({ behavior: 'smooth' });
+
+    google.script.run.withSuccessHandler(itens => {
+      if (itens.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Nenhum item encontrado.</td></tr>';
+        return;
+      }
+
+      let html = '';
+      itens.forEach(it => {
+        html += `
+          <tr>
+            <td>${it[0]}</td>
+            <td>${it[1]}</td>
+            <td style="font-weight: 600;">R$ ${parseFloat(it[2]).toFixed(2)}</td>
+          </tr>
+        `;
+      });
+      tbody.innerHTML = html;
+    }).getItensVenda(idPedido);
+  }
+
+  function fecharDetalhesVenda() {
+    document.getElementById('view-detalhes-venda').style.display = 'none';
+  }
+
+  function confirmarExcluirVenda(idPedido) {
+    if (confirm(`AVISO CRÍTICO: Você deseja excluir permanentemente o pedido ${idPedido} e todos os seus itens associados?`)) {
+      document.getElementById('corpo-tabela-vendas').innerHTML = '<tr><td colspan="5" style="text-align:center;"><div class="spinner" style="display:inline-block; border-top-color: var(--error);"></div> Excluindo...</td></tr>';
+
+      google.script.run.withSuccessHandler(res => {
+        showToast(res.mensagem, res.sucesso);
+        carregarListaVendas();
+      }).excluirVenda(idPedido);
+    }
   }
 
   function salvarCampanha() {

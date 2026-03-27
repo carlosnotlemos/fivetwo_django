@@ -229,12 +229,38 @@
       </div>
 
       <div id="page-compra" class="tab-content">
-        <header class="page-header">
-          <h1>Registrar Venda</h1>
-          <p class="page-subtitle">Adicione múltiplos itens ao carrinho do cliente</p>
+        <header class="page-header" style="display: flex; justify-content: space-between; align-items: flex-end;">
+          <div>
+            <h1 id="titulo-pagina-venda">Histórico de Vendas</h1>
+            <p class="page-subtitle" id="subtitulo-pagina-venda">Acompanhe e gerencie as transações da sua base</p>
+          </div>
+          <button id="btn-nova-venda" class="prime-btn" onclick="mostrarFormVenda()">
+            <i class="fa-solid fa-cart-plus"></i> Nova Venda
+          </button>
         </header>
 
-        <div class="glass-card">
+        <div class="glass-card" id="view-lista-venda">
+          <div class="data-table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID Pedido</th>
+                  <th>Data</th>
+                  <th>Cliente</th>
+                  <th>Total</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="corpo-tabela-vendas">
+                <tr>
+                  <td colspan="5" style="text-align:center;">Carregando histórico...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="glass-card" id="view-form-venda" style="display: none;">
           <div class="form-group full-width">
             <label>Selecione o Cliente (Dono da Compra)</label>
             <select id="compra-cliente">
@@ -286,12 +312,37 @@
             </div>
           </div>
 
-          <div class="btn-container">
+          <div class="btn-container" style="justify-content: space-between; margin-top: 20px;">
+            <button class="prime-btn secondary" onclick="voltarParaListaVendas()">Cancelar</button>
             <button id="btn-compra" class="prime-btn" onclick="processarCarrinho()"
-              style="background: linear-gradient(135deg, var(--success) 0%, #059669 100%); width: 100%; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);">
+              style="background: linear-gradient(135deg, var(--success) 0%, #059669 100%); box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);">
               <div class="spinner"></div><i class="fa-solid fa-cart-check btn-icon"></i> <span
                 class="btn-text">Finalizar Transação</span>
             </button>
+          </div>
+        </div>
+
+        <!-- Visualização de Detalhes (Itens da Venda) -->
+        <div id="view-detalhes-venda" class="glass-card" style="display: none; margin-top: 20px; border-color: var(--primary);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 id="detalhes-venda-titulo" style="margin: 0;">Itens do Pedido: PED-XXXX</h3>
+            <button class="btn-icon-action" onclick="fecharDetalhesVenda()">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <div class="data-table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Produto</th>
+                  <th>Quantidade</th>
+                  <th>Subtotal</th>
+                </tr>
+              </thead>
+              <tbody id="corpo-tabela-detalhes-venda">
+                <!-- Preenchido via JS -->
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
