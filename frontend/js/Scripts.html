@@ -7,6 +7,7 @@
   // 1. VARIÁVEIS GLOBAIS
   // =========================================================
   let produtosGlobais = [];
+  let clientesGlobais = [];
   let carrinhoDeCompras = [];
 
   // =========================================================
@@ -23,6 +24,7 @@
     // Gatilhos de carregamento ao trocar de tela
     if (pageId === 'page-envio') carregarCampanhas();
     if (pageId === 'page-compra') carregarDadosCompra();
+    if (pageId === 'page-produto') carregarListaProdutos();
   }
 
   function showToast(msg, isSuccess) {
@@ -240,17 +242,113 @@
     if (isNaN(precoNumerico) || precoNumerico <= 0) return showToast('Por favor, informe um preço válido.', false);
 
     setLoading('btn-produto', true, 'Catalogar Produto');
+    const nomeOriginal = document.getElementById('p-nome-original').value;
     const dados = {
       nome: document.getElementById('p-nome').value,
       preco: precoNumerico,
-      descricao: document.getElementById('p-desc').value
+      descricao: document.getElementById('p-desc').value,
+      nomeOriginal: nomeOriginal
     };
+
+    const nomeFuncaoBackend = nomeOriginal ? 'atualizarProduto' : 'salvarProduto';
 
     google.script.run.withSuccessHandler(res => {
       showToast(res.mensagem, res.sucesso);
       setLoading('btn-produto', false, 'Catalogar Produto');
-      if (res.sucesso === true) document.querySelectorAll('#page-produto input').forEach(input => input.value = '');
-    }).salvarProduto(dados);
+      if (res.sucesso === true) {
+        voltarParaListaProdutos();
+        document.querySelectorAll('#page-produto input').forEach(input => input.value = '');
+      }
+    })[nomeFuncaoBackend](dados);
+  }
+
+  function mostrarFormProduto(isEdit = false) {
+    document.getElementById('view-lista-produto').style.display = 'none';
+    document.getElementById('view-form-produto').style.display = 'block';
+    document.getElementById('btn-novo-produto').style.display = 'none';
+
+    if (isEdit) {
+      document.getElementById('titulo-pagina-produto').innerHTML = 'Editar Produto';
+      document.getElementById('subtitulo-pagina-produto').innerHTML = 'Atualize as informações do item no catálogo';
+    } else {
+      document.getElementById('titulo-pagina-produto').innerHTML = 'Catalogar Produto';
+      document.getElementById('subtitulo-pagina-produto').innerHTML = 'Cadastre um novo item disponível para venda';
+
+      // Limpa os campos para um novo cadastro
+      document.getElementById('p-nome-original').value = '';
+      document.getElementById('p-nome').value = '';
+      document.getElementById('p-preco').value = '';
+      document.getElementById('p-desc').value = '';
+    }
+  }
+
+  function voltarParaListaProdutos() {
+    document.getElementById('view-lista-produto').style.display = 'block';
+    document.getElementById('view-form-produto').style.display = 'none';
+    document.getElementById('btn-novo-produto').style.display = 'block';
+
+    document.getElementById('titulo-pagina-produto').innerHTML = 'Catálogo de Produtos';
+    document.getElementById('subtitulo-pagina-produto').innerHTML = 'Gerencie os itens disponíveis para venda no seu ecossistema';
+
+    carregarListaProdutos(); // Atualiza a tabela
+  }
+
+  function abrirEdicaoProduto(index) {
+    const p = produtosGlobais[index];
+
+    // Preenche os campos do formulário com os dados da tabela
+    document.getElementById('p-nome-original').value = p[0];
+    document.getElementById('p-nome').value = p[0];
+    document.getElementById('p-preco').value = p[1];
+    document.getElementById('p-desc').value = p[2];
+
+    mostrarFormProduto(true);
+  }
+
+  function confirmarExcluirProduto(nome) {
+    if (confirm(`Tem certeza que deseja remover o produto "${nome}" do catálogo?`)) {
+      document.getElementById('corpo-tabela-produtos').innerHTML = '<tr><td colspan="4" style="text-align:center;"><div class="spinner" style="display:inline-block; border-top-color: var(--error);"></div> Excluindo...</td></tr>';
+
+      google.script.run.withSuccessHandler(res => {
+        showToast(res.mensagem, res.sucesso);
+        carregarListaProdutos();
+      }).excluirProduto(nome);
+    }
+  }
+
+  function carregarListaProdutos() {
+    const tbody = document.getElementById('corpo-tabela-produtos');
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;"><div class="spinner" style="display:inline-block; border-top-color: var(--primary);"></div> Carregando catálogo...</td></tr>';
+
+    google.script.run.withSuccessHandler(produtos => {
+      produtosGlobais = produtos;
+
+      if (produtos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--text-muted); padding: 30px;">Nenhum produto cadastrado ainda.</td></tr>';
+        return;
+      }
+
+      let html = '';
+      produtos.forEach((p, index) => {
+        html += `
+          <tr>
+            <td><strong style="color: var(--text-main);">${p[0]}</strong></td>
+            <td>R$ ${p[1]}</td>
+            <td style="font-size: 13px; color: var(--text-muted);">${p[2]}</td>
+            <td>
+              <button class="btn-icon-action" onclick="abrirEdicaoProduto(${index})" title="Editar">
+                <i class="fa-solid fa-pen-to-square"></i>
+              </button>
+              <button class="btn-icon-action" onclick="confirmarExcluirProduto('${p[0]}')" title="Excluir" style="color: var(--error); margin-left: 10px;">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+    }).getProdutos();
   }
 
   function processarCarrinho() {

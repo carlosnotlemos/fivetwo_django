@@ -66,13 +66,6 @@ function salvarCampanha(dados) {
   return { sucesso: true, mensagem: "Campanha salva com sucesso!" };
 }
 
-function salvarProduto(dados) {
-  const sheet = getDb().getSheetByName("Produtos");
-  sheet.appendRow([dados.nome, dados.preco, dados.descricao]);
-
-  return { sucesso: true, mensagem: "Produto catalogado com sucesso!" };
-}
-
 function salvarCompra(dados) {
   const ss = getDb();
   const sheetCompras = ss.getSheetByName("Compras");

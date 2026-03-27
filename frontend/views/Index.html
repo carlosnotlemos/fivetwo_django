@@ -15,247 +15,348 @@
 <body>
 
   <aside class="sidebar">
-    <div class="sidebar-top">
-      <div class="brand">
-        <i class="fa-solid fa-paper-plane brand-icon"></i>
-        <span>PostlyMail</span>
+    <div class="brand">
+      <div class="brand-icon">
+        <i class="fa-solid fa-paper-plane"></i>
       </div>
-
-      <nav class="nav-group">
-        <button class="nav-btn active" onclick="showPage('page-cliente', this)">
-          <i class="fa-solid fa-user-plus"></i> Novo Cliente
-        </button>
-        <button class="nav-btn" onclick="showPage('page-produto', this)">
-          <i class="fa-solid fa-box-open"></i> Novo Produto
-        </button>
-        <button class="nav-btn" onclick="showPage('page-compra', this)">
-          <i class="fa-solid fa-cart-shopping"></i> Registrar Compra
-        </button>
-        <button class="nav-btn" onclick="showPage('page-campanha', this)">
-          <i class="fa-solid fa-pen-nib"></i> Criar Campanha
-        </button>
-        <button class="nav-btn" onclick="showPage('page-envio', this)">
-          <i class="fa-solid fa-rocket"></i> Agendar Disparo
-        </button>
-      </nav>
+      <span>PostlyMail</span>
     </div>
 
+    <nav class="nav-group">
+      <button class="nav-btn active" onclick="showPage('page-dashboard', this)">
+        <i class="fa-solid fa-chart-pie"></i> Dashboard
+      </button>
+      <button class="nav-btn" onclick="showPage('page-cliente', this)">
+        <i class="fa-solid fa-users"></i> Clientes
+      </button>
+      <button class="nav-btn" onclick="showPage('page-produto', this)">
+        <i class="fa-solid fa-box-open"></i> Produtos
+      </button>
+      <button class="nav-btn" onclick="showPage('page-compra', this)">
+        <i class="fa-solid fa-cart-shopping"></i> Vendas
+      </button>
+      <button class="nav-btn" onclick="showPage('page-campanha', this)">
+        <i class="fa-solid fa-pen-nib"></i> Campanhas
+      </button>
+      <button class="nav-btn" onclick="showPage('page-envio', this)">
+        <i class="fa-solid fa-rocket"></i> Disparos
+      </button>
+    </nav>
+
     <div class="sidebar-footer">
-      PostlyMail v1.0 | Premium
+      <i class="fa-solid fa-shield-check" style="color: var(--success)"></i>
+      <span>PostlyMail Premium v1.2</span>
     </div>
   </aside>
 
-  <main class="main-content">
-
-    <div id="status-panel" class="status-panel"></div>
-
-    <div id="page-cliente" class="tab-content active">
-      <header class="page-header" style="display: flex; justify-content: space-between; align-items: flex-end;">
-        <div>
-          <h1 id="titulo-pagina-cliente">Clientes</h1>
-          <p class="page-subtitle" id="subtitulo-pagina-cliente">Gerencie sua base de contatos</p>
+  <div class="main-container">
+    <header class="top-bar">
+      <div class="search-mockup" style="display: flex; align-items: center; background: var(--bg-input); padding: 8px 16px; border-radius: 10px; border: 1px solid var(--border); width: 350px;">
+        <i class="fa-solid fa-magnifying-glass" style="color: var(--text-muted); margin-right: 12px;"></i>
+        <input type="text" placeholder="Pesquisar..." style="background: transparent; border: none; padding: 0; font-size: 14px; box-shadow: none;">
+      </div>
+      
+      <div class="user-profile" style="display: flex; align-items: center; gap: 15px;">
+        <div class="notifications" style="position: relative; color: var(--text-muted); cursor: pointer;">
+          <i class="fa-solid fa-bell"></i>
+          <span style="position: absolute; top: -5px; right: -5px; background: var(--error); width: 8px; height: 8px; border-radius: 50%; border: 2px solid var(--bg-sidebar);"></span>
         </div>
-        <button id="btn-novo-cliente" class="prime-btn" onclick="mostrarFormCliente()"
-          style="padding: 10px 20px; font-size: 14px;">
-          <i class="fa-solid fa-plus"></i> Novo Cliente
-        </button>
-      </header>
+        <div style="width: 1px; height: 24px; background: var(--border);"></div>
+        <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+          <div style="text-align: right;">
+            <div style="font-size: 14px; font-weight: 600; color: #fff;">Carlos Lemos</div>
+            <div style="font-size: 11px; color: var(--text-muted);">Admin Account</div>
+          </div>
+          <div style="width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, var(--primary), var(--accent)); display: flex; align-items: center; justify-content: center; font-weight: 700;">CL</div>
+        </div>
+      </div>
+    </header>
 
-      <div class="glass-card" id="view-lista-cliente">
-        <div class="data-table-container">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Nome</th>
-                <th>E-mail</th>
-                <th>Telefone</th>
-                <th>Data Cadastro</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody id="corpo-tabela-clientes">
-              <tr>
-                <td colspan="5" style="text-align:center;">Carregando dados...</td>
-              </tr>
-            </tbody>
-          </table>
+    <main class="main-content">
+      <div id="status-panel" class="status-panel"></div>
+
+      <div id="page-dashboard" class="tab-content active">
+        <header class="page-header">
+          <h1>Dashboard Overview</h1>
+          <p class="page-subtitle">Bem-vindo de volta, Carlos. Aqui está o resumo do seu negócio.</p>
+        </header>
+
+        <!-- Overview Stats -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(99, 102, 241, 0.15); color: var(--primary);">
+              <i class="fa-solid fa-users"></i>
+            </div>
+            <div class="stat-value">1,284</div>
+            <div class="stat-label">Total Clientes</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(14, 165, 233, 0.15); color: var(--accent);">
+              <i class="fa-solid fa-money-bill-trend-up"></i>
+            </div>
+            <div class="stat-value">R$ 12.5k</div>
+            <div class="stat-label">Receita Mensal</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: var(--success);">
+              <i class="fa-solid fa-paper-plane"></i>
+            </div>
+            <div class="stat-value">98.2%</div>
+            <div class="stat-label">Taxa de Entrega</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--warning);">
+              <i class="fa-solid fa-bolt"></i>
+            </div>
+            <div class="stat-value">15</div>
+            <div class="stat-label">Campanhas Ativas</div>
+          </div>
+        </div>
+
+        <div class="glass-card">
+          <h3>Atividade Recente</h3>
+          <p style="color: var(--text-muted); font-size: 14px;">Sua conta está sincronizada e operando normalmente.</p>
+          <div style="height: 200px; background: rgba(255,255,255,0.02); border-radius: 12px; border: 1px dashed var(--border); display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-style: italic;">
+            [ Gráfico de Atividade Mockup ]
+          </div>
         </div>
       </div>
 
-      <div class="glass-card" id="view-form-cliente" style="display: none;">
-        <input type="hidden" id="c-email-original">
-
-        <div class="form-grid">
-          <div class="form-group full-width"><label>Nome Completo</label><input type="text" id="c-nome"
-              placeholder="Ex: Ada Lovelace"></div>
-          <div class="form-group"><label>E-mail Direct</label><input type="email" id="c-email"
-              placeholder="ada@tech.com"></div>
-          <div class="form-group"><label>Telefone</label><input type="text" id="c-tel" placeholder="+55 11 ..."></div>
-        </div>
-
-        <div class="btn-container" style="justify-content: space-between; margin-top: 10px;">
-          <button class="nav-btn" onclick="voltarParaListaClientes()"
-            style="border: 1px solid var(--border); color: var(--text-main); max-width: 150px; text-align: center;">Cancelar</button>
-          <button id="btn-cliente" class="prime-btn" onclick="salvarCliente()">
-            <div class="spinner"></div><i class="fa-solid fa-disk-shadow btn-icon"></i> <span class="btn-text">Salvar
-              Cliente</span>
+      <div id="page-cliente" class="tab-content">
+        <header class="page-header" style="display: flex; justify-content: space-between; align-items: flex-end;">
+          <div>
+            <h1 id="titulo-pagina-cliente">Gestão de Clientes</h1>
+            <p class="page-subtitle" id="subtitulo-pagina-cliente">Visualize e organize sua base de contatos estratégica</p>
+          </div>
+          <button id="btn-novo-cliente" class="prime-btn" onclick="mostrarFormCliente()">
+            <i class="fa-solid fa-plus"></i> Novo Cliente
           </button>
-        </div>
-      </div>
-    </div>
+        </header>
 
-    <div id="page-produto" class="tab-content">
-      <header class="page-header">
-        <h1>Catálogo de Produtos</h1>
-        <p class="page-subtitle">Cadastre os itens disponíveis para venda</p>
-      </header>
-      <div class="glass-card">
-        <div class="form-grid">
-          <div class="form-group"><label>Nome do Produto</label><input type="text" id="p-nome"
-              placeholder="Ex: Curso de Marketing"></div>
-          <div class="form-group"><label>Preço Base (R$)</label><input type="text" id="p-preco" placeholder="0,00"
-              oninput="aplicarMascaraMoeda(event)"></div>
-          <div class="form-group full-width"><label>Descrição Curta</label><input type="text" id="p-desc"
-              placeholder="Detalhes do produto..."></div>
-        </div>
-        <div class="btn-container">
-          <button id="btn-produto" class="prime-btn" onclick="salvarProduto()">
-            <div class="spinner"></div><i class="fa-solid fa-box btn-icon"></i> <span class="btn-text">Catalogar
-              Produto</span>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div id="page-compra" class="tab-content">
-      <header class="page-header">
-        <h1>Registrar Compra</h1>
-        <p class="page-subtitle">Adicione múltiplos itens ao carrinho do cliente</p>
-      </header>
-
-      <div class="glass-card">
-        <div class="form-group full-width">
-          <label>Selecione o Cliente (Dono da Compra)</label>
-          <select id="compra-cliente">
-            <option disabled selected>Carregando clientes...</option>
-          </select>
-        </div>
-
-        <hr style="border: 0; border-top: 1px solid var(--border); margin: 25px 0;">
-
-        <div class="form-grid" style="align-items: end;">
-          <div class="form-group">
-            <label>Produto</label>
-            <select id="compra-produto" onchange="calcularSubtotal()">
-              <option disabled selected>Carregando...</option>
-            </select>
+        <div class="glass-card" id="view-lista-cliente">
+          <div class="data-table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>E-mail</th>
+                  <th>Telefone</th>
+                  <th>Data Cadastro</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="corpo-tabela-clientes">
+                <tr>
+                  <td colspan="5" style="text-align:center;">Carregando dados...</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-          <div class="form-group">
-            <label>Qtd</label>
-            <input type="number" id="compra-qtd" value="1" min="1" onchange="calcularSubtotal()">
+        </div>
+
+        <div class="glass-card" id="view-form-cliente" style="display: none;">
+          <input type="hidden" id="c-email-original">
+
+          <div class="form-grid">
+            <div class="form-group full-width"><label>Nome Completo</label><input type="text" id="c-nome"
+                placeholder="Ex: Ada Lovelace"></div>
+            <div class="form-group"><label>E-mail Direct</label><input type="email" id="c-email"
+                placeholder="ada@tech.com"></div>
+            <div class="form-group"><label>Telefone</label><input type="text" id="c-tel" placeholder="+55 11 ..."></div>
           </div>
-          <div class="form-group">
-            <label>Subtotal (R$)</label>
-            <input type="number" id="compra-subtotal" readonly
-              style="background: rgba(34, 211, 238, 0.05); border-color: var(--cyan);">
-          </div>
-          <div class="form-group">
-            <button class="prime-btn" onclick="adicionarAoCarrinho()"
-              style="width: 100%; padding: 14px; background: rgba(139, 92, 246, 0.2); border: 1px solid var(--primary); color: var(--primary);">
-              <i class="fa-solid fa-plus"></i> Add
+
+          <div class="btn-container" style="justify-content: space-between; margin-top: 20px;">
+            <button class="prime-btn secondary" onclick="voltarParaListaClientes()">Cancelar</button>
+            <button id="btn-cliente" class="prime-btn" onclick="salvarCliente()">
+              <div class="spinner"></div><i class="fa-solid fa-floppy-disk btn-icon"></i> <span class="btn-text">Salvar
+                Cliente</span>
             </button>
           </div>
         </div>
+      </div>
 
-        <div
-          style="background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-top: 15px;">
-          <h3 style="margin-top: 0; font-size: 14px; color: var(--text-muted); text-transform: uppercase;">Itens no
-            Carrinho</h3>
+      <div id="page-produto" class="tab-content">
+        <header class="page-header" style="display: flex; justify-content: space-between; align-items: flex-end;">
+          <div>
+            <h1 id="titulo-pagina-produto">Catálogo de Produtos</h1>
+            <p class="page-subtitle" id="subtitulo-pagina-produto">Gerencie os itens disponíveis para venda no seu ecossistema</p>
+          </div>
+          <button id="btn-novo-produto" class="prime-btn" onclick="mostrarFormProduto()">
+            <i class="fa-solid fa-plus"></i> Novo Produto
+          </button>
+        </header>
 
-          <ul id="lista-carrinho"
-            style="list-style: none; padding: 0; margin: 0 0 15px 0; font-size: 14px; min-height: 50px;">
-            <li style="color: var(--text-muted); font-style: italic;">Nenhum item adicionado ainda.</li>
-          </ul>
-
-          <div
-            style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 15px;">
-            <span style="font-size: 16px; font-weight: 500;">Total da Compra:</span>
-            <span style="font-size: 22px; font-weight: 700; color: var(--success);">R$ <span
-                id="carrinho-total-geral">0.00</span></span>
+        <div class="glass-card" id="view-lista-produto">
+          <div class="data-table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Produto</th>
+                  <th>Preço Base</th>
+                  <th>Descrição</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="corpo-tabela-produtos">
+                <tr>
+                  <td colspan="4" style="text-align:center;">Carregando catálogo...</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
-        <div class="btn-container">
-          <button id="btn-compra" class="prime-btn" onclick="processarCarrinho()"
-            style="background: linear-gradient(135deg, var(--success) 0%, #047857 100%); width: 100%; max-width: 100%;">
-            <div class="spinner"></div><i class="fa-solid fa-cart-arrow-down btn-icon"></i> <span
-              class="btn-text">Finalizar Compra Completa</span>
-          </button>
+        <div class="glass-card" id="view-form-produto" style="display: none;">
+          <input type="hidden" id="p-nome-original">
+
+          <div class="form-grid">
+            <div class="form-group"><label>Nome do Produto</label><input type="text" id="p-nome"
+                placeholder="Ex: Curso de Marketing"></div>
+            <div class="form-group"><label>Preço Base (R$)</label><input type="text" id="p-preco" placeholder="0,00"
+                oninput="aplicarMascaraMoeda(event)"></div>
+            <div class="form-group full-width"><label>Descrição Curta</label><input type="text" id="p-desc"
+                placeholder="Detalhes do produto..."></div>
+          </div>
+
+          <div class="btn-container" style="justify-content: space-between; margin-top: 20px;">
+            <button class="prime-btn secondary" onclick="voltarParaListaProdutos()">Cancelar</button>
+            <button id="btn-produto" class="prime-btn" onclick="salvarProduto()">
+              <div class="spinner"></div><i class="fa-solid fa-floppy-disk btn-icon"></i> <span class="btn-text">Catalogar
+                Produto</span>
+            </button>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div id="page-campanha" class="tab-content">
-      <header class="page-header">
-        <h1>Nova Campanha</h1>
-        <p class="page-subtitle">Desenvolva o conteúdo e assunto do seu e-mail marketing</p>
-      </header>
+      <div id="page-compra" class="tab-content">
+        <header class="page-header">
+          <h1>Registrar Venda</h1>
+          <p class="page-subtitle">Adicione múltiplos itens ao carrinho do cliente</p>
+        </header>
 
-      <div class="glass-card">
-        <div class="form-group full-width">
-          <label>ID da Campanha (Uso Interno)</label>
-          <input type="text" id="camp-nome" placeholder="Ex: Black_Friday_2026_Launch">
-        </div>
-        <div class="form-group full-width">
-          <label>Assunto do E-mail</label>
-          <input type="text" id="camp-assunto" placeholder="Uma oferta irrecusável aguarda você...">
-        </div>
-        <div class="form-group full-width">
-          <label>Conteúdo HTML (Use {{nome}} para personalização)</label>
-          <textarea id="camp-conteudo" rows="12"
-            placeholder="<h1>Olá, {{nome}}!</h1><p>Seu próximo passo começa aqui...</p>"></textarea>
-        </div>
-        <div class="btn-container">
-          <button id="btn-campanha" class="prime-btn" onclick="salvarCampanha()">
-            <div class="spinner"></div><i class="fa-solid fa-feather btn-icon"></i> <span class="btn-text">Gravar
-              Campanha</span>
-          </button>
+        <div class="glass-card">
+          <div class="form-group full-width">
+            <label>Selecione o Cliente (Dono da Compra)</label>
+            <select id="compra-cliente">
+              <option disabled selected>Carregando clientes...</option>
+            </select>
+          </div>
+
+          <hr style="border: 0; border-top: 1px solid var(--border); margin: 30px 0;">
+
+          <div class="form-grid" style="align-items: end;">
+            <div class="form-group">
+              <label>Produto</label>
+              <select id="compra-produto" onchange="calcularSubtotal()">
+                <option disabled selected>Carregando...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Qtd</label>
+              <input type="number" id="compra-qtd" value="1" min="1" onchange="calcularSubtotal()">
+            </div>
+            <div class="form-group">
+              <label>Subtotal (R$)</label>
+              <input type="number" id="compra-subtotal" readonly
+                style="background: rgba(14, 165, 233, 0.05); border-color: var(--accent);">
+            </div>
+            <div class="form-group">
+              <button class="prime-btn secondary" onclick="adicionarAoCarrinho()"
+                style="width: 100%; border-color: var(--primary); color: var(--primary);">
+                <i class="fa-solid fa-plus"></i> Add Item
+              </button>
+            </div>
+          </div>
+
+          <div
+            style="background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-top: 25px;">
+            <h3 style="margin-top: 0; font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Itens no
+              Carrinho</h3>
+
+            <ul id="lista-carrinho"
+              style="list-style: none; padding: 0; margin: 0 0 20px 0; font-size: 14px; min-height: 50px;">
+              <li style="color: var(--text-muted); font-style: italic;">Nenhum item adicionado ainda.</li>
+            </ul>
+
+            <div
+              style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 20px;">
+              <span style="font-size: 16px; font-weight: 500;">Total da Compra:</span>
+              <span style="font-size: 24px; font-weight: 800; color: var(--success);">R$ <span
+                  id="carrinho-total-geral">0.00</span></span>
+            </div>
+          </div>
+
+          <div class="btn-container">
+            <button id="btn-compra" class="prime-btn" onclick="processarCarrinho()"
+              style="background: linear-gradient(135deg, var(--success) 0%, #059669 100%); width: 100%; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);">
+              <div class="spinner"></div><i class="fa-solid fa-cart-check btn-icon"></i> <span
+                class="btn-text">Finalizar Transação</span>
+            </button>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div id="page-envio" class="tab-content">
-      <header class="page-header">
-        <h1>Agendar Disparo</h1>
-        <p class="page-subtitle">Selecione o público e a campanha para envio em lote</p>
-      </header>
+      <div id="page-campanha" class="tab-content">
+        <header class="page-header">
+          <h1>Nova Campanha</h1>
+          <p class="page-subtitle">Desenvolva o conteúdo e assunto do seu e-mail marketing</p>
+        </header>
 
-      <div class="glass-card">
-        <div class="form-group full-width">
-          <label>Selecionar Campanha Ativa</label>
-          <select id="env-campanha">
-            <option disabled selected>Aguarde, sincronizando...</option>
-          </select>
-        </div>
-        <div class="form-group full-width">
-          <label>Pipeline de Público (Segmento)</label>
-          <select id="env-segmento">
-            <option value="Todos">Base Completa de Clientes</option>
-            <option value="Recentes">Engajados Recentemente (< 30 dias)</option>
-            <option value="Inativos">Reengajamento Inativos (> 90 dias)</option>
-          </select>
-        </div>
-        <div class="btn-container">
-          <button id="btn-envio" class="prime-btn" onclick="agendarEnvio()"
-            style="background: linear-gradient(135deg, var(--cyan) 0%, #0891b2 100%); color: #000;">
-            <div class="spinner" style="border-top-color: #000;"></div><i
-              class="fa-solid fa-rocket-launch btn-icon"></i> <span class="btn-text">Iniciar Pipeline de Envio</span>
-          </button>
+        <div class="glass-card">
+          <div class="form-group full-width">
+            <label>ID da Campanha (Uso Interno)</label>
+            <input type="text" id="camp-nome" placeholder="Ex: Black_Friday_2026_Launch">
+          </div>
+          <div class="form-group full-width">
+            <label>Assunto do E-mail</label>
+            <input type="text" id="camp-assunto" placeholder="Uma oferta irrecusável aguarda você...">
+          </div>
+          <div class="form-group full-width">
+            <label>Conteúdo HTML (Use {{nome}} para personalização)</label>
+            <textarea id="camp-conteudo" rows="12"
+              placeholder="<h1>Olá, {{nome}}!</h1><p>Seu próximo passo começa aqui...</p>"></textarea>
+          </div>
+          <div class="btn-container">
+            <button id="btn-campanha" class="prime-btn" onclick="salvarCampanha()">
+              <div class="spinner"></div><i class="fa-solid fa-feather-pointed btn-icon"></i> <span class="btn-text">Gravar
+                Campanha</span>
+            </button>
+          </div>
         </div>
       </div>
-    </div>
 
-  </main>
+      <div id="page-envio" class="tab-content">
+        <header class="page-header">
+          <h1>Agendar Disparo</h1>
+          <p class="page-subtitle">Selecione o público e a campanha para envio em lote</p>
+        </header>
+
+        <div class="glass-card">
+          <div class="form-group full-width">
+            <label>Selecionar Campanha Ativa</label>
+            <select id="env-campanha">
+              <option disabled selected>Aguarde, sincronizando...</option>
+            </select>
+          </div>
+          <div class="form-group full-width">
+            <label>Pipeline de Público (Segmento)</label>
+            <select id="env-segmento">
+              <option value="Todos">Base Completa de Clientes</option>
+              <option value="Recentes">Engajados Recentemente (< 30 dias)</option>
+              <option value="Inativos">Reengajamento Inativos (> 90 dias)</option>
+            </select>
+          </div>
+          <div class="btn-container">
+            <button id="btn-envio" class="prime-btn" onclick="agendarEnvio()"
+              style="background: linear-gradient(135deg, var(--accent) 0%, #0284c7 100%); box-shadow: 0 4px 14px rgba(14, 165, 233, 0.4);">
+              <div class="spinner"></div><i
+                class="fa-solid fa-rocket btn-icon"></i> <span class="btn-text">Iniciar Pipeline de Envio</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
 
   <?!= include('frontend/js/Scripts'); ?>
 </body>
