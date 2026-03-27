@@ -509,8 +509,45 @@
     google.script.run.withSuccessHandler(res => {
       showToast(res.mensagem, res.sucesso);
       setLoading('btn-campanha', false, 'Gravar Campanha');
-      if (res.sucesso === true) document.querySelectorAll('#page-campanha input, #page-campanha textarea').forEach(input => input.value = '');
+      if (res.sucesso === true) {
+        document.querySelectorAll('#page-campanha input, #page-campanha textarea').forEach(input => input.value = '');
+        document.getElementById('camp-preview').srcdoc = '';
+      }
     }).salvarCampanha(dados);
+  }
+
+  function atualizarPreviewCampanha() {
+    const conteudo = document.getElementById('camp-conteudo').value;
+    const previewIframe = document.getElementById('camp-preview');
+
+    if (!conteudo.trim()) {
+      previewIframe.srcdoc = `
+        <html>
+          <body style="font-family: 'Inter', sans-serif; display: flex; align-items: center; justify-content: center; height: 90vh; margin: 0; color: #999; font-style: italic;">
+            <div>O conteúdo do seu e-mail aparecerá aqui...</div>
+          </body>
+        </html>`;
+      return;
+    }
+
+    // Processamento de Tags para o Preview
+    let htmlProcessado = conteudo
+      .replace(/{{nome}}/g, '<span style="color: #6366f1; font-weight: 600;">Carlos Lemos</span>')
+      .replace(/{{email}}/g, '<span style="color: #6366f1; font-weight: 600;">carlos@exemplo.com</span>');
+
+    // Injeção no Iframe com CSS Reset básico
+    previewIframe.srcdoc = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+          <style>
+            body { font-family: 'Inter', sans-serif; margin: 0; padding: 20px; color: #333; line-height: 1.5; background: #fff; }
+            img { max-width: 100%; height: auto; }
+          </style>
+        </head>
+        <body>${htmlProcessado}</body>
+      </html>`;
   }
 
   function agendarEnvio() {
