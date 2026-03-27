@@ -11,11 +11,13 @@
     clientesGlobais = state.clientes;
     produtosGlobais = state.produtos;
     vendasGlobais = state.vendas;
+    campanhasGlobais = state.campanhas;
 
     // Renderiza todas as tabelas em segundo plano
     renderizarTabelaClientes(clientesGlobais);
     renderizarTabelaProdutos(produtosGlobais);
     renderizarTabelaVendas(vendasGlobais);
+    renderizarTabelaCampanhas(campanhasGlobais);
 
     // Esconde possíveis esqueletos ou spinners iniciais
     console.log("App Inicializado com sucesso.");
@@ -27,6 +29,7 @@
   let produtosGlobais = [];
   let clientesGlobais = [];
   let vendasGlobais = [];
+  let campanhasGlobais = [];
   let carrinhoDeCompras = [];
 
   // =========================================================
@@ -500,20 +503,108 @@
 
   function salvarCampanha() {
     setLoading('btn-campanha', true, 'Gravar Campanha');
+
+    const originalNome = document.getElementById('camp-original-nome').value;
     const dados = {
       nome: document.getElementById('camp-nome').value,
       assunto: document.getElementById('camp-assunto').value,
-      conteudo: document.getElementById('camp-conteudo').value
+      conteudo: document.getElementById('camp-conteudo').value,
+      originalNome: originalNome
     };
+
+    if (!dados.nome || !dados.assunto || !dados.conteudo) {
+      showToast("Preencha todos os campos da campanha.", false);
+      setLoading('btn-campanha', false, 'Gravar Campanha');
+      return;
+    }
+
+    const acao = originalNome ? 'atualizarCampanha' : 'salvarCampanha';
 
     google.script.run.withSuccessHandler(res => {
       showToast(res.mensagem, res.sucesso);
       setLoading('btn-campanha', false, 'Gravar Campanha');
       if (res.sucesso === true) {
-        document.querySelectorAll('#page-campanha input, #page-campanha textarea').forEach(input => input.value = '');
-        document.getElementById('camp-preview').srcdoc = '';
+        voltarParaListaCampanhas();
+        carregarListaCampanhas();
       }
-    }).salvarCampanha(dados);
+    })[acao](dados);
+  }
+
+  function carregarListaCampanhas() {
+    google.script.run.withSuccessHandler(campanhas => {
+      campanhasGlobais = campanhas;
+      renderizarTabelaCampanhas(campanhas);
+    }).getCampanhas();
+  }
+
+  function renderizarTabelaCampanhas(campanhas) {
+    const tbody = document.getElementById('corpo-tabela-campanhas');
+    if (!tbody) return;
+
+    if (campanhas.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color: var(--text-muted); padding: 30px;">Nenhuma campanha criada ainda.</td></tr>';
+      return;
+    }
+
+    let html = '';
+    campanhas.forEach((c, index) => {
+      html += `
+        <tr>
+          <td><strong style="color: var(--text-main);">${c[0]}</strong></td>
+          <td>${c[1]}</td>
+          <td>
+            <button class="btn-icon-action" onclick="abrirEdicaoCampanha(${index})" title="Editar">
+              <i class="fa-solid fa-pen-to-square"></i>
+            </button>
+            <button class="btn-icon-action" onclick="confirmarExclusaoCampanha('${c[0]}')" title="Excluir" style="color: var(--error); margin-left: 10px;">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `;
+    });
+    tbody.innerHTML = html;
+  }
+
+  function abrirEdicaoCampanha(index) {
+    const c = campanhasGlobais[index];
+    document.getElementById('camp-original-nome').value = c[0];
+    document.getElementById('camp-nome').value = c[0];
+    document.getElementById('camp-assunto').value = c[1];
+    document.getElementById('camp-conteudo').value = c[2];
+
+    mostrarFormCampanha();
+    atualizarPreviewCampanha();
+  }
+
+  function confirmarExclusaoCampanha(nome) {
+    if (confirm(`Tem certeza que deseja excluir a campanha "${nome}"?`)) {
+      google.script.run.withSuccessHandler(res => {
+        showToast(res.mensagem, res.sucesso);
+        if (res.sucesso) carregarListaCampanhas();
+      }).excluirCampanha(nome);
+    }
+  }
+
+  function mostrarFormCampanha() {
+    document.getElementById('view-lista-campanha').style.display = 'none';
+    document.getElementById('btn-nova-campanha').style.display = 'none';
+    document.getElementById('view-form-campanha').style.display = 'block';
+    document.getElementById('btn-voltar-campanha').style.display = 'inline-flex';
+  }
+
+  function voltarParaListaCampanhas() {
+    document.getElementById('view-lista-campanha').style.display = 'block';
+    document.getElementById('btn-nova-campanha').style.display = 'inline-flex';
+    document.getElementById('view-form-campanha').style.display = 'none';
+    document.getElementById('btn-voltar-campanha').style.display = 'none';
+
+    // Limpa o formulário
+    document.getElementById('camp-original-nome').value = '';
+    document.getElementById('camp-nome').value = '';
+    document.getElementById('camp-assunto').value = '';
+    document.getElementById('camp-conteudo').value = '';
+    document.getElementById('camp-preview').srcdoc = '';
   }
 
   function atualizarPreviewCampanha() {

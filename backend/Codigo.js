@@ -59,25 +59,10 @@ function validarEmail(email) {
   return re.test(email);
 }
 
-function salvarCampanha(dados) {
-  const sheet = getDb().getSheetByName("Campanhas");
-  sheet.appendRow([dados.nome, dados.assunto, dados.conteudo]);
-
-  return { sucesso: true, mensagem: "Campanha salva com sucesso!" };
-}
 
 
-function validarEmail(email) {
-  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return re.test(email);
-}
 
 // 3. Lógica de Envio e Fila
-function getCampanhas() {
-  const sheet = getDb().getSheetByName("Campanhas");
-  if (sheet.getLastRow() < 2) return [];
-  return sheet.getRange(2, 1, sheet.getLastRow() - 1, 3).getValues();
-}
 
 // --- FUNÇÃO PARA ALIMENTAR OS MENUS SUSPENSOS ---
 // Busca clientes e produtos para preencher o formulário de compras
@@ -106,7 +91,8 @@ function getAppState() {
   return {
     clientes: getClientes(),
     produtos: getProdutos(),
-    vendas: getVendas()
+    vendas: getVendas(),
+    campanhas: getCampanhas()
   };
 }
 

@@ -361,15 +361,26 @@
     transform: translateY(0);
   }
 
-  .prime-btn.secondary {
+  .btn-secondary, .prime-btn.secondary {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--border);
     box-shadow: none;
+    color: var(--text-main);
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
   }
 
-  .prime-btn.secondary:hover {
+  .btn-secondary:hover, .prime-btn.secondary:hover {
     background: rgba(255, 255, 255, 0.1);
     border-color: var(--text-muted);
+    transform: translateY(-2px);
   }
 
   /* --- ACTIONS --- */
