@@ -14,6 +14,18 @@
     campanhasGlobais = state.campanhas;
     enviosGlobais = state.envios;
 
+    // Personalização do Usuário (Baseado na conta Google)
+    const email = state.userEmail || "email@exemplo.com";
+    const partes = email.split('@')[0].split('.');
+    const primeiroNome = partes[0].charAt(0).toUpperCase() + partes[0].slice(1);
+    const nomeCompleto = partes.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
+    const iniciais = (partes[0].charAt(0) + (partes[1] ? partes[1].charAt(0) : "")).toUpperCase();
+
+    document.getElementById('topbar-user-name').textContent = nomeCompleto;
+    document.getElementById('topbar-user-email').textContent = email;
+    document.getElementById('topbar-user-initials').textContent = iniciais;
+    document.getElementById('dash-welcome-msg').innerHTML = `Bem-vindo de volta, <strong>${primeiroNome}</strong>. Aqui está o resumo do seu negócio.`;
+
     // Renderiza todas as tabelas em segundo plano
     renderizarDashboard();
     renderizarTabelaClientes(clientesGlobais);

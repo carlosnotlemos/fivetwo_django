@@ -67,12 +67,12 @@
         <div style="width: 1px; height: 24px; background: var(--border);"></div>
         <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
           <div style="text-align: right;">
-            <div style="font-size: 14px; font-weight: 600; color: #fff;">Carlos Lemos</div>
-            <div style="font-size: 11px; color: var(--text-muted);">Admin Account</div>
+            <div id="topbar-user-name" style="font-size: 14px; font-weight: 600; color: #fff;">Usuário</div>
+            <div id="topbar-user-email" style="font-size: 11px; color: var(--text-muted);">email@exemplo.com</div>
           </div>
-          <div
+          <div id="topbar-user-initials"
             style="width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, var(--primary), var(--accent)); display: flex; align-items: center; justify-content: center; font-weight: 700;">
-            CL</div>
+            US</div>
         </div>
       </div>
     </header>
@@ -83,7 +83,7 @@
       <div id="page-dashboard" class="tab-content active">
         <header class="page-header">
           <h1>Dashboard Overview</h1>
-          <p class="page-subtitle">Bem-vindo de volta, Carlos. Aqui está o resumo do seu negócio.</p>
+          <p id="dash-welcome-msg" class="page-subtitle">Bem-vindo ao PostlyMail. Aqui está o resumo do seu negócio.</p>
         </header>
 
         <!-- Overview Stats -->

@@ -89,6 +89,7 @@ function getDadosParaCompra() {
 // 4. OTIMIZAÇÃO: Carregamento Único
 function getAppState() {
   return {
+    userEmail: Session.getActiveUser().getEmail(),
     clientes: getClientes(),
     produtos: getProdutos(),
     vendas: getVendas(),
