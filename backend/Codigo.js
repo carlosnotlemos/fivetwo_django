@@ -92,7 +92,8 @@ function getAppState() {
     clientes: getClientes(),
     produtos: getProdutos(),
     vendas: getVendas(),
-    campanhas: getCampanhas()
+    campanhas: getCampanhas(),
+    envios: getEnvios()
   };
 }
 

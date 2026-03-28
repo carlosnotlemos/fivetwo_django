@@ -51,15 +51,18 @@
 
   <div class="main-container">
     <header class="top-bar">
-      <div class="search-mockup" style="display: flex; align-items: center; background: var(--bg-input); padding: 8px 16px; border-radius: 10px; border: 1px solid var(--border); width: 350px;">
+      <div class="search-mockup"
+        style="display: flex; align-items: center; background: var(--bg-input); padding: 8px 16px; border-radius: 10px; border: 1px solid var(--border); width: 350px;">
         <i class="fa-solid fa-magnifying-glass" style="color: var(--text-muted); margin-right: 12px;"></i>
-        <input type="text" placeholder="Pesquisar..." style="background: transparent; border: none; padding: 0; font-size: 14px; box-shadow: none;">
+        <input type="text" placeholder="Pesquisar..."
+          style="background: transparent; border: none; padding: 0; font-size: 14px; box-shadow: none;">
       </div>
-      
+
       <div class="user-profile" style="display: flex; align-items: center; gap: 15px;">
         <div class="notifications" style="position: relative; color: var(--text-muted); cursor: pointer;">
           <i class="fa-solid fa-bell"></i>
-          <span style="position: absolute; top: -5px; right: -5px; background: var(--error); width: 8px; height: 8px; border-radius: 50%; border: 2px solid var(--bg-sidebar);"></span>
+          <span
+            style="position: absolute; top: -5px; right: -5px; background: var(--error); width: 8px; height: 8px; border-radius: 50%; border: 2px solid var(--bg-sidebar);"></span>
         </div>
         <div style="width: 1px; height: 24px; background: var(--border);"></div>
         <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
@@ -67,7 +70,9 @@
             <div style="font-size: 14px; font-weight: 600; color: #fff;">Carlos Lemos</div>
             <div style="font-size: 11px; color: var(--text-muted);">Admin Account</div>
           </div>
-          <div style="width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, var(--primary), var(--accent)); display: flex; align-items: center; justify-content: center; font-weight: 700;">CL</div>
+          <div
+            style="width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, var(--primary), var(--accent)); display: flex; align-items: center; justify-content: center; font-weight: 700;">
+            CL</div>
         </div>
       </div>
     </header>
@@ -116,7 +121,8 @@
         <div class="glass-card">
           <h3>Atividade Recente</h3>
           <p style="color: var(--text-muted); font-size: 14px;">Sua conta está sincronizada e operando normalmente.</p>
-          <div style="height: 200px; background: rgba(255,255,255,0.02); border-radius: 12px; border: 1px dashed var(--border); display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-style: italic;">
+          <div
+            style="height: 200px; background: rgba(255,255,255,0.02); border-radius: 12px; border: 1px dashed var(--border); display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-style: italic;">
             [ Gráfico de Atividade Mockup ]
           </div>
         </div>
@@ -126,7 +132,8 @@
         <header class="page-header" style="display: flex; justify-content: space-between; align-items: flex-end;">
           <div>
             <h1 id="titulo-pagina-cliente">Gestão de Clientes</h1>
-            <p class="page-subtitle" id="subtitulo-pagina-cliente">Visualize e organize sua base de contatos estratégica</p>
+            <p class="page-subtitle" id="subtitulo-pagina-cliente">Visualize e organize sua base de contatos estratégica
+            </p>
           </div>
           <button id="btn-novo-cliente" class="prime-btn" onclick="mostrarFormCliente()">
             <i class="fa-solid fa-plus"></i> Novo Cliente
@@ -179,7 +186,8 @@
         <header class="page-header" style="display: flex; justify-content: space-between; align-items: flex-end;">
           <div>
             <h1 id="titulo-pagina-produto">Catálogo de Produtos</h1>
-            <p class="page-subtitle" id="subtitulo-pagina-produto">Gerencie os itens disponíveis para venda no seu ecossistema</p>
+            <p class="page-subtitle" id="subtitulo-pagina-produto">Gerencie os itens disponíveis para venda no seu
+              ecossistema</p>
           </div>
           <button id="btn-novo-produto" class="prime-btn" onclick="mostrarFormProduto()">
             <i class="fa-solid fa-plus"></i> Novo Produto
@@ -221,7 +229,8 @@
           <div class="btn-container" style="justify-content: space-between; margin-top: 20px;">
             <button class="prime-btn secondary" onclick="voltarParaListaProdutos()">Cancelar</button>
             <button id="btn-produto" class="prime-btn" onclick="salvarProduto()">
-              <div class="spinner"></div><i class="fa-solid fa-floppy-disk btn-icon"></i> <span class="btn-text">Catalogar
+              <div class="spinner"></div><i class="fa-solid fa-floppy-disk btn-icon"></i> <span
+                class="btn-text">Catalogar
                 Produto</span>
             </button>
           </div>
@@ -296,7 +305,9 @@
 
           <div
             style="background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-top: 25px;">
-            <h3 style="margin-top: 0; font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Itens no
+            <h3
+              style="margin-top: 0; font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">
+              Itens no
               Carrinho</h3>
 
             <ul id="lista-carrinho"
@@ -323,7 +334,8 @@
         </div>
 
         <!-- Visualização de Detalhes (Itens da Venda) -->
-        <div id="view-detalhes-venda" class="glass-card" style="display: none; margin-top: 20px; border-color: var(--primary);">
+        <div id="view-detalhes-venda" class="glass-card"
+          style="display: none; margin-top: 20px; border-color: var(--primary);">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h3 id="detalhes-venda-titulo" style="margin: 0;">Itens do Pedido: PED-XXXX</h3>
             <button class="btn-icon-action" onclick="fecharDetalhesVenda()">
@@ -356,7 +368,8 @@
           <button class="prime-btn" onclick="mostrarFormCampanha()" id="btn-nova-campanha">
             <i class="fa-solid fa-plus btn-icon"></i> Nova Campanha
           </button>
-          <button class="prime-btn secondary" onclick="voltarParaListaCampanhas()" id="btn-voltar-campanha" style="display: none;">
+          <button class="prime-btn secondary" onclick="voltarParaListaCampanhas()" id="btn-voltar-campanha"
+            style="display: none;">
             <i class="fa-solid fa-arrow-left btn-icon"></i> Voltar para Lista
           </button>
         </header>
@@ -382,15 +395,20 @@
         <!-- Formulário de Campanha (Escondido por padrão) -->
         <div id="view-form-campanha" style="display: none;">
           <!-- Card de Dicas -->
-          <div class="glass-card" style="margin-bottom: 25px; border-left: 4px solid var(--accent); background: rgba(14, 165, 233, 0.05);">
+          <div class="glass-card"
+            style="margin-bottom: 25px; border-left: 4px solid var(--accent); background: rgba(14, 165, 233, 0.05);">
             <div style="display: flex; gap: 15px; align-items: center;">
               <div style="font-size: 24px; color: var(--accent);"><i class="fa-solid fa-lightbulb"></i></div>
               <div>
                 <h4 style="margin: 0 0 5px 0; color: #fff;">Dicas de Personalização</h4>
                 <p style="margin: 0; font-size: 13px; color: var(--text-muted);">
-                  Use as tags dinâmicas para aumentar o engajamento: 
-                  <code style="background: var(--bg-input); padding: 2px 6px; border-radius: 4px; color: var(--cyan);">{{nome}}</code> para o nome do cliente e 
-                  <code style="background: var(--bg-input); padding: 2px 6px; border-radius: 4px; color: var(--cyan);">{{email}}</code> para o endereço de e-mail.
+                  Use as tags dinâmicas para aumentar o engajamento:
+                  <code
+                    style="background: var(--bg-input); padding: 2px 6px; border-radius: 4px; color: var(--cyan);">{{nome}}</code>
+                  para o nome do cliente e
+                  <code
+                    style="background: var(--bg-input); padding: 2px 6px; border-radius: 4px; color: var(--cyan);">{{email}}</code>
+                  para o endereço de e-mail.
                 </p>
               </div>
             </div>
@@ -413,9 +431,10 @@
                 <textarea id="camp-conteudo" rows="12" oninput="atualizarPreviewCampanha()"
                   placeholder="<h1>Olá, {{nome}}!</h1><p>Seu próximo passo começa aqui...</p>"></textarea>
               </div>
-              <div class="btn-container">
+              <div class="btn-container" style="margin-top: 30px;">
                 <button id="btn-campanha" class="prime-btn" onclick="salvarCampanha()">
-                  <div class="spinner"></div><i class="fa-solid fa-feather-pointed btn-icon"></i> <span class="btn-text">Gravar
+                  <div class="spinner"></div><i class="fa-solid fa-feather-pointed btn-icon"></i> <span
+                    class="btn-text">Gravar
                     Campanha</span>
                 </button>
               </div>
@@ -423,40 +442,82 @@
 
             <!-- Coluna do Preview -->
             <div class="glass-card" style="margin: 0; min-height: 500px; display: flex; flex-direction: column;">
-              <h3 style="margin-top: 0; font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Preview em Tempo Real</h3>
-              <iframe id="camp-preview" style="background: #fff; flex-grow: 1; border-radius: 8px; border: 1px solid var(--border); overflow: hidden; width: 100%; height: 400px;"></iframe>
+              <h3
+                style="margin-top: 0; font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">
+                Preview em Tempo Real</h3>
+              <iframe id="camp-preview"
+                style="background: #fff; flex-grow: 1; border-radius: 8px; border: 1px solid var(--border); overflow: hidden; width: 100%; height: 400px;"></iframe>
             </div>
           </div>
         </div>
       </div>
 
       <div id="page-envio" class="tab-content">
-        <header class="page-header">
-          <h1>Agendar Disparo</h1>
-          <p class="page-subtitle">Selecione o público e a campanha para envio em lote</p>
+        <header class="page-header" style="flex-direction: row; justify-content: space-between; align-items: center;">
+          <div>
+            <h1>Disparos de E-mail</h1>
+            <p class="page-subtitle">Gerencie suas filas e visualize o histórico de envios</p>
+          </div>
+          <button class="prime-btn" onclick="mostrarFormEnvio()" id="btn-novo-envio">
+            <i class="fa-solid fa-rocket btn-icon"></i> Novo Disparo
+          </button>
+          <button class="prime-btn secondary" onclick="voltarParaListaEnvios()" id="btn-voltar-envio"
+            style="display: none;">
+            <i class="fa-solid fa-arrow-left btn-icon"></i> Voltar para Lista
+          </button>
         </header>
 
-        <div class="glass-card">
-          <div class="form-group full-width">
-            <label>Selecionar Campanha Ativa</label>
-            <select id="env-campanha">
-              <option disabled selected>Aguarde, sincronizando...</option>
-            </select>
+        <!-- Lista de Envios (Histórico) -->
+        <div id="view-lista-envio">
+          <div class="glass-card" style="padding: 0; overflow: hidden;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Destinatário</th>
+                  <th>Assunto</th>
+                  <th>Status</th>
+                  <th style="width: 80px;">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="corpo-tabela-envios">
+                <!-- Populado via JS -->
+              </tbody>
+            </table>
           </div>
-          <div class="form-group full-width">
-            <label>Pipeline de Público (Segmento)</label>
-            <select id="env-segmento">
-              <option value="Todos">Base Completa de Clientes</option>
-              <option value="Recentes">Engajados Recentemente (< 30 dias)</option>
-              <option value="Inativos">Reengajamento Inativos (> 90 dias)</option>
-            </select>
-          </div>
-          <div class="btn-container">
-            <button id="btn-envio" class="prime-btn" onclick="agendarEnvio()"
-              style="background: linear-gradient(135deg, var(--accent) 0%, #0284c7 100%); box-shadow: 0 4px 14px rgba(14, 165, 233, 0.4);">
-              <div class="spinner"></div><i
-                class="fa-solid fa-rocket btn-icon"></i> <span class="btn-text">Iniciar Pipeline de Envio</span>
-            </button>
+        </div>
+
+        <!-- Formulário de Novo Disparo (Escondido por padrão) -->
+        <div id="view-form-envio" style="display: none;">
+          <div class="glass-card">
+            <h3>Configurar Novo Pipeline de Envio</h3>
+            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px;">Selecione a campanha e o grupo de
+              clientes para iniciar o processamento.</p>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Campanha Ativa</label>
+                <select id="env-campanha">
+                  <option value="">Carregando campanhas...</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Segmento de Clientes</label>
+                <select id="env-segmento">
+                  <option value="Todos">Todos os Clientes</option>
+                  <option value="Recentes">Engajados Recentemente (&lt; 30 dias)</option>
+                  <option value="Inativos">Reengajamento Inativos (&gt; 90 dias)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="btn-container" style="margin-top: 30px;">
+              <button id="btn-envio" class="prime-btn" onclick="agendarEnvio()"
+                style="background: linear-gradient(135deg, var(--accent) 0%, #0284c7 100%); box-shadow: 0 4px 14px rgba(14, 165, 233, 0.4);">
+                <div class="spinner"></div><i class="fa-solid fa-paper-plane btn-icon"></i> <span
+                  class="btn-text">Iniciar Pipeline de Envio</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
