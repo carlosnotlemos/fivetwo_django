@@ -92,39 +92,55 @@
             <div class="stat-icon" style="background: rgba(99, 102, 241, 0.15); color: var(--primary);">
               <i class="fa-solid fa-users"></i>
             </div>
-            <div class="stat-value">1,284</div>
+            <div class="stat-value" id="dash-total-clientes">0</div>
             <div class="stat-label">Total Clientes</div>
           </div>
           <div class="stat-card">
             <div class="stat-icon" style="background: rgba(14, 165, 233, 0.15); color: var(--accent);">
               <i class="fa-solid fa-money-bill-trend-up"></i>
             </div>
-            <div class="stat-value">R$ 12.5k</div>
-            <div class="stat-label">Receita Mensal</div>
+            <div class="stat-value" id="dash-faturamento-total">R$ 0,00</div>
+            <div class="stat-label">Faturamento (LTV)</div>
           </div>
           <div class="stat-card">
             <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: var(--success);">
-              <i class="fa-solid fa-paper-plane"></i>
+              <i class="fa-solid fa-hand-holding-dollar"></i>
             </div>
-            <div class="stat-value">98.2%</div>
-            <div class="stat-label">Taxa de Entrega</div>
+            <div class="stat-value" id="dash-ticket-medio">R$ 0,00</div>
+            <div class="stat-label">Ticket Médio (AOV)</div>
           </div>
           <div class="stat-card">
             <div class="stat-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--warning);">
-              <i class="fa-solid fa-bolt"></i>
+              <i class="fa-solid fa-envelope-circle-check"></i>
             </div>
-            <div class="stat-value">15</div>
-            <div class="stat-label">Campanhas Ativas</div>
+            <div class="stat-value" id="dash-total-envios">0</div>
+            <div class="stat-label">E-mails Disparados</div>
           </div>
         </div>
 
-        <div class="glass-card">
-          <h3>Atividade Recente</h3>
-          <p style="color: var(--text-muted); font-size: 14px;">Sua conta está sincronizada e operando normalmente.</p>
-          <div
-            style="height: 200px; background: rgba(255,255,255,0.02); border-radius: 12px; border: 1px dashed var(--border); display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-style: italic;">
-            [ Gráfico de Atividade Mockup ]
+        <div class="glass-card" style="padding: 0; overflow: hidden;">
+          <div style="padding: 20px 25px;">
+            <h3 style="margin: 0;">Vendas Recentes</h3>
+            <p style="color: var(--text-muted); font-size: 14px; margin: 5px 0 0 0;">As últimas 5 transações realizadas
+              no sistema.</p>
           </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Data</th>
+                <th>Cliente</th>
+                <th>Valor Total</th>
+              </tr>
+            </thead>
+            <tbody id="dash-corpo-vendas-recentes">
+              <!-- Populado via JS -->
+              <tr>
+                <td colspan="4" style="text-align:center; padding: 20px; color: var(--text-muted);">Aguardando dados...
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -490,7 +506,12 @@
         <!-- Formulário de Novo Disparo (Escondido por padrão) -->
         <div id="view-form-envio" style="display: none;">
           <div class="glass-card">
-            <h3>Configurar Novo Pipeline de Envio</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+              <h3 style="margin: 0;">Configurar Novo Pipeline de Envio</h3>
+              <div style="background: rgba(14, 165, 233, 0.1); color: var(--accent); padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; border: 1px solid rgba(14, 165, 233, 0.2);">
+                <i class="fa-solid fa-shield-halved"></i> Cota: 40 envios/dia
+              </div>
+            </div>
             <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px;">Selecione a campanha e o grupo de
               clientes para iniciar o processamento.</p>
 

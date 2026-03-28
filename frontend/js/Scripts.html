@@ -15,6 +15,7 @@
     enviosGlobais = state.envios;
 
     // Renderiza todas as tabelas em segundo plano
+    renderizarDashboard();
     renderizarTabelaClientes(clientesGlobais);
     renderizarTabelaProdutos(produtosGlobais);
     renderizarTabelaVendas(vendasGlobais);
@@ -23,6 +24,54 @@
 
     // Esconde possíveis esqueletos ou spinners iniciais
     console.log("App Inicializado com sucesso.");
+  }
+
+  function renderizarDashboard() {
+    // 1. Métricas de Clientes
+    document.getElementById('dash-total-clientes').textContent = clientesGlobais.length;
+
+    // 2. Métricas de Vendas (LTV e AOV)
+    let faturamentoTotal = 0;
+    vendasGlobais.forEach(v => {
+      const valor = parseFloat(v[3]) || 0;
+      faturamentoTotal += valor;
+    });
+
+    const ticketMedio = vendasGlobais.length > 0 ? (faturamentoTotal / vendasGlobais.length) : 0;
+
+    document.getElementById('dash-faturamento-total').textContent = `R$ ${faturamentoTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    document.getElementById('dash-ticket-medio').textContent = `R$ ${ticketMedio.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+    // 3. Métricas de Engajamento (Total de Envios)
+    let totalEmailsDisparados = 0;
+    enviosGlobais.forEach(e => {
+      const qtd = parseInt(e[3]) || 0;
+      totalEmailsDisparados += qtd;
+    });
+    document.getElementById('dash-total-envios').textContent = totalEmailsDisparados;
+
+    // 4. Vendas Recentes (Top 5)
+    const tbody = document.getElementById('dash-corpo-vendas-recentes');
+    if (tbody) {
+      if (vendasGlobais.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px; color: var(--text-muted);">Nenhuma venda realizada ainda.</td></tr>';
+      } else {
+        let html = '';
+        // Pega as últimas 5 vendas (vendasGlobais já vem em ordem cronológica?)
+        // Vamos assumir que sim, e reverter para ver as mais recentes.
+        [...vendasGlobais].reverse().slice(0, 5).forEach(v => {
+          html += `
+            <tr>
+              <td><span style="font-size: 11px; font-weight: 600; color: var(--accent);">${v[0]}</span></td>
+              <td>${v[1]}</td>
+              <td style="font-size: 13px;">${v[2]}</td>
+              <td style="font-weight: 600; color: var(--success);">R$ ${parseFloat(v[3]).toFixed(2)}</td>
+            </tr>
+          `;
+        });
+        tbody.innerHTML = html;
+      }
+    }
   }
 
   // =========================================================
@@ -47,6 +96,7 @@
     btnElement.classList.add('active');
 
     // Refresh das tabelas específicas se necessário ao trocar de aba
+    if (pageId === 'page-dashboard') renderizarDashboard();
     if (pageId === 'page-envio') renderizarTabelaEnvios(enviosGlobais);
     if (pageId === 'page-campanha') renderizarTabelaCampanhas(campanhasGlobais);
     if (pageId === 'page-cliente') renderizarTabelaClientes(clientesGlobais);
@@ -735,6 +785,54 @@
       voltarParaListaEnvios();
       carregarListaEnvios();
     }).processarFila();
+  }
+
+
+  function carregarListaClientes() {
+    google.script.run.withSuccessHandler(clientes => {
+      clientesGlobais = clientes;
+      renderizarTabelaClientes(clientes);
+    }).getClientes();
+  }
+
+  function renderizarTabelaClientes(clientes) {
+    const tbody = document.getElementById('corpo-tabela-clientes');
+    if (!tbody) return;
+
+    if (!clientes || clientes.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted); padding: 30px;">Nenhum cliente cadastrado ainda.</td></tr>';
+      return;
+    }
+
+    let html = '';
+    clientes.forEach((c, index) => {
+      html += `
+        <tr>
+          <td><strong style="color: var(--text-main);">${c[0]}</strong></td>
+          <td>${c[1]}</td>
+          <td>${c[2]}</td>
+          <td>${c[3]}</td>
+          <td>
+            <button class="btn-icon-action" onclick="abrirEdicaoCliente(${index})" title="Editar">
+              <i class="fa-solid fa-pen-to-square"></i>
+            </button>
+            <button class="btn-icon-action" onclick="confirmarExclusao('${c[1]}')" title="Excluir" style="color: var(--error); margin-left: 10px;">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `;
+    });
+    tbody.innerHTML = html;
+  }
+
+  function confirmarExclusao(email) {
+    if (confirm(`Tem certeza que deseja excluir permanentemente o cliente com e-mail: ${email}?`)) {
+      google.script.run.withSuccessHandler(res => {
+        showToast(res.mensagem, res.sucesso);
+        carregarListaClientes();
+      }).excluirCliente(email);
+    }
   }
 
 </script>

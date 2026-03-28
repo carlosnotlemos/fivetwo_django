@@ -198,13 +198,16 @@ function agendarEnvio(campanhaNome, segmento) {
   return { sucesso: true, mensagem: `Pipeline iniciado! ${alvos.length} e-mails preparados para a segmentação: ${segmento}.` };
 }
 
-// 4. Processamento de Lotes
+// 4. Processamento de Lotes (Execução Real)
 function processarFilaEnvio() {
-  const filaSheet = getDb().getSheetByName("Fila_Envio");
+  const ss = getDb();
+  const filaSheet = ss.getSheetByName("Fila_Envio");
+  const enviosSheet = ss.getSheetByName("Envios");
   if (filaSheet.getLastRow() < 2) return;
 
   const dadosFila = filaSheet.getRange(2, 1, filaSheet.getLastRow() - 1, 5).getValues();
   let enviadosNoLote = 0;
+  let ultimaCampanha = "";
 
   for (let i = 0; i < dadosFila.length; i++) {
     if (enviadosNoLote >= BATCH_SIZE) break;
@@ -218,17 +221,27 @@ function processarFilaEnvio() {
           subject: assunto,
           htmlBody: conteudo
         });
-        // Atualizar status na planilha (i + 2 porque a linha 1 é cabeçalho)
         filaSheet.getRange(i + 2, 5).setValue("Enviado");
         enviadosNoLote++;
+        ultimaCampanha = campanha;
       } catch (e) {
         filaSheet.getRange(i + 2, 5).setValue("Erro: " + e.message);
       }
     }
   }
+
+  // Registra Log do Lote Processado
+  if (enviadosNoLote > 0) {
+    enviosSheet.appendRow([
+      new Date().toLocaleDateString('pt-BR'), 
+      ultimaCampanha || "Múltiplas", 
+      "Lote Automático (Diário)", 
+      enviadosNoLote
+    ]);
+  }
 }
 
-// 5. Automatização (Gatilhos)
+// 5. Automatização (Gatilhos de Tempo)
 function criarGatilhoFila() {
   // Limpa gatilhos antigos para evitar duplicidade
   const triggers = ScriptApp.getProjectTriggers();
@@ -238,13 +251,15 @@ function criarGatilhoFila() {
     }
   }
 
-  // Cria um gatilho para rodar a cada 15 minutos
+  // Configura para rodar UMA VEZ por dia (Ex: entre 8h e 9h)
+  // Isso respeita a cota diária do usuário
   ScriptApp.newTrigger('processarFilaEnvio')
     .timeBased()
-    .everyMinutes(15)
+    .everyDays(1)
+    .atHour(8)
     .create();
 
-  SpreadsheetApp.getUi().alert('Gatilho criado! A fila será processada automaticamente a cada 15 minutos.');
+  SpreadsheetApp.getUi().alert('Gatilho configurado! Agora o sistema enviará automaticamente um lote de 40 e-mails todos os dias às 8h da manhã.');
 }
 
 // --- MOTOR DE TEMPLATE (INCLUDE) ---
