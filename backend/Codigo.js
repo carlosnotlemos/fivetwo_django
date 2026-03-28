@@ -121,8 +121,8 @@ function agendarEnvio(campanhaNome, segmento) {
 
   let historicoCompras = [];
   if (comprasSheet.getLastRow() > 1) {
-    // Pega as datas e e-mails das compras
-    historicoCompras = comprasSheet.getRange(2, 2, comprasSheet.getLastRow() - 1, 2).getValues();
+    // Pega Data, E-mail e Valor das compras (Colunas 2, 3 e 4)
+    historicoCompras = comprasSheet.getRange(2, 2, comprasSheet.getLastRow() - 1, 3).getValues();
   }
 
   let alvos = [];
@@ -132,33 +132,52 @@ function agendarEnvio(campanhaNome, segmento) {
   clientes.forEach(c => {
     const nome = c[0];
     const email = c[1];
+    const dataCadastroStr = c[3];
 
     if (!validarEmail(email)) return;
 
-    let diasDesdeCompra = Infinity;
-    const comprasDoCliente = historicoCompras.filter(compra => compra[1] === email);
+    // 1. Calcular Dias desde Cadastro
+    let dataCadastro = new Date(dataCadastroStr);
+    if (isNaN(dataCadastro.getTime()) && typeof dataCadastroStr === 'string' && dataCadastroStr.includes('/')) {
+      const p = dataCadastroStr.split('/');
+      dataCadastro = new Date(p[2], p[1] - 1, p[0]);
+    }
+    const diasCadastro = Math.floor((hoje - dataCadastro) / (1000 * 60 * 60 * 24));
 
-    if (comprasDoCliente.length > 0) {
-      // Converte as datas (DD/MM/YYYY) para comparar e achar a mais recente
-      const datas = comprasDoCliente.map(compra => {
-        const d = compra[0];
+    // 2. Calcular Dados de Compra (Recência e Total Gasto)
+    const comprasDoCli = historicoCompras.filter(compra => compra[1] === email);
+    let totalGasto = 0;
+    let diasUltimaCompra = Infinity;
+
+    if (comprasDoCli.length > 0) {
+      const datas = comprasDoCli.map(cp => {
+        const d = cp[0];
         if (typeof d === 'string' && d.includes('/')) {
-          const partes = d.split('/');
-          return new Date(partes[2], partes[1] - 1, partes[0]);
+          const p = d.split('/');
+          return new Date(p[2], p[1] - 1, p[0]);
         }
         return new Date(d);
-      });
-      const ultimaData = new Date(Math.max.apply(null, datas));
-      diasDesdeCompra = (hoje - ultimaData) / (1000 * 60 * 60 * 24);
+      }).filter(d => !isNaN(d.getTime()));
+
+      if (datas.length > 0) {
+        const ultimaData = new Date(Math.max.apply(null, datas));
+        diasUltimaCompra = Math.floor((hoje - ultimaData) / (1000 * 60 * 60 * 24));
+      }
+      
+      totalGasto = comprasDoCli.reduce((acc, curr) => acc + (parseFloat(curr[2]) || 0), 0);
     }
 
-    // Regras de Adição à Fila
-    let adicionar = false;
-    if (segmento === "Todos") adicionar = true;
-    else if (segmento === "Recentes" && diasDesdeCompra <= 30) adicionar = true;
-    else if (segmento === "Inativos" && diasDesdeCompra >= 90 && diasDesdeCompra !== Infinity) adicionar = true;
+    // 3. Lógica de Segmentação
+    let incluir = false;
+    switch (segmento) {
+      case 'Todos': incluir = true; break;
+      case 'Novos': if (diasCadastro <= 7) incluir = true; break;
+      case 'Recentes': if (diasUltimaCompra <= 30) incluir = true; break;
+      case 'Inativos': if (diasUltimaCompra > 90) incluir = true; break;
+      case 'VIP': if (totalGasto >= 500) incluir = true; break;
+    }
 
-    if (adicionar) {
+    if (incluir) {
       // Pega o HTML puro da campanha e substitui as tags dinâmicas
       let templateCompleto = conteudoBase
         .replace(/{{nome}}/g, nome)
@@ -176,7 +195,7 @@ function agendarEnvio(campanhaNome, segmento) {
   // 5. Registrar log de agendamento na aba Envios
   enviosSheet.appendRow([new Date().toLocaleDateString('pt-BR'), campanhaNome, segmento, alvos.length]);
 
-  return { sucesso: true, mensagem: `${alvos.length} e-mails encaminhados para a fila de disparo!` };
+  return { sucesso: true, mensagem: `Pipeline iniciado! ${alvos.length} e-mails preparados para a segmentação: ${segmento}.` };
 }
 
 // 4. Processamento de Lotes
