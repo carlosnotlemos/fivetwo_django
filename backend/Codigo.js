@@ -239,7 +239,9 @@ function processarFilaEnvio() {
       "Lote Automático (Diário)", 
       enviadosNoLote
     ]);
+    return { sucesso: true, mensagem: `${enviadosNoLote} e-mails processados com sucesso.` };
   }
+  return { sucesso: true, mensagem: "Nenhum e-mail pendente para processar no momento." };
 }
 
 // 5. Automatização (Gatilhos de Tempo)

@@ -782,21 +782,53 @@
 
     google.script.run.withSuccessHandler(res => {
       showToast(res.mensagem || res, res.sucesso !== undefined ? res.sucesso : true);
+      setLoading('btn-envio', false, 'Iniciar Pipeline de Envio');
       if (res.sucesso || typeof res === 'string') {
-        processarFila();
-      } else {
-        setLoading('btn-envio', false, 'Iniciar Pipeline de Envio');
+        voltarParaListaEnvios();
+        carregarListaEnvios();
       }
     }).agendarEnvio(campanha, segmento);
   }
 
+  function mostrarFormEnvio() {
+    document.getElementById('view-lista-envio').style.display = 'none';
+    document.getElementById('btn-novo-envio').style.display = 'none';
+    const btnManual = document.getElementById('btn-processar-manual');
+    if (btnManual) btnManual.style.display = 'none';
+    document.getElementById('view-form-envio').style.display = 'block';
+    document.getElementById('btn-voltar-envio').style.display = 'inline-flex';
+
+    // Preenche as campanhas no select
+    const select = document.getElementById('env-campanha');
+    if (campanhasGlobais.length > 0) {
+      let options = '<option value="">Selecione uma campanha...</option>';
+      campanhasGlobais.forEach(c => {
+        options += `<option value="${c[0]}">${c[0]}</option>`;
+      });
+      select.innerHTML = options;
+    } else {
+      select.innerHTML = '<option value="">Nenhuma campanha disponível</option>';
+    }
+  }
+
+  function voltarParaListaEnvios() {
+    document.getElementById('view-lista-envio').style.display = 'block';
+    document.getElementById('btn-novo-envio').style.display = 'inline-flex';
+    const btnManual = document.getElementById('btn-processar-manual');
+    if (btnManual) btnManual.style.display = 'inline-flex';
+    document.getElementById('view-form-envio').style.display = 'none';
+    document.getElementById('btn-voltar-envio').style.display = 'none';
+  }
+
   function processarFila() {
+    const btn = document.getElementById('btn-processar-manual');
+    if (btn) btn.disabled = true;
+    
     google.script.run.withSuccessHandler(res => {
-      showToast(res.mensagem || "Fila processada com sucesso!", true);
-      setLoading('btn-envio', false, 'Iniciar Pipeline de Envio');
-      voltarParaListaEnvios();
+      showToast(res.mensagem || "Fila processada com sucesso!", res.sucesso !== false);
+      if (btn) btn.disabled = false;
       carregarListaEnvios();
-    }).processarFila();
+    }).processarFilaEnvio();
   }
 
 

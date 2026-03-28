@@ -474,9 +474,14 @@
             <h1>Disparos de E-mail</h1>
             <p class="page-subtitle">Gerencie suas filas e visualize o histórico de envios</p>
           </div>
-          <button class="prime-btn" onclick="mostrarFormEnvio()" id="btn-novo-envio">
-            <i class="fa-solid fa-rocket btn-icon"></i> Novo Disparo
-          </button>
+          <div style="display: flex; gap: 10px;">
+            <button class="prime-btn secondary" onclick="processarFila()" id="btn-processar-manual">
+              <i class="fa-solid fa-play btn-icon"></i> Processar Fila Agora
+            </button>
+            <button class="prime-btn" onclick="mostrarFormEnvio()" id="btn-novo-envio">
+              <i class="fa-solid fa-rocket btn-icon"></i> Novo Disparo
+            </button>
+          </div>
           <button class="prime-btn secondary" onclick="voltarParaListaEnvios()" id="btn-voltar-envio"
             style="display: none;">
             <i class="fa-solid fa-arrow-left btn-icon"></i> Voltar para Lista
