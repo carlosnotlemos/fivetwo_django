@@ -11,6 +11,8 @@
     clientesGlobais = state.clientes;
     produtosGlobais = state.produtos;
     vendasGlobais = state.vendas;
+    custosGlobais = state.custos || [];
+    rentabilidadeGlobais = state.rentabilidade || [];
     campanhasGlobais = state.campanhas;
     enviosGlobais = state.envios;
 
@@ -31,6 +33,7 @@
     renderizarTabelaClientes(clientesGlobais);
     renderizarTabelaProdutos(produtosGlobais);
     renderizarTabelaVendas(vendasGlobais);
+    renderizarTabelaCustos(custosGlobais);
     renderizarTabelaCampanhas(campanhasGlobais);
     renderizarTabelaEnvios(enviosGlobais);
 
@@ -39,13 +42,25 @@
   }
 
   function renderizarDashboard() {
+    const parseReal = (val) => {
+      if (val === null || val === undefined) return 0;
+      if (typeof val === 'number') return val;
+      let str = val.toString().trim();
+      if (!str) return 0;
+      if (str.indexOf(',') !== -1) {
+        str = str.replace(/\./g, '').replace(',', '.');
+      }
+      str = str.replace(/[^\d.-]/g, '');
+      return parseFloat(str) || 0;
+    };
+
     // 1. Métricas de Clientes
     document.getElementById('dash-total-clientes').textContent = clientesGlobais.length;
 
     // 2. Métricas de Vendas (LTV e AOV)
     let faturamentoTotal = 0;
     vendasGlobais.forEach(v => {
-      const valor = parseFloat(v[3]) || 0;
+      const valor = parseReal(v[3]);
       faturamentoTotal += valor;
     });
 
@@ -61,6 +76,24 @@
       totalEmailsDisparados += qtd;
     });
     document.getElementById('dash-total-envios').textContent = totalEmailsDisparados;
+
+    // 4. Métricas de Custos e Faturamento Líquido
+    let totalCustos = 0;
+    if (rentabilidadeGlobais && rentabilidadeGlobais.length > 0) {
+      rentabilidadeGlobais.forEach(r => {
+        totalCustos += r.custo || 0;
+      });
+    } else {
+      custosGlobais.forEach(c => {
+        const valor = parseReal(c[3]);
+        totalCustos += valor;
+      });
+    }
+
+    const faturamentoLiquido = faturamentoTotal - totalCustos;
+
+    document.getElementById('dash-total-custos').textContent = `R$ ${totalCustos.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    document.getElementById('dash-faturamento-liquido').textContent = `R$ ${faturamentoLiquido.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
     // 4. Vendas Recentes (Top 5)
     const tbody = document.getElementById('dash-corpo-vendas-recentes');
@@ -97,6 +130,8 @@
   let produtosGlobais = [];
   let clientesGlobais = [];
   let vendasGlobais = [];
+  let custosGlobais = [];
+  let rentabilidadeGlobais = [];
   let campanhasGlobais = [];
   let enviosGlobais = [];
   let carrinhoDeCompras = [];
@@ -119,6 +154,7 @@
     if (pageId === 'page-cliente') renderizarTabelaClientes(clientesGlobais);
     if (pageId === 'page-produto') renderizarTabelaProdutos(produtosGlobais);
     if (pageId === 'page-compra') renderizarTabelaVendas(vendasGlobais);
+    if (pageId === 'page-custo') carregarListaCustos();
   }
 
   function showToast(msg, isSuccess) {
@@ -926,6 +962,247 @@
         showToast(res.mensagem, res.sucesso);
         carregarListaClientes();
       }).excluirCliente(email);
+    }
+  }
+
+  // =========================================================
+  // GESTÃO DE CUSTOS (MÉTODOS DE CONTROLE & UI)
+  // =========================================================
+
+  function mostrarFormCusto() {
+    document.getElementById('view-lista-custo').style.display = 'none';
+    document.getElementById('view-form-custo').style.display = 'block';
+    
+    document.getElementById('form-custo-titulo').textContent = 'Lançar Novo Custo';
+    document.getElementById('custo-id-edicao').value = '';
+    document.getElementById('custo-valor').value = '';
+    document.getElementById('custo-desc').value = '';
+    document.getElementById('custo-data').value = new Date().toISOString().substring(0, 10);
+    
+    const selProd = document.getElementById('custo-produto');
+    selProd.innerHTML = produtosGlobais.length
+      ? '<option disabled selected value="">Selecione o produto...</option>' + produtosGlobais.map(p => `<option value="${p[0]}">${p[0]}</option>`).join('')
+      : '<option disabled selected value="">Nenhum produto cadastrado</option>';
+  }
+
+  function voltarParaListaCustos() {
+    document.getElementById('view-form-custo').style.display = 'none';
+    document.getElementById('view-lista-custo').style.display = 'block';
+    carregarListaCustos();
+  }
+
+  function carregarListaCustos() {
+    // 1. Busca custos
+    google.script.run.withSuccessHandler(custos => {
+      custosGlobais = custos;
+      renderizarTabelaCustos(custos);
+      renderizarDashboard();
+    }).getCustos();
+
+    // 2. Busca rentabilidade
+    google.script.run.withSuccessHandler(rentabilidade => {
+      rentabilidadeGlobais = rentabilidade;
+      renderizarTabelaRentabilidade(rentabilidade);
+      renderizarDashboard();
+    }).getRentabilidadeProdutos();
+  }
+
+  function renderizarTabelaCustos(custos) {
+    const tbody = document.getElementById('corpo-tabela-custos');
+    if (!tbody) return;
+
+    if (!custos || custos.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 30px;">Nenhum custo registrado ainda.</td></tr>';
+      return;
+    }
+
+    let html = '';
+    [...custos].reverse().forEach(c => {
+      const idCusto = c[0];
+      const produto = c[1];
+      const tipo = c[2];
+      const valor = parseFloat(c[3]) || 0;
+      const data = c[4];
+      const desc = c[5] || "";
+
+      html += `
+        <tr>
+          <td><strong style="color: var(--accent); font-size: 11px;">${idCusto}</strong></td>
+          <td><strong>${produto}</strong></td>
+          <td><span style="font-size: 13px; color: var(--text-muted);">${tipo}</span></td>
+          <td style="font-weight: 600; color: var(--error);">R$ ${valor.toFixed(2)}</td>
+          <td>${data}</td>
+          <td style="font-size: 13px; color: var(--text-muted); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${desc}">${desc || '-'}</td>
+          <td>
+            <button class="btn-icon-action" onclick="editarCusto('${idCusto}')" title="Editar">
+              <i class="fa-solid fa-pen-to-square"></i>
+            </button>
+            <button class="btn-icon-action" onclick="confirmarExcluirCusto('${idCusto}')" title="Excluir" style="color: var(--error); margin-left: 10px;">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `;
+    });
+    tbody.innerHTML = html;
+  }
+
+  function renderizarTabelaRentabilidade(rentabilidade) {
+    const tbody = document.getElementById('corpo-tabela-rentabilidade');
+    if (!tbody) return;
+
+    if (!rentabilidade || rentabilidade.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color: var(--text-muted); padding: 20px;">Nenhum produto cadastrado no catálogo.</td></tr>';
+      return;
+    }
+
+    let html = '';
+    rentabilidade.forEach(r => {
+      const margemVal = parseFloat(r.margem);
+      let badgeClass = 'excellent';
+      if (margemVal <= 0) {
+        badgeClass = 'danger';
+      } else if (margemVal < 30) {
+        badgeClass = 'warning';
+      }
+
+      html += `
+        <tr>
+          <td><strong>${r.nome}</strong></td>
+          <td style="font-weight: 500; color: var(--text-main);">R$ ${parseFloat(r.bruto).toFixed(2)}</td>
+          <td style="color: var(--error);">R$ ${parseFloat(r.custo).toFixed(2)}</td>
+          <td style="font-weight: 600; color: ${parseFloat(r.liquido) >= 0 ? 'var(--success)' : 'var(--error)'};">R$ ${parseFloat(r.liquido).toFixed(2)}</td>
+          <td><span class="badge-margin ${badgeClass}">${margemVal.toFixed(1)}%</span></td>
+          <td>
+            <button class="btn-icon-action" onclick="visualizarDetalhesCustosProduto('${r.nome}')" title="Visualizar Custos Adicionados">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </td>
+        </tr>
+      `;
+    });
+    tbody.innerHTML = html;
+  }
+
+  function salvarNovoCusto() {
+    const idCusto = document.getElementById('custo-id-edicao').value;
+    const produto = document.getElementById('custo-produto').value;
+    const tipoCusto = document.getElementById('custo-tipo').value;
+    const valor = document.getElementById('custo-valor').value;
+    const data = document.getElementById('custo-data').value;
+    const descricao = document.getElementById('custo-desc').value;
+
+    if (!produto) return showToast("Por favor, selecione um produto.", false);
+    if (!valor || parseFloat(valor) <= 0) return showToast("Por favor, insira um valor válido maior que zero.", false);
+    if (!data) return showToast("Por favor, selecione uma data válida.", false);
+
+    setLoading('btn-salvar-custo', true, 'Salvar Custo');
+
+    const dados = {
+      idCusto: idCusto,
+      produto: produto,
+      tipoCusto: tipoCusto,
+      valor: valor,
+      data: data,
+      descricao: descricao
+    };
+
+    const isEdicao = !!idCusto;
+    const runner = google.script.run
+      .withSuccessHandler(res => {
+        showToast(res.mensagem, res.sucesso);
+        setLoading('btn-salvar-custo', false, 'Salvar Custo');
+        if (res.sucesso) {
+          voltarParaListaCustos();
+        }
+      })
+      .withFailureHandler(err => {
+        showToast("Erro ao processar custo: " + err, false);
+        setLoading('btn-salvar-custo', false, 'Salvar Custo');
+      });
+
+    if (isEdicao) {
+      runner.atualizarCusto(dados);
+    } else {
+      runner.salvarCusto(dados);
+    }
+  }
+
+  function editarCusto(idCusto) {
+    const custo = custosGlobais.find(c => c[0] === idCusto);
+    if (!custo) return showToast("Erro: Lançamento de custo não localizado.", false);
+
+    mostrarFormCusto();
+    document.getElementById('form-custo-titulo').textContent = 'Editar Lançamento de Custo';
+    
+    document.getElementById('custo-id-edicao').value = custo[0];
+    document.getElementById('custo-produto').value = custo[1];
+    document.getElementById('custo-tipo').value = custo[2];
+    document.getElementById('custo-valor').value = parseFloat(custo[3]);
+    
+    // Converte a data do formato pt-BR (DD/MM/AAAA) para AAAA-MM-DD para o input type="date"
+    const partesData = custo[4].split('/');
+    if (partesData.length === 3) {
+      document.getElementById('custo-data').value = `${partesData[2]}-${partesData[1]}-${partesData[0]}`;
+    }
+    
+    document.getElementById('custo-desc').value = custo[5] || "";
+  }
+
+  function confirmarExcluirCusto(idCusto) {
+    if (confirm(`Tem certeza que deseja excluir permanentemente o lançamento de custo ${idCusto}?`)) {
+      google.script.run.withSuccessHandler(res => {
+        showToast(res.mensagem, res.sucesso);
+        carregarListaCustos();
+      }).excluirCusto(idCusto);
+    }
+  }
+
+  function visualizarDetalhesCustosProduto(prodNome) {
+    const painel = document.getElementById('view-detalhes-custos-produto');
+    const titulo = document.getElementById('detalhes-custos-produto-titulo');
+    const tbody = document.getElementById('corpo-tabela-detalhes-custos-produto');
+
+    if (!painel || !titulo || !tbody) return;
+
+    // Filtra os custos que pertencem ao produto selecionado
+    const custosFiltrados = custosGlobais.filter(c => c[1] === prodNome);
+
+    titulo.textContent = `Detalhamento de Custos: ${prodNome}`;
+
+    if (custosFiltrados.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted); padding: 20px;">Nenhum lançamento de custo associado a este produto ainda.</td></tr>';
+    } else {
+      let html = '';
+      custosFiltrados.forEach(c => {
+        const idCusto = c[0];
+        const tipo = c[2];
+        const valor = parseFloat(c[3]) || 0;
+        const data = c[4];
+        const desc = c[5] || "";
+        
+        html += `
+          <tr>
+            <td><strong style="color: var(--accent); font-size: 11px;">${idCusto}</strong></td>
+            <td><span style="font-size: 13px; color: var(--text-muted);">${tipo}</span></td>
+            <td style="font-weight: 600; color: var(--error);">R$ ${valor.toFixed(2)}</td>
+            <td>${data}</td>
+            <td style="font-size: 13px; color: var(--text-muted); white-space: pre-wrap;">${desc || '-'}</td>
+          </tr>
+        `;
+      });
+      tbody.innerHTML = html;
+    }
+
+    // Exibe o painel de detalhes com animação suave e scroll suave
+    painel.style.display = 'block';
+    painel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function fecharDetalhesCustosProduto() {
+    const painel = document.getElementById('view-detalhes-custos-produto');
+    if (painel) {
+      painel.style.display = 'none';
     }
   }
 

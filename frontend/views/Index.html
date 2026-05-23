@@ -35,6 +35,9 @@
       <button class="nav-btn" onclick="showPage('page-compra', this)">
         <i class="fa-solid fa-cart-shopping"></i> Vendas
       </button>
+      <button class="nav-btn" onclick="showPage('page-custo', this)">
+        <i class="fa-solid fa-hand-holding-dollar"></i> Custos
+      </button>
       <button class="nav-btn" onclick="showPage('page-campanha', this)">
         <i class="fa-solid fa-pen-nib"></i> Campanhas
       </button>
@@ -115,6 +118,20 @@
             </div>
             <div class="stat-value" id="dash-total-envios">0</div>
             <div class="stat-label">E-mails Disparados</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(239, 68, 68, 0.15); color: var(--error);">
+              <i class="fa-solid fa-receipt"></i>
+            </div>
+            <div class="stat-value" id="dash-total-custos">R$ 0,00</div>
+            <div class="stat-label">Custos Acumulados</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: var(--success);">
+              <i class="fa-solid fa-sack-dollar"></i>
+            </div>
+            <div class="stat-value" id="dash-faturamento-liquido">R$ 0,00</div>
+            <div class="stat-label">Lucro Líquido Real</div>
           </div>
         </div>
 
@@ -393,6 +410,142 @@
                 <!-- Preenchido via JS -->
               </tbody>
             </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Aba de Gestão de Custos -->
+      <div id="page-custo" class="tab-content">
+        <header class="page-header" style="display: flex; justify-content: space-between; align-items: flex-end;">
+          <div>
+            <h1 id="titulo-pagina-custo">Gestão de Custos</h1>
+            <p class="page-subtitle" id="subtitulo-pagina-custo">Controle as despesas e investimentos do seu negócio</p>
+          </div>
+          <button id="btn-novo-custo" class="prime-btn" onclick="mostrarFormCusto()">
+            <i class="fa-solid fa-plus btn-icon"></i> Novo Custo
+          </button>
+        </header>
+
+        <!-- View 1: Tabela de Histórico de Custos -->
+        <div class="glass-card" id="view-lista-custo">
+          <div class="data-table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Produto</th>
+                  <th>Tipo de Custo</th>
+                  <th>Valor</th>
+                  <th>Data</th>
+                  <th>Descrição</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="corpo-tabela-custos">
+                <tr>
+                  <td colspan="7" style="text-align:center; color: var(--text-muted); padding: 30px;">Carregando custos...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Tabela de Rentabilidade por Produto -->
+          <div style="margin-top: 40px; border-top: 1px solid var(--border); padding-top: 30px;">
+            <h3 style="margin-top: 0; font-size: 16px; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
+              <i class="fa-solid fa-magnifying-glass-chart" style="color: var(--accent);"></i> Análise de Lucratividade por Produto
+            </h3>
+            <p style="color: var(--text-muted); font-size: 13px; margin: -5px 0 20px 0;">Demonstrativo financeiro dinâmico, exibindo a performance e margem líquida real de cada produto.</p>
+            <div class="data-table-container">
+              <table class="data-table" style="background: rgba(0,0,0,0.1);">
+                <thead>
+                  <tr>
+                    <th>Produto</th>
+                    <th>Faturamento Bruto</th>
+                    <th>Custos Totais</th>
+                    <th>Lucro Líquido Real</th>
+                    <th>Margem Líquida</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="corpo-tabela-rentabilidade">
+                  <tr>
+                    <td colspan="6" style="text-align:center; color: var(--text-muted); padding: 20px;">Processando inteligência de negócios...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Detalhes de Custos por Produto -->
+          <div id="view-detalhes-custos-produto" class="glass-card" style="display: none; margin-top: 30px; border-color: var(--accent); animation: fadeIn 0.4s ease-out;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+              <h3 id="detalhes-custos-produto-titulo" style="margin: 0; font-size: 16px; font-weight: 600; color: var(--text-main);">Detalhamento de Custos: Produto X</h3>
+              <button class="btn-icon-action" onclick="fecharDetalhesCustosProduto()">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+            <div class="data-table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Tipo de Custo</th>
+                    <th>Valor</th>
+                    <th>Data</th>
+                    <th>Descrição</th>
+                  </tr>
+                </thead>
+                <tbody id="corpo-tabela-detalhes-custos-produto">
+                  <!-- Preenchido via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- View 2: Form de Lançamento / Edição de Custo -->
+        <div class="glass-card" id="view-form-custo" style="display: none;">
+          <h3 id="form-custo-titulo" style="margin-top: 0; margin-bottom: 25px; font-weight: 600; border-bottom: 1px solid var(--border); padding-bottom: 15px;">Lançar Novo Custo</h3>
+          
+          <input type="hidden" id="custo-id-edicao">
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Produto Associado</label>
+              <select id="custo-produto">
+                <option disabled selected value="">Carregando produtos...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Tipo / Categoria de Custo</label>
+              <select id="custo-tipo">
+                <option value="Tráfego Pago (Ads)" selected>Tráfego Pago (Ads)</option>
+                <option value="Insumos / Produção">Insumos / Produção</option>
+                <option value="Embalagem / Logística">Embalagem / Logística</option>
+                <option value="Infraestrutura / Software">Infraestrutura / Software</option>
+                <option value="Outros Custos Operacionais">Outros Custos Operacionais</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Valor do Custo (R$)</label>
+              <input type="number" id="custo-valor" step="0.01" min="0.01" placeholder="Ex: 150.00">
+            </div>
+            <div class="form-group">
+              <label>Data do Lançamento</label>
+              <input type="date" id="custo-data">
+            </div>
+          </div>
+
+          <div class="form-group full-width" style="margin-top: 20px;">
+            <label>Descrição / Observações do Custo</label>
+            <textarea id="custo-desc" rows="4" placeholder="Ex: Compra de 50 caixas de envio personalizadas com o fornecedor X.&#10;Nota Fiscal nº 1234."></textarea>
+          </div>
+
+          <div class="btn-container" style="justify-content: space-between; margin-top: 30px;">
+            <button class="prime-btn secondary" onclick="voltarParaListaCustos()">Cancelar</button>
+            <button id="btn-salvar-custo" class="prime-btn" onclick="salvarNovoCusto()">
+              <div class="spinner"></div><i class="fa-solid fa-floppy-disk btn-icon"></i> <span class="btn-text">Salvar Custo</span>
+            </button>
           </div>
         </div>
       </div>
