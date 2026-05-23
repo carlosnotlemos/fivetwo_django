@@ -59,60 +59,10 @@ function validarEmail(email) {
   return re.test(email);
 }
 
-function salvarCampanha(dados) {
-  const sheet = getDb().getSheetByName("Campanhas");
-  sheet.appendRow([dados.nome, dados.assunto, dados.conteudo]);
 
-  return { sucesso: true, mensagem: "Campanha salva com sucesso!" };
-}
 
-function salvarProduto(dados) {
-  const sheet = getDb().getSheetByName("Produtos");
-  sheet.appendRow([dados.nome, dados.preco, dados.descricao]);
-
-  return { sucesso: true, mensagem: "Produto catalogado com sucesso!" };
-}
-
-function salvarCompra(dados) {
-  const ss = getDb();
-  const sheetCompras = ss.getSheetByName("Compras");
-  const sheetItens = ss.getSheetByName("Compra_Itens");
-
-  // Retornando objeto de ERRO
-  if (!dados.itens || dados.itens.length === 0) {
-    return { sucesso: false, mensagem: "O carrinho está vazio." };
-  }
-
-  const idPedido = "PED-" + new Date().getTime();
-  const dataCompra = new Date().toLocaleDateString('pt-BR');
-
-  let valorTotalPedido = 0;
-
-  const linhasItens = dados.itens.map(item => {
-    valorTotalPedido += item.valorTotal;
-    return [idPedido, item.produto, item.quantidade, item.valorTotal];
-  });
-
-  sheetCompras.appendRow([idPedido, dataCompra, dados.emailCliente, valorTotalPedido]);
-
-  const startRow = sheetItens.getLastRow() + 1;
-  sheetItens.getRange(startRow, 1, linhasItens.length, 4).setValues(linhasItens);
-
-  // Retornando objeto de SUCESSO
-  return { sucesso: true, mensagem: `Pedido ${idPedido} registrado com sucesso!` };
-}
-
-function validarEmail(email) {
-  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return re.test(email);
-}
 
 // 3. Lógica de Envio e Fila
-function getCampanhas() {
-  const sheet = getDb().getSheetByName("Campanhas");
-  if (sheet.getLastRow() < 2) return [];
-  return sheet.getRange(2, 1, sheet.getLastRow() - 1, 3).getValues();
-}
 
 // --- FUNÇÃO PARA ALIMENTAR OS MENUS SUSPENSOS ---
 // Busca clientes e produtos para preencher o formulário de compras
@@ -134,6 +84,18 @@ function getDadosParaCompra() {
   }
 
   return { clientes: clientes, produtos: produtos };
+}
+
+// 4. OTIMIZAÇÃO: Carregamento Único
+function getAppState() {
+  return {
+    userEmail: Session.getActiveUser().getEmail(),
+    clientes: getClientes(),
+    produtos: getProdutos(),
+    vendas: getVendas(),
+    campanhas: getCampanhas(),
+    envios: getEnvios()
+  };
 }
 
 function agendarEnvio(campanhaNome, segmento) {
@@ -160,8 +122,8 @@ function agendarEnvio(campanhaNome, segmento) {
 
   let historicoCompras = [];
   if (comprasSheet.getLastRow() > 1) {
-    // Pega as datas e e-mails das compras
-    historicoCompras = comprasSheet.getRange(2, 2, comprasSheet.getLastRow() - 1, 2).getValues();
+    // Pega Data, E-mail e Valor das compras (Colunas 2, 3 e 4)
+    historicoCompras = comprasSheet.getRange(2, 2, comprasSheet.getLastRow() - 1, 3).getValues();
   }
 
   let alvos = [];
@@ -171,33 +133,52 @@ function agendarEnvio(campanhaNome, segmento) {
   clientes.forEach(c => {
     const nome = c[0];
     const email = c[1];
+    const dataCadastroStr = c[3];
 
     if (!validarEmail(email)) return;
 
-    let diasDesdeCompra = Infinity;
-    const comprasDoCliente = historicoCompras.filter(compra => compra[1] === email);
+    // 1. Calcular Dias desde Cadastro
+    let dataCadastro = new Date(dataCadastroStr);
+    if (isNaN(dataCadastro.getTime()) && typeof dataCadastroStr === 'string' && dataCadastroStr.includes('/')) {
+      const p = dataCadastroStr.split('/');
+      dataCadastro = new Date(p[2], p[1] - 1, p[0]);
+    }
+    const diasCadastro = Math.floor((hoje - dataCadastro) / (1000 * 60 * 60 * 24));
 
-    if (comprasDoCliente.length > 0) {
-      // Converte as datas (DD/MM/YYYY) para comparar e achar a mais recente
-      const datas = comprasDoCliente.map(compra => {
-        const d = compra[0];
+    // 2. Calcular Dados de Compra (Recência e Total Gasto)
+    const comprasDoCli = historicoCompras.filter(compra => compra[1] === email);
+    let totalGasto = 0;
+    let diasUltimaCompra = Infinity;
+
+    if (comprasDoCli.length > 0) {
+      const datas = comprasDoCli.map(cp => {
+        const d = cp[0];
         if (typeof d === 'string' && d.includes('/')) {
-          const partes = d.split('/');
-          return new Date(partes[2], partes[1] - 1, partes[0]);
+          const p = d.split('/');
+          return new Date(p[2], p[1] - 1, p[0]);
         }
         return new Date(d);
-      });
-      const ultimaData = new Date(Math.max.apply(null, datas));
-      diasDesdeCompra = (hoje - ultimaData) / (1000 * 60 * 60 * 24);
+      }).filter(d => !isNaN(d.getTime()));
+
+      if (datas.length > 0) {
+        const ultimaData = new Date(Math.max.apply(null, datas));
+        diasUltimaCompra = Math.floor((hoje - ultimaData) / (1000 * 60 * 60 * 24));
+      }
+      
+      totalGasto = comprasDoCli.reduce((acc, curr) => acc + (parseFloat(curr[2]) || 0), 0);
     }
 
-    // Regras de Adição à Fila
-    let adicionar = false;
-    if (segmento === "Todos") adicionar = true;
-    else if (segmento === "Recentes" && diasDesdeCompra <= 30) adicionar = true;
-    else if (segmento === "Inativos" && diasDesdeCompra >= 90 && diasDesdeCompra !== Infinity) adicionar = true;
+    // 3. Lógica de Segmentação
+    let incluir = false;
+    switch (segmento) {
+      case 'Todos': incluir = true; break;
+      case 'Novos': if (diasCadastro <= 7) incluir = true; break;
+      case 'Recentes': if (diasUltimaCompra <= 30) incluir = true; break;
+      case 'Inativos': if (diasUltimaCompra > 90) incluir = true; break;
+      case 'VIP': if (totalGasto >= 500) incluir = true; break;
+    }
 
-    if (adicionar) {
+    if (incluir) {
       // Pega o HTML puro da campanha e substitui as tags dinâmicas
       let templateCompleto = conteudoBase
         .replace(/{{nome}}/g, nome)
@@ -215,16 +196,19 @@ function agendarEnvio(campanhaNome, segmento) {
   // 5. Registrar log de agendamento na aba Envios
   enviosSheet.appendRow([new Date().toLocaleDateString('pt-BR'), campanhaNome, segmento, alvos.length]);
 
-  return { sucesso: true, mensagem: `${alvos.length} e-mails encaminhados para a fila de disparo!` };
+  return { sucesso: true, mensagem: `Pipeline iniciado! ${alvos.length} e-mails preparados para a segmentação: ${segmento}.` };
 }
 
-// 4. Processamento de Lotes
+// 4. Processamento de Lotes (Execução Real)
 function processarFilaEnvio() {
-  const filaSheet = getDb().getSheetByName("Fila_Envio");
+  const ss = getDb();
+  const filaSheet = ss.getSheetByName("Fila_Envio");
+  const enviosSheet = ss.getSheetByName("Envios");
   if (filaSheet.getLastRow() < 2) return;
 
   const dadosFila = filaSheet.getRange(2, 1, filaSheet.getLastRow() - 1, 5).getValues();
   let enviadosNoLote = 0;
+  let ultimaCampanha = "";
 
   for (let i = 0; i < dadosFila.length; i++) {
     if (enviadosNoLote >= BATCH_SIZE) break;
@@ -238,17 +222,29 @@ function processarFilaEnvio() {
           subject: assunto,
           htmlBody: conteudo
         });
-        // Atualizar status na planilha (i + 2 porque a linha 1 é cabeçalho)
         filaSheet.getRange(i + 2, 5).setValue("Enviado");
         enviadosNoLote++;
+        ultimaCampanha = campanha;
       } catch (e) {
         filaSheet.getRange(i + 2, 5).setValue("Erro: " + e.message);
       }
     }
   }
+
+  // Registra Log do Lote Processado
+  if (enviadosNoLote > 0) {
+    enviosSheet.appendRow([
+      new Date().toLocaleDateString('pt-BR'), 
+      ultimaCampanha || "Múltiplas", 
+      "Lote Automático (Diário)", 
+      enviadosNoLote
+    ]);
+    return { sucesso: true, mensagem: `${enviadosNoLote} e-mails processados com sucesso.` };
+  }
+  return { sucesso: true, mensagem: "Nenhum e-mail pendente para processar no momento." };
 }
 
-// 5. Automatização (Gatilhos)
+// 5. Automatização (Gatilhos de Tempo)
 function criarGatilhoFila() {
   // Limpa gatilhos antigos para evitar duplicidade
   const triggers = ScriptApp.getProjectTriggers();
@@ -258,13 +254,15 @@ function criarGatilhoFila() {
     }
   }
 
-  // Cria um gatilho para rodar a cada 15 minutos
+  // Configura para rodar UMA VEZ por dia (Ex: entre 8h e 9h)
+  // Isso respeita a cota diária do usuário
   ScriptApp.newTrigger('processarFilaEnvio')
     .timeBased()
-    .everyMinutes(15)
+    .everyDays(1)
+    .atHour(8)
     .create();
 
-  SpreadsheetApp.getUi().alert('Gatilho criado! A fila será processada automaticamente a cada 15 minutos.');
+  SpreadsheetApp.getUi().alert('Gatilho configurado! Agora o sistema enviará automaticamente um lote de 40 e-mails todos os dias às 8h da manhã.');
 }
 
 // --- MOTOR DE TEMPLATE (INCLUDE) ---

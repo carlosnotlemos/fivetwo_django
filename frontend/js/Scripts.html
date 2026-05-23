@@ -1,12 +1,99 @@
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    carregarListaClientes();
+    // Carregamento inicial único para máxima performance
+    google.script.run
+      .withSuccessHandler(inicializarApp)
+      .withFailureHandler(err => showToast("Erro no carregamento inicial: " + err, false))
+      .getAppState();
   });
+
+  function inicializarApp(state) {
+    clientesGlobais = state.clientes;
+    produtosGlobais = state.produtos;
+    vendasGlobais = state.vendas;
+    campanhasGlobais = state.campanhas;
+    enviosGlobais = state.envios;
+
+    // Personalização do Usuário (Baseado na conta Google)
+    const email = state.userEmail || "email@exemplo.com";
+    const partes = email.split('@')[0].split('.');
+    const primeiroNome = partes[0].charAt(0).toUpperCase() + partes[0].slice(1);
+    const nomeCompleto = partes.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
+    const iniciais = (partes[0].charAt(0) + (partes[1] ? partes[1].charAt(0) : "")).toUpperCase();
+
+    document.getElementById('topbar-user-name').textContent = nomeCompleto;
+    document.getElementById('topbar-user-email').textContent = email;
+    document.getElementById('topbar-user-initials').textContent = iniciais;
+    document.getElementById('dash-welcome-msg').innerHTML = `Bem-vindo de volta, <strong>${primeiroNome}</strong>. Aqui está o resumo do seu negócio.`;
+
+    // Renderiza todas as tabelas em segundo plano
+    renderizarDashboard();
+    renderizarTabelaClientes(clientesGlobais);
+    renderizarTabelaProdutos(produtosGlobais);
+    renderizarTabelaVendas(vendasGlobais);
+    renderizarTabelaCampanhas(campanhasGlobais);
+    renderizarTabelaEnvios(enviosGlobais);
+
+    // Esconde possíveis esqueletos ou spinners iniciais
+    console.log("App Inicializado com sucesso.");
+  }
+
+  function renderizarDashboard() {
+    // 1. Métricas de Clientes
+    document.getElementById('dash-total-clientes').textContent = clientesGlobais.length;
+
+    // 2. Métricas de Vendas (LTV e AOV)
+    let faturamentoTotal = 0;
+    vendasGlobais.forEach(v => {
+      const valor = parseFloat(v[3]) || 0;
+      faturamentoTotal += valor;
+    });
+
+    const ticketMedio = vendasGlobais.length > 0 ? (faturamentoTotal / vendasGlobais.length) : 0;
+
+    document.getElementById('dash-faturamento-total').textContent = `R$ ${faturamentoTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    document.getElementById('dash-ticket-medio').textContent = `R$ ${ticketMedio.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+    // 3. Métricas de Engajamento (Total de Envios)
+    let totalEmailsDisparados = 0;
+    enviosGlobais.forEach(e => {
+      const qtd = parseInt(e[3]) || 0;
+      totalEmailsDisparados += qtd;
+    });
+    document.getElementById('dash-total-envios').textContent = totalEmailsDisparados;
+
+    // 4. Vendas Recentes (Top 5)
+    const tbody = document.getElementById('dash-corpo-vendas-recentes');
+    if (tbody) {
+      if (vendasGlobais.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px; color: var(--text-muted);">Nenhuma venda realizada ainda.</td></tr>';
+      } else {
+        let html = '';
+        // Pega as últimas 5 vendas (vendasGlobais já vem em ordem cronológica?)
+        // Vamos assumir que sim, e reverter para ver as mais recentes.
+        [...vendasGlobais].reverse().slice(0, 5).forEach(v => {
+          html += `
+            <tr>
+              <td><span style="font-size: 11px; font-weight: 600; color: var(--accent);">${v[0]}</span></td>
+              <td>${v[1]}</td>
+              <td style="font-size: 13px;">${v[2]}</td>
+              <td style="font-weight: 600; color: var(--success);">R$ ${parseFloat(v[3]).toFixed(2)}</td>
+            </tr>
+          `;
+        });
+        tbody.innerHTML = html;
+      }
+    }
+  }
 
   // =========================================================
   // 1. VARIÁVEIS GLOBAIS
   // =========================================================
   let produtosGlobais = [];
+  let clientesGlobais = [];
+  let vendasGlobais = [];
+  let campanhasGlobais = [];
+  let enviosGlobais = [];
   let carrinhoDeCompras = [];
 
   // =========================================================
@@ -20,9 +107,13 @@
     document.getElementById(pageId).classList.add('active');
     btnElement.classList.add('active');
 
-    // Gatilhos de carregamento ao trocar de tela
-    if (pageId === 'page-envio') carregarCampanhas();
-    if (pageId === 'page-compra') carregarDadosCompra();
+    // Refresh das tabelas específicas se necessário ao trocar de aba
+    if (pageId === 'page-dashboard') renderizarDashboard();
+    if (pageId === 'page-envio') renderizarTabelaEnvios(enviosGlobais);
+    if (pageId === 'page-campanha') renderizarTabelaCampanhas(campanhasGlobais);
+    if (pageId === 'page-cliente') renderizarTabelaClientes(clientesGlobais);
+    if (pageId === 'page-produto') renderizarTabelaProdutos(produtosGlobais);
+    if (pageId === 'page-compra') renderizarTabelaVendas(vendasGlobais);
   }
 
   function showToast(msg, isSuccess) {
@@ -153,18 +244,6 @@
     }).getDadosParaCompra();
   }
 
-  function carregarCampanhas() {
-    const select = document.getElementById('env-campanha');
-    select.innerHTML = '<option disabled selected>Sincronizando pipelines...</option>';
-
-    google.script.run.withSuccessHandler(campanhas => {
-      if (campanhas.length > 0) {
-        select.innerHTML = campanhas.map(c => `<option value="${c[0]}">${c[0]}</option>`).join('');
-      } else {
-        select.innerHTML = '<option disabled selected>Nenhuma campanha provisionada</option>';
-      }
-    }).getCampanhas();
-  }
 
   function salvarCliente() {
     setLoading('btn-cliente', true, 'Salvar Cliente');
@@ -240,17 +319,115 @@
     if (isNaN(precoNumerico) || precoNumerico <= 0) return showToast('Por favor, informe um preço válido.', false);
 
     setLoading('btn-produto', true, 'Catalogar Produto');
+    const nomeOriginal = document.getElementById('p-nome-original').value;
     const dados = {
       nome: document.getElementById('p-nome').value,
       preco: precoNumerico,
-      descricao: document.getElementById('p-desc').value
+      descricao: document.getElementById('p-desc').value,
+      nomeOriginal: nomeOriginal
     };
+
+    const nomeFuncaoBackend = nomeOriginal ? 'atualizarProduto' : 'salvarProduto';
 
     google.script.run.withSuccessHandler(res => {
       showToast(res.mensagem, res.sucesso);
       setLoading('btn-produto', false, 'Catalogar Produto');
-      if (res.sucesso === true) document.querySelectorAll('#page-produto input').forEach(input => input.value = '');
-    }).salvarProduto(dados);
+      if (res.sucesso === true) {
+        voltarParaListaProdutos();
+        document.querySelectorAll('#page-produto input').forEach(input => input.value = '');
+      }
+    })[nomeFuncaoBackend](dados);
+  }
+
+  function mostrarFormProduto(isEdit = false) {
+    document.getElementById('view-lista-produto').style.display = 'none';
+    document.getElementById('view-form-produto').style.display = 'block';
+    document.getElementById('btn-novo-produto').style.display = 'none';
+
+    if (isEdit) {
+      document.getElementById('titulo-pagina-produto').innerHTML = 'Editar Produto';
+      document.getElementById('subtitulo-pagina-produto').innerHTML = 'Atualize as informações do item no catálogo';
+    } else {
+      document.getElementById('titulo-pagina-produto').innerHTML = 'Catalogar Produto';
+      document.getElementById('subtitulo-pagina-produto').innerHTML = 'Cadastre um novo item disponível para venda';
+
+      // Limpa os campos para um novo cadastro
+      document.getElementById('p-nome-original').value = '';
+      document.getElementById('p-nome').value = '';
+      document.getElementById('p-preco').value = '';
+      document.getElementById('p-desc').value = '';
+    }
+  }
+
+  function voltarParaListaProdutos() {
+    document.getElementById('view-lista-produto').style.display = 'block';
+    document.getElementById('view-form-produto').style.display = 'none';
+    document.getElementById('btn-novo-produto').style.display = 'block';
+
+    document.getElementById('titulo-pagina-produto').innerHTML = 'Catálogo de Produtos';
+    document.getElementById('subtitulo-pagina-produto').innerHTML = 'Gerencie os itens disponíveis para venda no seu ecossistema';
+
+    carregarListaProdutos(); // Atualiza a tabela
+  }
+
+  function abrirEdicaoProduto(index) {
+    const p = produtosGlobais[index];
+
+    // Preenche os campos do formulário com os dados da tabela
+    document.getElementById('p-nome-original').value = p[0];
+    document.getElementById('p-nome').value = p[0];
+    document.getElementById('p-preco').value = p[1];
+    document.getElementById('p-desc').value = p[2];
+
+    mostrarFormProduto(true);
+  }
+
+  function confirmarExcluirProduto(nome) {
+    if (confirm(`Tem certeza que deseja remover o produto "${nome}" do catálogo?`)) {
+      document.getElementById('corpo-tabela-produtos').innerHTML = '<tr><td colspan="4" style="text-align:center;"><div class="spinner" style="display:inline-block; border-top-color: var(--error);"></div> Excluindo...</td></tr>';
+
+      google.script.run.withSuccessHandler(res => {
+        showToast(res.mensagem, res.sucesso);
+        carregarListaProdutos();
+      }).excluirProduto(nome);
+    }
+  }
+
+  function carregarListaProdutos() {
+    google.script.run.withSuccessHandler(produtos => {
+      produtosGlobais = produtos;
+      renderizarTabelaProdutos(produtos);
+    }).getProdutos();
+  }
+
+  function renderizarTabelaProdutos(produtos) {
+    const tbody = document.getElementById('corpo-tabela-produtos');
+    if (!tbody) return;
+
+    if (produtos.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--text-muted); padding: 30px;">Nenhum produto cadastrado ainda.</td></tr>';
+      return;
+    }
+
+    let html = '';
+    produtos.forEach((p, index) => {
+      html += `
+        <tr>
+          <td><strong style="color: var(--text-main);">${p[0]}</strong></td>
+          <td>R$ ${p[1]}</td>
+          <td style="font-size: 13px; color: var(--text-muted);">${p[2]}</td>
+          <td>
+            <button class="btn-icon-action" onclick="abrirEdicaoProduto(${index})" title="Editar">
+              <i class="fa-solid fa-pen-to-square"></i>
+            </button>
+            <button class="btn-icon-action" onclick="confirmarExcluirProduto('${p[0]}')" title="Excluir" style="color: var(--error); margin-left: 10px;">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `;
+    });
+    tbody.innerHTML = html;
   }
 
   function processarCarrinho() {
@@ -268,23 +445,328 @@
         carrinhoDeCompras = [];
         atualizarInterfaceCarrinho();
         document.getElementById('compra-cliente').selectedIndex = 0;
+        voltarParaListaVendas();
       }
     }).salvarCompra({ emailCliente: cliente, itens: carrinhoDeCompras });
   }
 
+  function carregarListaVendas() {
+    google.script.run.withSuccessHandler(vendas => {
+      vendasGlobais = vendas;
+      renderizarTabelaVendas(vendas);
+    }).getVendas();
+  }
+
+  function renderizarTabelaVendas(vendas) {
+    const tbody = document.getElementById('corpo-tabela-vendas');
+    if (!tbody) return;
+
+    if (vendas.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted); padding: 30px;">Nenhuma venda registrada ainda.</td></tr>';
+      return;
+    }
+
+    let html = '';
+    // Copia e inverte para mostrar as mais recentes primeiro sem alterar o original
+    [...vendas].reverse().forEach(v => {
+      html += `
+        <tr>
+          <td><strong style="color: var(--cyan);">${v[0]}</strong></td>
+          <td>${v[1]}</td>
+          <td>${v[2]}</td>
+          <td style="font-weight: 600; color: var(--success);">R$ ${v[3]}</td>
+          <td>
+            <button class="btn-icon-action" onclick="abrirDetalhesVenda('${v[0]}')" title="Ver Itens">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+            <button class="btn-icon-action" onclick="confirmarExcluirVenda('${v[0]}')" title="Excluir" style="color: var(--error); margin-left: 10px;">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `;
+    });
+    tbody.innerHTML = html;
+  }
+
+  function mostrarFormVenda() {
+    document.getElementById('view-lista-venda').style.display = 'none';
+    document.getElementById('view-form-venda').style.display = 'block';
+    document.getElementById('btn-nova-venda').style.display = 'none';
+    document.getElementById('view-detalhes-venda').style.display = 'none';
+
+    document.getElementById('titulo-pagina-venda').innerHTML = 'Registrar Venda';
+    document.getElementById('subtitulo-pagina-venda').innerHTML = 'Adicione múltiplos itens ao carrinho do cliente';
+
+    carregarDadosCompra(); // Carrega selects de clientes/produtos
+  }
+
+  function voltarParaListaVendas() {
+    document.getElementById('view-lista-venda').style.display = 'block';
+    document.getElementById('view-form-venda').style.display = 'none';
+    document.getElementById('btn-nova-venda').style.display = 'block';
+    document.getElementById('view-detalhes-venda').style.display = 'none';
+
+    document.getElementById('titulo-pagina-venda').innerHTML = 'Histórico de Vendas';
+    document.getElementById('subtitulo-pagina-venda').innerHTML = 'Acompanhe e gerencie as transações da sua base';
+
+    carregarListaVendas();
+  }
+
+  function abrirDetalhesVenda(idPedido) {
+    document.getElementById('detalhes-venda-titulo').innerHTML = `Itens do Pedido: <span style="color: var(--cyan);">${idPedido}</span>`;
+    const tbody = document.getElementById('corpo-tabela-detalhes-venda');
+    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;"><div class="spinner" style="display:inline-block;"></div></td></tr>';
+    
+    document.getElementById('view-detalhes-venda').style.display = 'block';
+    // Rola para baixo para ver os detalhes se necessário
+    document.getElementById('view-detalhes-venda').scrollIntoView({ behavior: 'smooth' });
+
+    google.script.run.withSuccessHandler(itens => {
+      if (itens.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Nenhum item encontrado.</td></tr>';
+        return;
+      }
+
+      let html = '';
+      itens.forEach(it => {
+        html += `
+          <tr>
+            <td>${it[0]}</td>
+            <td>${it[1]}</td>
+            <td style="font-weight: 600;">R$ ${parseFloat(it[2]).toFixed(2)}</td>
+          </tr>
+        `;
+      });
+      tbody.innerHTML = html;
+    }).getItensVenda(idPedido);
+  }
+
+  function fecharDetalhesVenda() {
+    document.getElementById('view-detalhes-venda').style.display = 'none';
+  }
+
+  function confirmarExcluirVenda(idPedido) {
+    if (confirm(`AVISO CRÍTICO: Você deseja excluir permanentemente o pedido ${idPedido} e todos os seus itens associados?`)) {
+      document.getElementById('corpo-tabela-vendas').innerHTML = '<tr><td colspan="5" style="text-align:center;"><div class="spinner" style="display:inline-block; border-top-color: var(--error);"></div> Excluindo...</td></tr>';
+
+      google.script.run.withSuccessHandler(res => {
+        showToast(res.mensagem, res.sucesso);
+        carregarListaVendas();
+      }).excluirVenda(idPedido);
+    }
+  }
+
   function salvarCampanha() {
     setLoading('btn-campanha', true, 'Gravar Campanha');
+
+    const originalNome = document.getElementById('camp-original-nome').value;
     const dados = {
       nome: document.getElementById('camp-nome').value,
       assunto: document.getElementById('camp-assunto').value,
-      conteudo: document.getElementById('camp-conteudo').value
+      conteudo: document.getElementById('camp-conteudo').value,
+      originalNome: originalNome
     };
+
+    if (!dados.nome || !dados.assunto || !dados.conteudo) {
+      showToast("Preencha todos os campos da campanha.", false);
+      setLoading('btn-campanha', false, 'Gravar Campanha');
+      return;
+    }
+
+    const acao = originalNome ? 'atualizarCampanha' : 'salvarCampanha';
 
     google.script.run.withSuccessHandler(res => {
       showToast(res.mensagem, res.sucesso);
       setLoading('btn-campanha', false, 'Gravar Campanha');
-      if (res.sucesso === true) document.querySelectorAll('#page-campanha input, #page-campanha textarea').forEach(input => input.value = '');
-    }).salvarCampanha(dados);
+      if (res.sucesso === true) {
+        voltarParaListaCampanhas();
+        carregarListaCampanhas();
+      }
+    })[acao](dados);
+  }
+
+  function carregarListaCampanhas() {
+    google.script.run.withSuccessHandler(campanhas => {
+      campanhasGlobais = campanhas;
+      renderizarTabelaCampanhas(campanhas);
+    }).getCampanhas();
+  }
+
+  function renderizarTabelaCampanhas(campanhas) {
+    const tbody = document.getElementById('corpo-tabela-campanhas');
+    if (!tbody) return;
+
+    if (!campanhas || campanhas.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color: var(--text-muted); padding: 30px;">Nenhuma campanha criada ainda ou erro no carregamento.</td></tr>';
+      return;
+    }
+
+    let html = '';
+    campanhas.forEach((c, index) => {
+      html += `
+        <tr>
+          <td><strong style="color: var(--text-main);">${c[0]}</strong></td>
+          <td>${c[1]}</td>
+          <td>
+            <button class="btn-icon-action" onclick="abrirEdicaoCampanha(${index})" title="Editar">
+              <i class="fa-solid fa-pen-to-square"></i>
+            </button>
+            <button class="btn-icon-action" onclick="confirmarExclusaoCampanha('${c[0]}')" title="Excluir" style="color: var(--error); margin-left: 10px;">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `;
+    });
+    tbody.innerHTML = html;
+  }
+
+  function abrirEdicaoCampanha(index) {
+    const c = campanhasGlobais[index];
+    document.getElementById('camp-original-nome').value = c[0];
+    document.getElementById('camp-nome').value = c[0];
+    document.getElementById('camp-assunto').value = c[1];
+    document.getElementById('camp-conteudo').value = c[2];
+
+    mostrarFormCampanha();
+    atualizarPreviewCampanha();
+  }
+
+  function confirmarExclusaoCampanha(nome) {
+    if (confirm(`Tem certeza que deseja excluir a campanha "${nome}"?`)) {
+      google.script.run.withSuccessHandler(res => {
+        showToast(res.mensagem, res.sucesso);
+        if (res.sucesso) carregarListaCampanhas();
+      }).excluirCampanha(nome);
+    }
+  }
+
+  function mostrarFormCampanha() {
+    document.getElementById('view-lista-campanha').style.display = 'none';
+    document.getElementById('btn-nova-campanha').style.display = 'none';
+    document.getElementById('view-form-campanha').style.display = 'block';
+    document.getElementById('btn-voltar-campanha').style.display = 'inline-flex';
+  }
+
+  function voltarParaListaCampanhas() {
+    document.getElementById('view-lista-campanha').style.display = 'block';
+    document.getElementById('btn-nova-campanha').style.display = 'inline-flex';
+    document.getElementById('view-form-campanha').style.display = 'none';
+    document.getElementById('btn-voltar-campanha').style.display = 'none';
+
+    // Limpa o formulário
+    document.getElementById('camp-original-nome').value = '';
+    document.getElementById('camp-nome').value = '';
+    document.getElementById('camp-assunto').value = '';
+    document.getElementById('camp-conteudo').value = '';
+    document.getElementById('camp-preview').srcdoc = '';
+  }
+
+  function atualizarPreviewCampanha() {
+    const conteudo = document.getElementById('camp-conteudo').value;
+    const previewIframe = document.getElementById('camp-preview');
+
+    if (!conteudo.trim()) {
+      previewIframe.srcdoc = `
+        <html>
+          <body style="font-family: 'Inter', sans-serif; display: flex; align-items: center; justify-content: center; height: 90vh; margin: 0; color: #999; font-style: italic;">
+            <div>O conteúdo do seu e-mail aparecerá aqui...</div>
+          </body>
+        </html>`;
+      return;
+    }
+
+    // Processamento de Tags para o Preview
+    let htmlProcessado = conteudo
+      .replace(/{{nome}}/g, '<span style="color: #6366f1; font-weight: 600;">Carlos Lemos</span>')
+      .replace(/{{email}}/g, '<span style="color: #6366f1; font-weight: 600;">carlos@exemplo.com</span>');
+
+    // Injeção no Iframe com CSS Reset básico
+    previewIframe.srcdoc = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+          <style>
+            body { font-family: 'Inter', sans-serif; margin: 0; padding: 20px; color: #333; line-height: 1.5; background: #fff; }
+            img { max-width: 100%; height: auto; }
+          </style>
+        </head>
+        <body>${htmlProcessado}</body>
+      </html>`;
+  }
+
+  function carregarListaEnvios() {
+    google.script.run.withSuccessHandler(envios => {
+      enviosGlobais = envios;
+      renderizarTabelaEnvios(envios);
+    }).getEnvios();
+  }
+
+  function renderizarTabelaEnvios(envios) {
+    const tbody = document.getElementById('corpo-tabela-envios');
+    if (!tbody) return;
+
+    if (envios.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted); padding: 30px;">Nenhum disparo registrado ainda.</td></tr>';
+      return;
+    }
+
+    let html = '';
+    // Mostra do mais recente para o mais antigo sem alterar o original
+    [...envios].reverse().forEach((e, revIndex) => {
+      const originalIndex = envios.length - 1 - revIndex;
+      html += `
+        <tr>
+          <td><span style="font-size: 13px;">${e[0]}</span></td>
+          <td>${e[1]}</td>
+          <td style="font-size: 11px; color: var(--text-muted);">${e[2]}</td>
+          <td><span class="badge ${e[3] === 'Enviado' ? 'success' : 'warning'}" style="padding: 4px 8px; border-radius: 4px; font-size: 11px; background: rgba(16, 185, 129, 0.1); color: var(--success);">${e[3]}</span></td>
+          <td>
+            <button class="btn-icon-action" onclick="confirmarExcluirLogEnvio(${originalIndex})" title="Remover Log" style="color: var(--error);">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </td>
+        </tr>
+      `;
+    });
+    tbody.innerHTML = html;
+  }
+
+  function confirmarExcluirLogEnvio(index) {
+    if (confirm("Deseja remover este registro do histórico de envios?")) {
+      google.script.run.withSuccessHandler(res => {
+        showToast(res.mensagem, res.sucesso);
+        if (res.sucesso) carregarListaEnvios();
+      }).excluirLogEnvio(index);
+    }
+  }
+
+  function mostrarFormEnvio() {
+    document.getElementById('view-lista-envio').style.display = 'none';
+    document.getElementById('btn-novo-envio').style.display = 'none';
+    document.getElementById('view-form-envio').style.display = 'block';
+    document.getElementById('btn-voltar-envio').style.display = 'inline-flex';
+
+    // Preenche as campanhas no select
+    const select = document.getElementById('env-campanha');
+    if (campanhasGlobais.length > 0) {
+      let options = '<option value="">Selecione uma campanha...</option>';
+      campanhasGlobais.forEach(c => {
+        options += `<option value="${c[0]}">${c[0]}</option>`;
+      });
+      select.innerHTML = options;
+    } else {
+      select.innerHTML = '<option value="">Nenhuma campanha disponível</option>';
+    }
+  }
+
+  function voltarParaListaEnvios() {
+    document.getElementById('view-lista-envio').style.display = 'block';
+    document.getElementById('btn-novo-envio').style.display = 'inline-flex';
+    document.getElementById('view-form-envio').style.display = 'none';
+    document.getElementById('btn-voltar-envio').style.display = 'none';
   }
 
   function agendarEnvio() {
@@ -292,62 +774,109 @@
     const campanha = document.getElementById('env-campanha').value;
     const segmento = document.getElementById('env-segmento').value;
 
+    if (!campanha) {
+      showToast("Selecione uma campanha antes de iniciar.", false);
+      setLoading('btn-envio', false, 'Iniciar Pipeline de Envio');
+      return;
+    }
+
     google.script.run.withSuccessHandler(res => {
-      // Já preparado para o novo padrão que faremos no back-end
       showToast(res.mensagem || res, res.sucesso !== undefined ? res.sucesso : true);
       setLoading('btn-envio', false, 'Iniciar Pipeline de Envio');
+      if (res.sucesso || typeof res === 'string') {
+        voltarParaListaEnvios();
+        carregarListaEnvios();
+      }
     }).agendarEnvio(campanha, segmento);
   }
 
+  function mostrarFormEnvio() {
+    document.getElementById('view-lista-envio').style.display = 'none';
+    document.getElementById('btn-novo-envio').style.display = 'none';
+    const btnManual = document.getElementById('btn-processar-manual');
+    if (btnManual) btnManual.style.display = 'none';
+    document.getElementById('view-form-envio').style.display = 'block';
+    document.getElementById('btn-voltar-envio').style.display = 'inline-flex';
+
+    // Preenche as campanhas no select
+    const select = document.getElementById('env-campanha');
+    if (campanhasGlobais.length > 0) {
+      let options = '<option value="">Selecione uma campanha...</option>';
+      campanhasGlobais.forEach(c => {
+        options += `<option value="${c[0]}">${c[0]}</option>`;
+      });
+      select.innerHTML = options;
+    } else {
+      select.innerHTML = '<option value="">Nenhuma campanha disponível</option>';
+    }
+  }
+
+  function voltarParaListaEnvios() {
+    document.getElementById('view-lista-envio').style.display = 'block';
+    document.getElementById('btn-novo-envio').style.display = 'inline-flex';
+    const btnManual = document.getElementById('btn-processar-manual');
+    if (btnManual) btnManual.style.display = 'inline-flex';
+    document.getElementById('view-form-envio').style.display = 'none';
+    document.getElementById('btn-voltar-envio').style.display = 'none';
+  }
+
+  function processarFila() {
+    const btn = document.getElementById('btn-processar-manual');
+    if (btn) btn.disabled = true;
+    
+    google.script.run.withSuccessHandler(res => {
+      showToast(res.mensagem || "Fila processada com sucesso!", res.sucesso !== false);
+      if (btn) btn.disabled = false;
+      carregarListaEnvios();
+    }).processarFilaEnvio();
+  }
+
+
+  function carregarListaClientes() {
+    google.script.run.withSuccessHandler(clientes => {
+      clientesGlobais = clientes;
+      renderizarTabelaClientes(clientes);
+    }).getClientes();
+  }
+
+  function renderizarTabelaClientes(clientes) {
+    const tbody = document.getElementById('corpo-tabela-clientes');
+    if (!tbody) return;
+
+    if (!clientes || clientes.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted); padding: 30px;">Nenhum cliente cadastrado ainda.</td></tr>';
+      return;
+    }
+
+    let html = '';
+    clientes.forEach((c, index) => {
+      html += `
+        <tr>
+          <td><strong style="color: var(--text-main);">${c[0]}</strong></td>
+          <td>${c[1]}</td>
+          <td>${c[2]}</td>
+          <td>${c[3]}</td>
+          <td>
+            <button class="btn-icon-action" onclick="abrirEdicaoCliente(${index})" title="Editar">
+              <i class="fa-solid fa-pen-to-square"></i>
+            </button>
+            <button class="btn-icon-action" onclick="confirmarExclusao('${c[1]}')" title="Excluir" style="color: var(--error); margin-left: 10px;">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `;
+    });
+    tbody.innerHTML = html;
+  }
+
   function confirmarExclusao(email) {
-    // Cria um alerta nativo do navegador para evitar exclusões acidentais
     if (confirm(`Tem certeza que deseja excluir permanentemente o cliente com e-mail: ${email}?`)) {
-
-      // Coloca a tabela em estado de carregamento
-      document.getElementById('corpo-tabela-clientes').innerHTML = '<tr><td colspan="5" style="text-align:center;"><div class="spinner" style="display:inline-block; border-top-color: var(--error);"></div> Excluindo...</td></tr>';
-
       google.script.run.withSuccessHandler(res => {
         showToast(res.mensagem, res.sucesso);
-        carregarListaClientes(); // Recarrega a tabela limpa
+        carregarListaClientes();
       }).excluirCliente(email);
     }
   }
 
-  function carregarListaClientes() {
-    const tbody = document.getElementById('corpo-tabela-clientes');
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;"><div class="spinner" style="display:inline-block; border-top-color: var(--primary);"></div> Carregando...</td></tr>';
-
-    google.script.run.withSuccessHandler(clientes => {
-      clientesGlobais = clientes; // Salva na memória para podermos editar depois
-
-      if (clientes.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted); padding: 30px;">Nenhum cliente cadastrado ainda.</td></tr>';
-        return;
-      }
-
-      let html = '';
-
-      // --- É AQUI QUE ENTRA O SEU BLOCO DE CÓDIGO ---
-      clientes.forEach((c, index) => {
-        html += `
-          <tr>
-            <td><strong style="color: var(--text-main);">${c[0]}</strong></td>
-            <td>${c[1]}</td>
-            <td>${c[2]}</td>
-            <td>${c[3]}</td>
-            <td>
-              <button class="btn-icon-action" onclick="abrirEdicaoCliente(${index})" title="Editar">
-                <i class="fa-solid fa-pen-to-square"></i>
-              </button>
-              <button class="btn-icon-action" onclick="confirmarExclusao('${c[1]}')" title="Excluir" style="color: var(--error); margin-left: 10px;">
-                <i class="fa-solid fa-trash"></i>
-              </button>
-            </td>
-          </tr>
-        `;
-      });
-
-      tbody.innerHTML = html;
-    }).getClientes();
-  }
 </script>

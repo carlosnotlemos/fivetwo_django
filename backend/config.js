@@ -2,7 +2,7 @@
 
 const CONFIG = {
   // Altere para 'PROD' quando quiser apontar para o banco oficial
-  AMBIENTE: 'DEV',
+  AMBIENTE: 'PROD',
 
   BANCO_DE_DADOS: {
     // Substitua pelos IDs reais das suas planilhas
