@@ -31,7 +31,9 @@ function salvarCompra(dados) {
   }
 
   // Salva o registro mestre na aba Compras
-  sheetCompras.appendRow([idPedido, dataCompra, dados.emailCliente, valorTotalPedido, nomeCliente]);
+  const metodoPagamento = dados.metodoPagamento || "Pix";
+  const descricaoVenda = dados.descricaoVenda || "";
+  sheetCompras.appendRow([idPedido, dataCompra, dados.emailCliente, valorTotalPedido, nomeCliente, metodoPagamento, descricaoVenda]);
 
   // Salva os itens na aba Compra_Itens
   const startRow = sheetItens.getLastRow() + 1;
@@ -44,8 +46,8 @@ function salvarCompra(dados) {
 function getVendas() {
   const sheet = getDb().getSheetByName("Compras");
   if (sheet.getLastRow() < 2) return [];
-  // Retorna [ID Pedido, Data, Cliente Email, Valor Total, Nome do Cliente]
-  return sheet.getRange(2, 1, sheet.getLastRow() - 1, 5).getDisplayValues();
+  // Retorna [ID Pedido, Data, Cliente Email, Valor Total, Nome do Cliente, Método, Descrição]
+  return sheet.getRange(2, 1, sheet.getLastRow() - 1, 7).getDisplayValues();
 }
 
 function getItensVenda(idPedido) {

@@ -237,7 +237,10 @@
       produtosGlobais = dados.produtos;
       const selProduto = document.getElementById('compra-produto');
       selProduto.innerHTML = dados.produtos.length
-        ? '<option disabled selected value="">Selecione um produto...</option>' + dados.produtos.map(p => `<option value="${p[0]}">${p[0]} - R$ ${p[1]}</option>`).join('')
+        ? '<option disabled selected value="">Selecione um produto...</option>' + dados.produtos.map(p => {
+            const desc = p[2] ? ` (${p[2]})` : '';
+            return `<option value="${p[0]}">${p[0]} - R$ ${p[1]}${desc}</option>`;
+          }).join('')
         : '<option disabled selected>Nenhum produto cadastrado</option>';
 
       document.getElementById('compra-subtotal').value = '';
@@ -432,6 +435,8 @@
 
   function processarCarrinho() {
     const cliente = document.getElementById('compra-cliente').value;
+    const metodoPagamento = document.getElementById('compra-pagamento').value;
+    const descricaoVenda = document.getElementById('compra-desc').value;
 
     if (!cliente || cliente.includes("Carregando")) return showToast("Selecione um cliente para a compra.", false);
     if (carrinhoDeCompras.length === 0) return showToast("Adicione pelo menos um item ao carrinho.", false);
@@ -445,9 +450,16 @@
         carrinhoDeCompras = [];
         atualizarInterfaceCarrinho();
         document.getElementById('compra-cliente').selectedIndex = 0;
+        document.getElementById('compra-pagamento').selectedIndex = 0;
+        document.getElementById('compra-desc').value = '';
         voltarParaListaVendas();
       }
-    }).salvarCompra({ emailCliente: cliente, itens: carrinhoDeCompras });
+    }).salvarCompra({ 
+      emailCliente: cliente, 
+      metodoPagamento: metodoPagamento,
+      descricaoVenda: descricaoVenda,
+      itens: carrinhoDeCompras 
+    });
   }
 
   function carregarListaVendas() {
@@ -462,7 +474,7 @@
     if (!tbody) return;
 
     if (vendas.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color: var(--text-muted); padding: 30px;">Nenhuma venda registrada ainda.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 30px;">Nenhuma venda registrada ainda.</td></tr>';
       return;
     }
 
@@ -473,12 +485,18 @@
       const email = v[2];
       const valor = v[3];
       const nomeCliente = v[4] || "";
+      const metodoPagamento = v[5] || "Pix";
+      const descricaoVenda = v[6] || "";
       html += `
         <tr>
-          <td><strong style="color: var(--cyan);">${idPedido}</strong></td>
+          <td><strong style="color: var(--accent);">${idPedido}</strong></td>
           <td>${data}</td>
-          <td><strong>${nomeCliente}</strong></td>
-          <td style="font-size: 13px; color: var(--text-muted);">${email}</td>
+          <td>
+            <strong style="color: var(--text-main);">${nomeCliente}</strong><br>
+            <span style="font-size: 12px; color: var(--text-muted);">${email}</span>
+          </td>
+          <td><span class="badge-payment" data-method="${metodoPagamento}">${metodoPagamento}</span></td>
+          <td style="font-size: 13px; color: var(--text-muted); max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${descricaoVenda}">${descricaoVenda || '-'}</td>
           <td style="font-weight: 600; color: var(--success);">R$ ${valor}</td>
           <td>
             <button class="btn-icon-action" onclick="abrirDetalhesVenda('${idPedido}')" title="Ver Itens">
@@ -523,6 +541,28 @@
     const tbody = document.getElementById('corpo-tabela-detalhes-venda');
     tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;"><div class="spinner" style="display:inline-block;"></div></td></tr>';
     
+    const venda = vendasGlobais.find(v => v[0] === idPedido);
+    const metaContainer = document.getElementById('detalhes-venda-meta');
+    if (venda && metaContainer) {
+      const metodo = venda[5] || "Pix";
+      const desc = venda[6] || "";
+      metaContainer.innerHTML = `
+        <div style="display: grid; grid-template-columns: auto 1fr; gap: 30px; align-items: start;">
+          <div>
+            <strong style="color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px;">Método de Pagamento</strong>
+            <span class="badge-payment" data-method="${metodo}">${metodo}</span>
+          </div>
+          <div>
+            <strong style="color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px;">Descrição / Observações da Venda</strong>
+            <div style="color: var(--text-main); font-size: 14px; line-height: 1.6; white-space: pre-wrap; background: rgba(0,0,0,0.15); border: 1px solid var(--border); padding: 12px 16px; border-radius: 8px;">${desc || '<span style="color: var(--text-muted); font-style: italic;">Nenhuma observação registrada.</span>'}</div>
+          </div>
+        </div>
+      `;
+      metaContainer.style.display = 'block';
+    } else if (metaContainer) {
+      metaContainer.style.display = 'none';
+    }
+
     document.getElementById('view-detalhes-venda').style.display = 'block';
     // Rola para baixo para ver os detalhes se necessário
     document.getElementById('view-detalhes-venda').scrollIntoView({ behavior: 'smooth' });

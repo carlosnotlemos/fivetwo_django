@@ -272,14 +272,15 @@
                   <th>ID Pedido</th>
                   <th>Data</th>
                   <th>Cliente</th>
-                  <th>E-mail</th>
+                  <th>Método</th>
+                  <th>Descrição</th>
                   <th>Total</th>
                   <th>Ações</th>
                 </tr>
               </thead>
               <tbody id="corpo-tabela-vendas">
                 <tr>
-                  <td colspan="6" style="text-align:center;">Carregando histórico...</td>
+                  <td colspan="7" style="text-align:center;">Carregando histórico...</td>
                 </tr>
               </tbody>
             </table>
@@ -292,6 +293,22 @@
             <select id="compra-cliente">
               <option disabled selected>Carregando clientes...</option>
             </select>
+          </div>
+
+          <div class="form-grid" style="margin-top: 20px;">
+            <div class="form-group">
+              <label>Método de Pagamento</label>
+              <select id="compra-pagamento">
+                <option value="Pix" selected>Pix</option>
+                <option value="Cartão">Cartão</option>
+                <option value="Espécie">Espécie</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group full-width" style="margin-top: 20px;">
+            <label>Descrição / Observações da Venda</label>
+            <textarea id="compra-desc" rows="4" placeholder="Ex: Venda realizada no balcão.&#10;Opção parcelada em 2 vezes.&#10;Entregar via motoboy."></textarea>
           </div>
 
           <hr style="border: 0; border-top: 1px solid var(--border); margin: 30px 0;">
@@ -358,6 +375,10 @@
             <button class="btn-icon-action" onclick="fecharDetalhesVenda()">
               <i class="fa-solid fa-xmark"></i>
             </button>
+          </div>
+
+          <div id="detalhes-venda-meta" style="margin-bottom: 25px; padding: 20px; background: rgba(255,255,255,0.015); border: 1px solid var(--border); border-radius: 12px; font-size: 14px; display: none;">
+            <!-- Preenchido via JS -->
           </div>
           <div class="data-table-container">
             <table class="data-table">
