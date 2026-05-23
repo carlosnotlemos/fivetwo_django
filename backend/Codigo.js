@@ -79,8 +79,8 @@ function getDadosParaCompra() {
   const sheetProdutos = ss.getSheetByName("Produtos");
   let produtos = [];
   if (sheetProdutos.getLastRow() > 1) {
-    // Pega Nome e Preço
-    produtos = sheetProdutos.getRange(2, 1, sheetProdutos.getLastRow() - 1, 2).getValues();
+    // Pega Nome, Preço e Descrição
+    produtos = sheetProdutos.getRange(2, 1, sheetProdutos.getLastRow() - 1, 3).getValues();
   }
 
   return { clientes: clientes, produtos: produtos };
