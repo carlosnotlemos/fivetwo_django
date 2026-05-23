@@ -72,11 +72,16 @@
         // Pega as últimas 5 vendas (vendasGlobais já vem em ordem cronológica?)
         // Vamos assumir que sim, e reverter para ver as mais recentes.
         [...vendasGlobais].reverse().slice(0, 5).forEach(v => {
+          const nomeCliente = v[4] || "";
+          const email = v[2];
           html += `
             <tr>
               <td><span style="font-size: 11px; font-weight: 600; color: var(--accent);">${v[0]}</span></td>
               <td>${v[1]}</td>
-              <td style="font-size: 13px;">${v[2]}</td>
+              <td>
+                <strong style="color: var(--text-main); font-size: 13px;">${nomeCliente}</strong><br>
+                <span style="font-size: 11px; color: var(--text-muted);">${email}</span>
+              </td>
               <td style="font-weight: 600; color: var(--success);">R$ ${parseFloat(v[3]).toFixed(2)}</td>
             </tr>
           `;
