@@ -19,8 +19,19 @@ function salvarCompra(dados) {
     return [idPedido, item.produto, item.quantidade, item.valorTotal];
   });
 
+  // Busca o nome do cliente pelo e-mail na aba Clientes
+  const sheetClientes = ss.getSheetByName("Clientes");
+  let nomeCliente = "";
+  if (sheetClientes && sheetClientes.getLastRow() > 1) {
+    const clientes = sheetClientes.getRange(2, 1, sheetClientes.getLastRow() - 1, 2).getValues();
+    const cliente = clientes.find(c => c[1] === dados.emailCliente);
+    if (cliente) {
+      nomeCliente = cliente[0];
+    }
+  }
+
   // Salva o registro mestre na aba Compras
-  sheetCompras.appendRow([idPedido, dataCompra, dados.emailCliente, valorTotalPedido]);
+  sheetCompras.appendRow([idPedido, dataCompra, dados.emailCliente, valorTotalPedido, nomeCliente]);
 
   // Salva os itens na aba Compra_Itens
   const startRow = sheetItens.getLastRow() + 1;
@@ -33,8 +44,8 @@ function salvarCompra(dados) {
 function getVendas() {
   const sheet = getDb().getSheetByName("Compras");
   if (sheet.getLastRow() < 2) return [];
-  // Retorna [ID Pedido, Data, Cliente, Valor Total]
-  return sheet.getRange(2, 1, sheet.getLastRow() - 1, 4).getDisplayValues();
+  // Retorna [ID Pedido, Data, Cliente Email, Valor Total, Nome do Cliente]
+  return sheet.getRange(2, 1, sheet.getLastRow() - 1, 5).getDisplayValues();
 }
 
 function getItensVenda(idPedido) {

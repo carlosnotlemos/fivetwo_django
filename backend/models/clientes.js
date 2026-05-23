@@ -2,7 +2,6 @@
 
 // 1. CREATE (Criar)
 function salvarCliente(dados) {
-  if (!validarEmail(dados.email)) return { sucesso: false, mensagem: "Erro: E-mail inválido." };
 
   const sheet = getDb().getSheetByName("Clientes");
   const emails = sheet.getRange(2, 2, Math.max(sheet.getLastRow() - 1, 1), 1).getValues().flat();

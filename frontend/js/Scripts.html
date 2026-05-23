@@ -462,24 +462,29 @@
     if (!tbody) return;
 
     if (vendas.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted); padding: 30px;">Nenhuma venda registrada ainda.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color: var(--text-muted); padding: 30px;">Nenhuma venda registrada ainda.</td></tr>';
       return;
     }
 
     let html = '';
-    // Copia e inverte para mostrar as mais recentes primeiro sem alterar o original
     [...vendas].reverse().forEach(v => {
+      const idPedido = v[0];
+      const data = v[1];
+      const email = v[2];
+      const valor = v[3];
+      const nomeCliente = v[4] || "";
       html += `
         <tr>
-          <td><strong style="color: var(--cyan);">${v[0]}</strong></td>
-          <td>${v[1]}</td>
-          <td>${v[2]}</td>
-          <td style="font-weight: 600; color: var(--success);">R$ ${v[3]}</td>
+          <td><strong style="color: var(--cyan);">${idPedido}</strong></td>
+          <td>${data}</td>
+          <td><strong>${nomeCliente}</strong></td>
+          <td style="font-size: 13px; color: var(--text-muted);">${email}</td>
+          <td style="font-weight: 600; color: var(--success);">R$ ${valor}</td>
           <td>
-            <button class="btn-icon-action" onclick="abrirDetalhesVenda('${v[0]}')" title="Ver Itens">
+            <button class="btn-icon-action" onclick="abrirDetalhesVenda('${idPedido}')" title="Ver Itens">
               <i class="fa-solid fa-eye"></i>
             </button>
-            <button class="btn-icon-action" onclick="confirmarExcluirVenda('${v[0]}')" title="Excluir" style="color: var(--error); margin-left: 10px;">
+            <button class="btn-icon-action" onclick="confirmarExcluirVenda('${idPedido}')" title="Excluir" style="color: var(--error); margin-left: 10px;">
               <i class="fa-solid fa-trash"></i>
             </button>
           </td>

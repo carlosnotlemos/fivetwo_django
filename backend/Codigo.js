@@ -34,7 +34,7 @@ function configurarPlanilhas() {
   const abas = {
     "Clientes": ["Nome", "E-mail", "Telefone", "Data Cadastro"],
     "Produtos": ["Nome do Produto", "Preço Base (R$)", "Descrição"],
-    "Compras": ["ID do Pedido", "Data", "E-mail do Cliente", "Valor Total do Pedido (R$)"],
+    "Compras": ["ID do Pedido", "Data", "E-mail do Cliente", "Valor Total do Pedido (R$)", "Nome do Cliente"],
     "Compra_Itens": ["ID do Pedido", "Produto", "Quantidade", "Subtotal (R$)"],
     "Campanhas": ["Nome da Campanha", "Assunto", "Conteúdo HTML"],
     "Envios": ["Data do Envio", "Campanha", "Segmento", "Quantidade"],
