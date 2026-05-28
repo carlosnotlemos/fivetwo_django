@@ -36,7 +36,7 @@ function configurarPlanilhas() {
     "Produtos": ["Nome do Produto", "Preço Base (R$)", "Descrição"],
     "Compras": ["ID do Pedido", "Data", "E-mail do Cliente", "Valor Total do Pedido (R$)", "Nome do Cliente", "Método de Pagamento", "Descrição da Compra"],
     "Compra_Itens": ["ID do Pedido", "Produto", "Quantidade", "Subtotal (R$)"],
-    "Custos": ["ID do Custo", "Produto", "Tipo de Custo", "Valor (R$)", "Data", "Descrição"],
+    "Custos": ["ID do Custo", "ID do Pedido", "Tipo de Custo", "Valor (R$)", "Data", "Descrição"],
     "Campanhas": ["Nome da Campanha", "Assunto", "Conteúdo HTML"],
     "Envios": ["Data do Envio", "Campanha", "Segmento", "Quantidade"],
     "Fila_Envio": ["E-mail", "Assunto", "Conteúdo", "Campanha", "Status"]

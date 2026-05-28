@@ -19,25 +19,57 @@ function salvarCompra(dados) {
     return [idPedido, item.produto, item.quantidade, item.valorTotal];
   });
 
-  // Busca o nome do cliente pelo e-mail na aba Clientes
+  // Calcula a soma de todos os custos vinculados a esta venda e subtrai do total
+  let totalCustos = 0;
+  if (dados.custos && dados.custos.length > 0) {
+    dados.custos.forEach(c => {
+      totalCustos += parseFloat(c.valor) || 0;
+    });
+  }
+  valorTotalPedido -= totalCustos;
+
+  // Busca o nome do cliente pelo e-mail ou nome na aba Clientes
   const sheetClientes = ss.getSheetByName("Clientes");
   let nomeCliente = "";
+  let emailClienteSalvar = dados.emailCliente || "";
   if (sheetClientes && sheetClientes.getLastRow() > 1) {
     const clientes = sheetClientes.getRange(2, 1, sheetClientes.getLastRow() - 1, 2).getValues();
-    const cliente = clientes.find(c => c[1] === dados.emailCliente);
+    // Busca por e-mail ou por nome (caso o e-mail esteja em branco e venha o nome do select)
+    const cliente = clientes.find(c => c[1] === dados.emailCliente || c[0] === dados.emailCliente);
     if (cliente) {
       nomeCliente = cliente[0];
+      emailClienteSalvar = cliente[1] || ""; // Salva o e-mail se houver, senão em branco
     }
   }
 
   // Salva o registro mestre na aba Compras
   const metodoPagamento = dados.metodoPagamento || "Pix";
   const descricaoVenda = dados.descricaoVenda || "";
-  sheetCompras.appendRow([idPedido, dataCompra, dados.emailCliente, valorTotalPedido, nomeCliente, metodoPagamento, descricaoVenda]);
+  sheetCompras.appendRow([idPedido, dataCompra, emailClienteSalvar, valorTotalPedido, nomeCliente, metodoPagamento, descricaoVenda]);
 
   // Salva os itens na aba Compra_Itens
   const startRow = sheetItens.getLastRow() + 1;
   sheetItens.getRange(startRow, 1, linhasItens.length, 4).setValues(linhasItens);
+
+  // Salva os custos opcionais lançados junto com a venda
+  if (dados.custos && dados.custos.length > 0) {
+    const sheetCustos = ss.getSheetByName("Custos");
+    if (sheetCustos) {
+      const dataVenda = new Date().toLocaleDateString('pt-BR');
+
+      dados.custos.forEach(c => {
+        const idCusto = "CST-" + new Date().getTime() + "-" + Math.floor(Math.random() * 1000);
+        sheetCustos.appendRow([
+          idCusto,
+          idPedido,       // Associado à venda, não ao produto
+          c.tipo,
+          parseFloat(c.valor),
+          dataVenda,
+          c.desc || ""
+        ]);
+      });
+    }
+  }
 
   return { sucesso: true, mensagem: `Pedido ${idPedido} registrado com sucesso!` };
 }
@@ -83,5 +115,16 @@ function excluirVenda(idPedido) {
     }
   }
 
-  return { sucesso: true, mensagem: "Venda e itens associados removidos com sucesso." };
+  // 3. Remover da aba Custos (pode haver múltiplos custos)
+  const sheetCustos = ss.getSheetByName("Custos");
+  if (sheetCustos && sheetCustos.getLastRow() > 1) {
+    const dataCustos = sheetCustos.getDataRange().getValues();
+    for (let i = dataCustos.length - 1; i >= 1; i--) {
+      if (dataCustos[i][1] === idPedido) { // Segunda coluna é o idPedido
+        sheetCustos.deleteRow(i + 1);
+      }
+    }
+  }
+
+  return { sucesso: true, mensagem: "Venda, itens e custos associados removidos com sucesso." };
 }

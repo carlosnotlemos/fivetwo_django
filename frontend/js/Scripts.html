@@ -41,19 +41,19 @@
     console.log("App Inicializado com sucesso.");
   }
 
-  function renderizarDashboard() {
-    const parseReal = (val) => {
-      if (val === null || val === undefined) return 0;
-      if (typeof val === 'number') return val;
-      let str = val.toString().trim();
-      if (!str) return 0;
-      if (str.indexOf(',') !== -1) {
-        str = str.replace(/\./g, '').replace(',', '.');
-      }
-      str = str.replace(/[^\d.-]/g, '');
-      return parseFloat(str) || 0;
-    };
+  function parseReal(val) {
+    if (val === null || val === undefined) return 0;
+    if (typeof val === 'number') return val;
+    let str = val.toString().trim();
+    if (!str) return 0;
+    if (str.indexOf(',') !== -1) {
+      str = str.replace(/\./g, '').replace(',', '.');
+    }
+    str = str.replace(/[^\d.-]/g, '');
+    return parseFloat(str) || 0;
+  }
 
+  function renderizarDashboard() {
     // 1. Métricas de Clientes
     document.getElementById('dash-total-clientes').textContent = clientesGlobais.length;
 
@@ -79,16 +79,10 @@
 
     // 4. Métricas de Custos e Faturamento Líquido
     let totalCustos = 0;
-    if (rentabilidadeGlobais && rentabilidadeGlobais.length > 0) {
-      rentabilidadeGlobais.forEach(r => {
-        totalCustos += r.custo || 0;
-      });
-    } else {
-      custosGlobais.forEach(c => {
-        const valor = parseReal(c[3]);
-        totalCustos += valor;
-      });
-    }
+    custosGlobais.forEach(c => {
+      const valor = parseReal(c[3]);
+      totalCustos += valor;
+    });
 
     const faturamentoLiquido = faturamentoTotal - totalCustos;
 
@@ -115,7 +109,7 @@
                 <strong style="color: var(--text-main); font-size: 13px;">${nomeCliente}</strong><br>
                 <span style="font-size: 11px; color: var(--text-muted);">${email}</span>
               </td>
-              <td style="font-weight: 600; color: var(--success);">R$ ${parseFloat(v[3]).toFixed(2)}</td>
+              <td style="font-weight: 600; color: var(--success);">R$ ${parseReal(v[3]).toFixed(2)}</td>
             </tr>
           `;
         });
@@ -135,6 +129,7 @@
   let campanhasGlobais = [];
   let enviosGlobais = [];
   let carrinhoDeCompras = [];
+  let carrinhoDeVendaCustos = [];
 
   // =========================================================
   // 2. CONTROLE DE INTERFACE (UI) & NAVEGAÇÃO
@@ -154,7 +149,6 @@
     if (pageId === 'page-cliente') renderizarTabelaClientes(clientesGlobais);
     if (pageId === 'page-produto') renderizarTabelaProdutos(produtosGlobais);
     if (pageId === 'page-compra') renderizarTabelaVendas(vendasGlobais);
-    if (pageId === 'page-custo') carregarListaCustos();
   }
 
   function showToast(msg, isSuccess) {
@@ -272,7 +266,11 @@
     google.script.run.withSuccessHandler(dados => {
       const selCliente = document.getElementById('compra-cliente');
       selCliente.innerHTML = dados.clientes.length
-        ? '<option disabled selected value="">Selecione um cliente...</option>' + dados.clientes.map(c => `<option value="${c[1]}">${c[0]} (${c[1]})</option>`).join('')
+        ? '<option disabled selected value="">Selecione um cliente...</option>' + dados.clientes.map(c => {
+            const val = c[1] || c[0];
+            const display = c[1] ? `${c[0]} (${c[1]})` : `${c[0]} (Sem e-mail)`;
+            return `<option value="${val}">${display}</option>`;
+          }).join('')
         : '<option disabled selected>Nenhum cliente cadastrado</option>';
 
       produtosGlobais = dados.produtos;
@@ -489,7 +487,9 @@
       setLoading('btn-compra', false, 'Finalizar Compra Completa');
       if (res.sucesso === true) {
         carrinhoDeCompras = [];
+        carrinhoDeVendaCustos = [];
         atualizarInterfaceCarrinho();
+        atualizarInterfaceCustosVenda();
         document.getElementById('compra-cliente').selectedIndex = 0;
         document.getElementById('compra-pagamento').selectedIndex = 0;
         document.getElementById('compra-desc').value = '';
@@ -499,7 +499,8 @@
       emailCliente: cliente, 
       metodoPagamento: metodoPagamento,
       descricaoVenda: descricaoVenda,
-      itens: carrinhoDeCompras 
+      itens: carrinhoDeCompras,
+      custos: carrinhoDeVendaCustos
     });
   }
 
@@ -507,6 +508,11 @@
     google.script.run.withSuccessHandler(vendas => {
       vendasGlobais = vendas;
       renderizarTabelaVendas(vendas);
+      
+      // Carrega custos atualizados para manter custosGlobais em sincronia
+      google.script.run.withSuccessHandler(custos => {
+        custosGlobais = custos;
+      }).getCustos();
     }).getVendas();
   }
 
@@ -562,6 +568,10 @@
     document.getElementById('titulo-pagina-venda').innerHTML = 'Registrar Venda';
     document.getElementById('subtitulo-pagina-venda').innerHTML = 'Adicione múltiplos itens ao carrinho do cliente';
 
+    // Reseta o carrinho de custos
+    carrinhoDeVendaCustos = [];
+    atualizarInterfaceCustosVenda();
+
     carregarDadosCompra(); // Carrega selects de clientes/produtos
   }
 
@@ -574,7 +584,64 @@
     document.getElementById('titulo-pagina-venda').innerHTML = 'Histórico de Vendas';
     document.getElementById('subtitulo-pagina-venda').innerHTML = 'Acompanhe e gerencie as transações da sua base';
 
+    // Reseta carrinho de custos
+    carrinhoDeVendaCustos = [];
+    atualizarInterfaceCustosVenda();
+
     carregarListaVendas();
+  }
+
+  // =========================================================
+  // CARRINHO DE CUSTOS DA VENDA
+  // =========================================================
+
+  function adicionarCustoVenda() {
+    const tipo = document.getElementById('custo-tipo-venda').value;
+    const valorStr = document.getElementById('custo-valor-venda').value;
+    const desc = document.getElementById('custo-desc-venda').value.trim();
+    const valor = parseFloat(valorStr);
+
+    if (!tipo) return showToast('Selecione um tipo de custo.', false);
+    if (isNaN(valor) || valor <= 0) return showToast('Informe um valor válido maior que zero.', false);
+
+    carrinhoDeVendaCustos.push({ tipo, valor, desc });
+    atualizarInterfaceCustosVenda();
+
+    // Limpa os campos
+    document.getElementById('custo-valor-venda').value = '';
+    document.getElementById('custo-desc-venda').value = '';
+  }
+
+  function removerCustoVenda(index) {
+    carrinhoDeVendaCustos.splice(index, 1);
+    atualizarInterfaceCustosVenda();
+  }
+
+  function atualizarInterfaceCustosVenda() {
+    const lista = document.getElementById('lista-custos-venda');
+    const totalSpan = document.getElementById('custos-venda-total');
+    if (!lista || !totalSpan) return;
+
+    if (carrinhoDeVendaCustos.length === 0) {
+      lista.innerHTML = '<li style="color: var(--text-muted); font-style: italic;">Nenhum custo adicionado ainda.</li>';
+      totalSpan.textContent = '0.00';
+      return;
+    }
+
+    let html = '';
+    let totalCustos = 0;
+    carrinhoDeVendaCustos.forEach((c, index) => {
+      totalCustos += c.valor;
+      const descLabel = c.desc ? ` <span style="color: var(--text-muted); font-size: 12px;">— ${c.desc}</span>` : '';
+      html += `
+        <li style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed rgba(255,255,255,0.1);">
+          <span><strong style="color: var(--warning);">${c.tipo}</strong>${descLabel}</span>
+          <span style="color: var(--warning); font-weight: 600;">R$ ${c.valor.toFixed(2)} <i class="fa-solid fa-trash" style="color: var(--error); cursor: pointer; margin-left: 12px;" onclick="removerCustoVenda(${index})"></i></span>
+        </li>`;
+    });
+
+    lista.innerHTML = html;
+    totalSpan.textContent = totalCustos.toFixed(2);
   }
 
   function abrirDetalhesVenda(idPedido) {
@@ -602,6 +669,35 @@
       metaContainer.style.display = 'block';
     } else if (metaContainer) {
       metaContainer.style.display = 'none';
+    }
+
+    // Processa e exibe os custos associados a essa venda
+    const containerCustos = document.getElementById('detalhes-venda-custos-container');
+    const tbodyCustos = document.getElementById('corpo-tabela-detalhes-venda-custos');
+    
+    if (containerCustos && tbodyCustos) {
+      // Filtra os custosGlobais buscando os que têm idPedido (coluna c[1]) igual a idPedido
+      const custosDaVenda = custosGlobais.filter(c => c[1] === idPedido);
+      
+      if (custosDaVenda.length > 0) {
+        let htmlCustos = '';
+        custosDaVenda.forEach(c => {
+          const tipo = c[2];
+          const valor = parseReal(c[3]);
+          const desc = c[5] || '-';
+          htmlCustos += `
+            <tr>
+              <td><strong style="color: var(--warning);">${tipo}</strong></td>
+              <td>${desc}</td>
+              <td style="font-weight: 600; color: var(--error);">R$ ${valor.toFixed(2)}</td>
+            </tr>
+          `;
+        });
+        tbodyCustos.innerHTML = htmlCustos;
+        containerCustos.style.display = 'block';
+      } else {
+        containerCustos.style.display = 'none';
+      }
     }
 
     document.getElementById('view-detalhes-venda').style.display = 'block';
@@ -1021,7 +1117,7 @@
       const idCusto = c[0];
       const produto = c[1];
       const tipo = c[2];
-      const valor = parseFloat(c[3]) || 0;
+      const valor = parseReal(c[3]);
       const data = c[4];
       const desc = c[5] || "";
 
@@ -1177,7 +1273,7 @@
       custosFiltrados.forEach(c => {
         const idCusto = c[0];
         const tipo = c[2];
-        const valor = parseFloat(c[3]) || 0;
+        const valor = parseReal(c[3]);
         const data = c[4];
         const desc = c[5] || "";
         
