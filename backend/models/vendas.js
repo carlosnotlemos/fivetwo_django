@@ -19,14 +19,9 @@ function salvarCompra(dados) {
     return [idPedido, item.produto, item.quantidade, item.valorTotal];
   });
 
-  // Calcula a soma de todos os custos vinculados a esta venda e subtrai do total
-  let totalCustos = 0;
-  if (dados.custos && dados.custos.length > 0) {
-    dados.custos.forEach(c => {
-      totalCustos += parseFloat(c.valor) || 0;
-    });
-  }
-  valorTotalPedido -= totalCustos;
+  // Salva o valor BRUTO (soma dos itens + acréscimo/desconto avulso).
+  // Os custos são armazenados separadamente na aba Custos e deduzidos
+  // apenas na exibição do dashboard, preservando o valor original da venda.
   valorTotalPedido += parseFloat(dados.acrescimo) || 0; // Acréscimo/desconto avulso
 
   // Busca o nome do cliente pelo e-mail ou nome na aba Clientes
@@ -145,21 +140,15 @@ function atualizarCompra(dados) {
     return { sucesso: false, mensagem: "Erro: O carrinho está vazio." };
   }
 
-  // 1. Calcula o total de itens
+  // 1. Calcula o total de itens (valor BRUTO — custos são armazenados
+  // separadamente e deduzidos apenas no dashboard)
   let valorTotalPedido = 0;
   const linhasItens = dados.itens.map(item => {
     valorTotalPedido += item.valorTotal;
     return [idPedido, item.produto, item.quantidade, item.valorTotal];
   });
 
-  // 2. Calcula e subtrai a soma dos custos
-  let totalCustos = 0;
-  if (dados.custos && dados.custos.length > 0) {
-    dados.custos.forEach(c => {
-      totalCustos += parseFloat(c.valor) || 0;
-    });
-  }
-  valorTotalPedido -= totalCustos;
+  // 2. Aplica apenas acréscimo/desconto avulso ao total bruto
   valorTotalPedido += parseFloat(dados.acrescimo) || 0; // Acréscimo/desconto avulso
 
   // 3. Busca o nome do cliente pelo e-mail ou nome na aba Clientes

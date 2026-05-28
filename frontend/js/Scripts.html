@@ -541,10 +541,19 @@
       const idPedido = v[0];
       const data = v[1];
       const email = v[2];
-      const valor = v[3];
+      // v[3] é o valor registrado na planilha — exibido diretamente sem subtrair custos
+      // (os custos ficam no painel de detalhes, calculados a partir dos itens)
+      const valorRegistrado = parseReal(v[3]);
       const nomeCliente = v[4] || "";
       const metodoPagamento = v[5] || "Pix";
       const descricaoVenda = v[6] || "";
+
+      const custosDaVenda = custosGlobais.filter(c => c[1] === idPedido);
+      const temCustos = custosDaVenda.length > 0;
+      const tooltipValor = temCustos
+        ? `Há custos vinculados a esta venda. Abra os detalhes para ver o líquido.`
+        : `Valor registrado: R$ ${valorRegistrado.toFixed(2)}`;
+
       html += `
         <tr>
           <td><strong style="color: var(--accent);">${idPedido}</strong></td>
@@ -555,7 +564,10 @@
           </td>
           <td><span class="badge-payment" data-method="${metodoPagamento}">${metodoPagamento}</span></td>
           <td style="font-size: 13px; color: var(--text-muted); max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${descricaoVenda}">${descricaoVenda || '-'}</td>
-          <td style="font-weight: 600; color: var(--success);">R$ ${valor}</td>
+          <td style="font-weight: 600; color: var(--success);" title="${tooltipValor}">
+            R$ ${valorRegistrado.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            ${temCustos ? '<i class="fa-solid fa-circle-info" style="font-size: 11px; color: var(--text-muted); margin-left: 5px;"></i>' : ''}
+          </td>
           <td>
             <button class="btn-icon-action" onclick="abrirDetalhesVenda('${idPedido}')" title="Ver Itens">
               <i class="fa-solid fa-eye"></i>
@@ -710,11 +722,12 @@
     // Processa e exibe os custos associados a essa venda
     const containerCustos = document.getElementById('detalhes-venda-custos-container');
     const tbodyCustos = document.getElementById('corpo-tabela-detalhes-venda-custos');
-    
+    const resumoValoresEl = document.getElementById('detalhes-venda-resumo-valores');
+
+    const custosDaVenda = custosGlobais.filter(c => c[1] === idPedido);
+    const totalCustosDetalhe = custosDaVenda.reduce((acc, c) => acc + parseReal(c[3]), 0);
+
     if (containerCustos && tbodyCustos) {
-      // Filtra os custosGlobais buscando os que têm idPedido (coluna c[1]) igual a idPedido
-      const custosDaVenda = custosGlobais.filter(c => c[1] === idPedido);
-      
       if (custosDaVenda.length > 0) {
         let htmlCustos = '';
         custosDaVenda.forEach(c => {
@@ -736,8 +749,10 @@
       }
     }
 
+    // Oculta o resumo até os itens carregarem (o bruto é calculado a partir dos itens)
+    if (resumoValoresEl) resumoValoresEl.style.display = 'none';
+
     document.getElementById('view-detalhes-venda').style.display = 'block';
-    // Rola para baixo para ver os detalhes se necessário
     document.getElementById('view-detalhes-venda').scrollIntoView({ behavior: 'smooth' });
 
     google.script.run.withSuccessHandler(itens => {
@@ -747,7 +762,10 @@
       }
 
       let html = '';
+      // O bruto é sempre a soma dos subtotais dos itens (fonte de verdade confiável)
+      let valorBrutoItens = 0;
       itens.forEach(it => {
+        valorBrutoItens += parseFloat(it[2]) || 0;
         html += `
           <tr>
             <td>${it[0]}</td>
@@ -757,6 +775,29 @@
         `;
       });
       tbody.innerHTML = html;
+
+      // Calcula o líquido usando o bruto real (soma dos itens) — evita dupla subtração
+      const valorLiquidoDetalhe = valorBrutoItens - totalCustosDetalhe;
+
+      if (resumoValoresEl) {
+        resumoValoresEl.innerHTML = `
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 20px;">
+            <div style="background: rgba(0,0,0,0.15); border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center;">
+              <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Valor Bruto</div>
+              <div style="font-size: 18px; font-weight: 700; color: var(--text-main);">R$ ${valorBrutoItens.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+            </div>
+            <div style="background: rgba(0,0,0,0.15); border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center;">
+              <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Total de Custos</div>
+              <div style="font-size: 18px; font-weight: 700; color: var(--error);">- R$ ${totalCustosDetalhe.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+            </div>
+            <div style="background: rgba(var(--success-rgb, 34,197,94), 0.1); border: 1px solid var(--success); border-radius: 10px; padding: 16px; text-align: center;">
+              <div style="font-size: 11px; color: var(--success); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Valor Líquido</div>
+              <div style="font-size: 22px; font-weight: 800; color: var(--success);">R$ ${valorLiquidoDetalhe.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+            </div>
+          </div>
+        `;
+        resumoValoresEl.style.display = 'block';
+      }
     }).getItensVenda(idPedido);
   }
 
