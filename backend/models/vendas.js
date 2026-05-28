@@ -27,6 +27,7 @@ function salvarCompra(dados) {
     });
   }
   valorTotalPedido -= totalCustos;
+  valorTotalPedido += parseFloat(dados.acrescimo) || 0; // Acréscimo/desconto avulso
 
   // Busca o nome do cliente pelo e-mail ou nome na aba Clientes
   const sheetClientes = ss.getSheetByName("Clientes");
@@ -159,6 +160,7 @@ function atualizarCompra(dados) {
     });
   }
   valorTotalPedido -= totalCustos;
+  valorTotalPedido += parseFloat(dados.acrescimo) || 0; // Acréscimo/desconto avulso
 
   // 3. Busca o nome do cliente pelo e-mail ou nome na aba Clientes
   const sheetClientes = ss.getSheetByName("Clientes");

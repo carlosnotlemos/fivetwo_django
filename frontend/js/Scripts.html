@@ -477,6 +477,7 @@
     const cliente = document.getElementById('compra-cliente').value;
     const metodoPagamento = document.getElementById('compra-pagamento').value;
     const descricaoVenda = document.getElementById('compra-desc').value;
+    const acrescimo = parseFloat(document.getElementById('venda-acrescimo').value) || 0;
 
     if (!cliente || cliente.includes("Carregando")) return showToast("Selecione um cliente para a compra.", false);
     if (carrinhoDeCompras.length === 0) return showToast("Adicione pelo menos um item ao carrinho.", false);
@@ -490,7 +491,8 @@
       metodoPagamento: metodoPagamento,
       descricaoVenda: descricaoVenda,
       itens: carrinhoDeCompras,
-      custos: carrinhoDeVendaCustos
+      custos: carrinhoDeVendaCustos,
+      acrescimo: acrescimo
     };
 
     const metodoBackend = idPedidoEdicao ? 'atualizarCompra' : 'salvarCompra';
@@ -507,6 +509,7 @@
         document.getElementById('compra-cliente').selectedIndex = 0;
         document.getElementById('compra-pagamento').selectedIndex = 0;
         document.getElementById('compra-desc').value = '';
+        document.getElementById('venda-acrescimo').value = '';
         voltarParaListaVendas();
       }
     })[metodoBackend](dadosPayload);
