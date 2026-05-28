@@ -128,3 +128,106 @@ function excluirVenda(idPedido) {
 
   return { sucesso: true, mensagem: "Venda, itens e custos associados removidos com sucesso." };
 }
+
+function atualizarCompra(dados) {
+  const ss = getDb();
+  const sheetCompras = ss.getSheetByName("Compras");
+  const sheetItens = ss.getSheetByName("Compra_Itens");
+  const sheetCustos = ss.getSheetByName("Custos");
+
+  const idPedido = dados.idPedido;
+  if (!idPedido) {
+    return { sucesso: false, mensagem: "Erro: ID do pedido inválido." };
+  }
+
+  if (!dados.itens || dados.itens.length === 0) {
+    return { sucesso: false, mensagem: "Erro: O carrinho está vazio." };
+  }
+
+  // 1. Calcula o total de itens
+  let valorTotalPedido = 0;
+  const linhasItens = dados.itens.map(item => {
+    valorTotalPedido += item.valorTotal;
+    return [idPedido, item.produto, item.quantidade, item.valorTotal];
+  });
+
+  // 2. Calcula e subtrai a soma dos custos
+  let totalCustos = 0;
+  if (dados.custos && dados.custos.length > 0) {
+    dados.custos.forEach(c => {
+      totalCustos += parseFloat(c.valor) || 0;
+    });
+  }
+  valorTotalPedido -= totalCustos;
+
+  // 3. Busca o nome do cliente pelo e-mail ou nome na aba Clientes
+  const sheetClientes = ss.getSheetByName("Clientes");
+  let nomeCliente = "";
+  let emailClienteSalvar = dados.emailCliente || "";
+  if (sheetClientes && sheetClientes.getLastRow() > 1) {
+    const clientes = sheetClientes.getRange(2, 1, sheetClientes.getLastRow() - 1, 2).getValues();
+    const cliente = clientes.find(c => c[1] === dados.emailCliente || c[0] === dados.emailCliente);
+    if (cliente) {
+      nomeCliente = cliente[0];
+      emailClienteSalvar = cliente[1] || "";
+    }
+  }
+
+  // 4. Atualiza o registro mestre na aba Compras
+  const dataCompras = sheetCompras.getDataRange().getValues();
+  let rowIndexCompra = -1;
+  for (let i = 1; i < dataCompras.length; i++) {
+    if (dataCompras[i][0] === idPedido) {
+      rowIndexCompra = i + 1;
+      break;
+    }
+  }
+
+  if (rowIndexCompra === -1) {
+    return { sucesso: false, mensagem: "Erro: Registro da compra não encontrado." };
+  }
+
+  const metodoPagamento = dados.metodoPagamento || "Pix";
+  const descricaoVenda = dados.descricaoVenda || "";
+  const dataCompra = dataCompras[rowIndexCompra - 1][1] || new Date().toLocaleDateString('pt-BR'); // Mantém a data original
+
+  // Atualiza as colunas na aba Compras: [ID do Pedido, Data, E-mail do Cliente, Valor Total do Pedido, Nome do Cliente, Método, Descrição]
+  sheetCompras.getRange(rowIndexCompra, 1, 1, 7).setValues([[idPedido, dataCompra, emailClienteSalvar, valorTotalPedido, nomeCliente, metodoPagamento, descricaoVenda]]);
+
+  // 5. Atualiza os itens na aba Compra_Itens (Deleta os antigos e insere os novos)
+  const dataItens = sheetItens.getDataRange().getValues();
+  for (let i = dataItens.length - 1; i >= 1; i--) {
+    if (dataItens[i][0] === idPedido) {
+      sheetItens.deleteRow(i + 1);
+    }
+  }
+  const startRow = sheetItens.getLastRow() + 1;
+  sheetItens.getRange(startRow, 1, linhasItens.length, 4).setValues(linhasItens);
+
+  // 6. Atualiza os custos na aba Custos (Deleta os antigos e insere os novos)
+  if (sheetCustos) {
+    const dataCustos = sheetCustos.getDataRange().getValues();
+    for (let i = dataCustos.length - 1; i >= 1; i--) {
+      if (dataCustos[i][1] === idPedido) {
+        sheetCustos.deleteRow(i + 1);
+      }
+    }
+
+    if (dados.custos && dados.custos.length > 0) {
+      const dataVenda = dataCompra; // Usa a mesma data da compra original
+      dados.custos.forEach(c => {
+        const idCusto = "CST-" + new Date().getTime() + "-" + Math.floor(Math.random() * 1000);
+        sheetCustos.appendRow([
+          idCusto,
+          idPedido,
+          c.tipo,
+          parseFloat(c.valor),
+          dataVenda,
+          c.desc || ""
+        ]);
+      });
+    }
+  }
+
+  return { sucesso: true, mensagem: `Pedido ${idPedido} atualizado com sucesso!` };
+}
