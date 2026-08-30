@@ -98,11 +98,11 @@ function getRentabilidadeProdutos() {
   });
 
   if (sheetItens && sheetItens.getLastRow() > 1) {
-    const itens = sheetItens.getRange(2, 2, sheetItens.getLastRow() - 1, 3).getValues(); // [Produto, Quantidade, Subtotal]
+    const itens = sheetItens.getRange(2, 1, sheetItens.getLastRow() - 1, 5).getValues();
     itens.forEach(it => {
-      const prodNome = it[0];
-      const qtd = parseDbNum(it[1]);
-      const subtotal = parseDbNum(it[2]);
+      const prodNome = it[1] || it[0];
+      const qtd = parseDbNum(it[3] ?? it[2]);
+      const subtotal = parseDbNum(it[4] ?? it[3]);
       if (faturamentoPorProduto[prodNome] !== undefined) {
         faturamentoPorProduto[prodNome] += subtotal;
         quantidadeVendidaPorProduto[prodNome] += qtd;

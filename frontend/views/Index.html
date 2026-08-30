@@ -32,6 +32,9 @@
       <button class="nav-btn" onclick="showPage('page-produto', this)">
         <i class="fa-solid fa-box-open"></i> Produtos
       </button>
+      <button class="nav-btn" onclick="showPage('page-estoque', this)">
+        <i class="fa-solid fa-warehouse"></i> Estoque
+      </button>
       <button class="nav-btn" onclick="showPage('page-compra', this)">
         <i class="fa-solid fa-cart-shopping"></i> Vendas
       </button>
@@ -268,6 +271,81 @@
         </div>
       </div>
 
+      <div id="page-estoque" class="tab-content">
+        <header class="page-header" style="display: flex; justify-content: space-between; align-items: flex-end;">
+          <div>
+            <h1 id="titulo-pagina-estoque">Controle de Estoque</h1>
+            <p class="page-subtitle" id="subtitulo-pagina-estoque">Gerencie a quantidade por produto e tamanho</p>
+          </div>
+          <button id="btn-novo-estoque" class="prime-btn" onclick="mostrarFormEstoque()">
+            <i class="fa-solid fa-plus"></i> Novo Item
+          </button>
+        </header>
+
+        <div class="glass-card" id="view-lista-estoque">
+          <div class="data-table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Produto</th>
+                  <th>Tamanho</th>
+                  <th>Quantidade</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="corpo-tabela-estoque">
+                <tr>
+                  <td colspan="4" style="text-align:center;">Carregando estoque...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="glass-card" id="view-form-estoque" style="display: none;">
+          <input type="hidden" id="estoque-produto-original">
+          <input type="hidden" id="estoque-tamanho-original">
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Produto</label>
+              <select id="estoque-produto">
+                <option value="" selected disabled>Selecione um produto...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Tamanho</label>
+              <select id="estoque-tamanho">
+                <option value="" selected disabled>Selecione o tamanho...</option>
+                <option value="PP">PP</option>
+                <option value="P">P</option>
+                <option value="M">M</option>
+                <option value="G">G</option>
+                <option value="GG">GG</option>
+                <option value="34">34</option>
+                <option value="36">36</option>
+                <option value="38">38</option>
+                <option value="40">40</option>
+                <option value="42">42</option>
+                <option value="44">44</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Quantidade em Estoque</label>
+              <input type="number" id="estoque-quantidade" min="0" value="0">
+            </div>
+          </div>
+
+          <div class="btn-container" style="justify-content: space-between; margin-top: 20px;">
+            <button class="prime-btn secondary" onclick="voltarParaListaEstoque()">Cancelar</button>
+            <button id="btn-estoque" class="prime-btn" onclick="salvarEstoque()">
+              <div class="spinner"></div><i class="fa-solid fa-floppy-disk btn-icon"></i>
+              <span class="btn-text">Salvar Estoque</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
       <div id="page-compra" class="tab-content">
         <header class="page-header" style="display: flex; justify-content: space-between; align-items: flex-end;">
           <div>
@@ -333,6 +411,23 @@
               <label>Produto</label>
               <select id="compra-produto" onchange="calcularSubtotal()">
                 <option disabled selected>Carregando...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Tamanho</label>
+              <select id="compra-tamanho">
+                <option value="" selected disabled>Selecione</option>
+                <option value="PP">PP</option>
+                <option value="P">P</option>
+                <option value="M">M</option>
+                <option value="G">G</option>
+                <option value="GG">GG</option>
+                <option value="34">34</option>
+                <option value="36">36</option>
+                <option value="38">38</option>
+                <option value="40">40</option>
+                <option value="42">42</option>
+                <option value="44">44</option>
               </select>
             </div>
             <div class="form-group">

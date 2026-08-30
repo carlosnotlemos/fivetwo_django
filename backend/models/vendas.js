@@ -10,13 +10,18 @@ function salvarCompra(dados) {
     return { sucesso: false, mensagem: "Erro: O carrinho está vazio." };
   }
 
+  const resultadoEstoque = debitarEstoquePorVenda(dados.itens);
+  if (!resultadoEstoque.sucesso) {
+    return { sucesso: false, mensagem: resultadoEstoque.mensagem };
+  }
+
   const idPedido = "PED-" + new Date().getTime();
   const dataCompra = new Date().toLocaleDateString('pt-BR');
 
   let valorTotalPedido = 0;
   const linhasItens = dados.itens.map(item => {
     valorTotalPedido += item.valorTotal;
-    return [idPedido, item.produto, item.quantidade, item.valorTotal];
+    return [idPedido, item.produto, item.tamanho || "", item.quantidade, item.valorTotal];
   });
 
   // Salva o valor BRUTO (soma dos itens + acréscimo/desconto avulso).
@@ -45,7 +50,7 @@ function salvarCompra(dados) {
 
   // Salva os itens na aba Compra_Itens
   const startRow = sheetItens.getLastRow() + 1;
-  sheetItens.getRange(startRow, 1, linhasItens.length, 4).setValues(linhasItens);
+  sheetItens.getRange(startRow, 1, linhasItens.length, 5).setValues(linhasItens);
 
   // Salva os custos opcionais lançados junto com a venda
   if (dados.custos && dados.custos.length > 0) {
@@ -80,11 +85,14 @@ function getVendas() {
 
 function getItensVenda(idPedido) {
   const sheet = getDb().getSheetByName("Compra_Itens");
-  if (sheet.getLastRow() < 2) return [];
-  
-  const data = sheet.getRange(2, 1, sheet.getLastRow() - 1, 4).getValues();
-  // Filtra itens pelo ID do Pedido
-  return data.filter(row => row[0] === idPedido).map(row => [row[1], row[2], row[3]]);
+  if (!sheet || sheet.getLastRow() < 2) return [];
+
+  const data = sheet.getRange(2, 1, sheet.getLastRow() - 1, 5).getValues();
+  return data.filter(row => row[0] === idPedido).map(row => {
+    const quantidade = Number(row[3] ?? row[2] ?? 0);
+    const subtotal = Number(row[4] ?? row[3] ?? 0);
+    return [row[1], quantidade, subtotal, row[2] || ""];
+  });
 }
 
 // 4. DELETE (Excluir)
@@ -92,6 +100,17 @@ function excluirVenda(idPedido) {
   const ss = getDb();
   const sheetCompras = ss.getSheetByName("Compras");
   const sheetItens = ss.getSheetByName("Compra_Itens");
+
+  const itensDaVenda = getItensVenda(idPedido).map(item => ({
+    produto: item[0],
+    tamanho: item[3] || "",
+    quantidade: Number(item[1] || 0)
+  }));
+
+  const restaurado = restaurarEstoquePorVenda(itensDaVenda);
+  if (!restaurado.sucesso) {
+    return { sucesso: false, mensagem: restaurado.mensagem };
+  }
 
   // 1. Remover da aba Compras
   const dataCompras = sheetCompras.getDataRange().getValues();
@@ -140,12 +159,28 @@ function atualizarCompra(dados) {
     return { sucesso: false, mensagem: "Erro: O carrinho está vazio." };
   }
 
+  const itensAnteriores = getItensVenda(idPedido).map(item => ({
+    produto: item[0],
+    tamanho: item[3] || "",
+    quantidade: Number(item[1] || 0)
+  }));
+
+  const restaurado = restaurarEstoquePorVenda(itensAnteriores);
+  if (!restaurado.sucesso) {
+    return { sucesso: false, mensagem: restaurado.mensagem };
+  }
+
+  const estoqueResultado = debitarEstoquePorVenda(dados.itens);
+  if (!estoqueResultado.sucesso) {
+    return { sucesso: false, mensagem: estoqueResultado.mensagem };
+  }
+
   // 1. Calcula o total de itens (valor BRUTO — custos são armazenados
   // separadamente e deduzidos apenas no dashboard)
   let valorTotalPedido = 0;
   const linhasItens = dados.itens.map(item => {
     valorTotalPedido += item.valorTotal;
-    return [idPedido, item.produto, item.quantidade, item.valorTotal];
+    return [idPedido, item.produto, item.tamanho || "", item.quantidade, item.valorTotal];
   });
 
   // 2. Aplica apenas acréscimo/desconto avulso ao total bruto
@@ -193,7 +228,7 @@ function atualizarCompra(dados) {
     }
   }
   const startRow = sheetItens.getLastRow() + 1;
-  sheetItens.getRange(startRow, 1, linhasItens.length, 4).setValues(linhasItens);
+  sheetItens.getRange(startRow, 1, linhasItens.length, 5).setValues(linhasItens);
 
   // 6. Atualiza os custos na aba Custos (Deleta os antigos e insere os novos)
   if (sheetCustos) {
