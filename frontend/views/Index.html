@@ -275,7 +275,7 @@
         <header class="page-header" style="display: flex; justify-content: space-between; align-items: flex-end;">
           <div>
             <h1 id="titulo-pagina-estoque">Controle de Estoque</h1>
-            <p class="page-subtitle" id="subtitulo-pagina-estoque">Gerencie a quantidade por produto e tamanho</p>
+            <p class="page-subtitle" id="subtitulo-pagina-estoque">Gerencie a quantidade por produto</p>
           </div>
           <button id="btn-novo-estoque" class="prime-btn" onclick="mostrarFormEstoque()">
             <i class="fa-solid fa-plus"></i> Novo Item
@@ -288,14 +288,13 @@
               <thead>
                 <tr>
                   <th>Produto</th>
-                  <th>Tamanho</th>
                   <th>Quantidade</th>
                   <th>Ações</th>
                 </tr>
               </thead>
               <tbody id="corpo-tabela-estoque">
                 <tr>
-                  <td colspan="4" style="text-align:center;">Carregando estoque...</td>
+                  <td colspan="3" style="text-align:center;">Carregando estoque...</td>
                 </tr>
               </tbody>
             </table>
@@ -304,30 +303,12 @@
 
         <div class="glass-card" id="view-form-estoque" style="display: none;">
           <input type="hidden" id="estoque-produto-original">
-          <input type="hidden" id="estoque-tamanho-original">
 
           <div class="form-grid">
             <div class="form-group">
               <label>Produto</label>
               <select id="estoque-produto">
                 <option value="" selected disabled>Selecione um produto...</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Tamanho</label>
-              <select id="estoque-tamanho">
-                <option value="" selected disabled>Selecione o tamanho...</option>
-                <option value="PP">PP</option>
-                <option value="P">P</option>
-                <option value="M">M</option>
-                <option value="G">G</option>
-                <option value="GG">GG</option>
-                <option value="34">34</option>
-                <option value="36">36</option>
-                <option value="38">38</option>
-                <option value="40">40</option>
-                <option value="42">42</option>
-                <option value="44">44</option>
               </select>
             </div>
             <div class="form-group">
@@ -411,23 +392,6 @@
               <label>Produto</label>
               <select id="compra-produto" onchange="calcularSubtotal()">
                 <option disabled selected>Carregando...</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Tamanho</label>
-              <select id="compra-tamanho">
-                <option value="" selected disabled>Selecione</option>
-                <option value="PP">PP</option>
-                <option value="P">P</option>
-                <option value="M">M</option>
-                <option value="G">G</option>
-                <option value="GG">GG</option>
-                <option value="34">34</option>
-                <option value="36">36</option>
-                <option value="38">38</option>
-                <option value="40">40</option>
-                <option value="42">42</option>
-                <option value="44">44</option>
               </select>
             </div>
             <div class="form-group">

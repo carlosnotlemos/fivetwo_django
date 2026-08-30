@@ -21,7 +21,7 @@ function salvarCompra(dados) {
   let valorTotalPedido = 0;
   const linhasItens = dados.itens.map(item => {
     valorTotalPedido += item.valorTotal;
-    return [idPedido, item.produto, item.tamanho || "", item.quantidade, item.valorTotal];
+    return [idPedido, item.produto, item.quantidade, item.valorTotal];
   });
 
   // Salva o valor BRUTO (soma dos itens + acréscimo/desconto avulso).
@@ -50,7 +50,7 @@ function salvarCompra(dados) {
 
   // Salva os itens na aba Compra_Itens
   const startRow = sheetItens.getLastRow() + 1;
-  sheetItens.getRange(startRow, 1, linhasItens.length, 5).setValues(linhasItens);
+  sheetItens.getRange(startRow, 1, linhasItens.length, 4).setValues(linhasItens);
 
   // Salva os custos opcionais lançados junto com a venda
   if (dados.custos && dados.custos.length > 0) {
@@ -86,13 +86,10 @@ function getVendas() {
 function getItensVenda(idPedido) {
   const sheet = getDb().getSheetByName("Compra_Itens");
   if (!sheet || sheet.getLastRow() < 2) return [];
-
-  const data = sheet.getRange(2, 1, sheet.getLastRow() - 1, 5).getValues();
-  return data.filter(row => row[0] === idPedido).map(row => {
-    const quantidade = Number(row[3] ?? row[2] ?? 0);
-    const subtotal = Number(row[4] ?? row[3] ?? 0);
-    return [row[1], quantidade, subtotal, row[2] || ""];
-  });
+  
+  const data = sheet.getRange(2, 1, sheet.getLastRow() - 1, 4).getValues();
+  // Filtra itens pelo ID do Pedido e retorna [Produto, Quantidade, Subtotal]
+  return data.filter(row => row[0] === idPedido).map(row => [row[1], row[2], row[3]]);
 }
 
 // 4. DELETE (Excluir)
@@ -103,7 +100,6 @@ function excluirVenda(idPedido) {
 
   const itensDaVenda = getItensVenda(idPedido).map(item => ({
     produto: item[0],
-    tamanho: item[3] || "",
     quantidade: Number(item[1] || 0)
   }));
 
@@ -161,7 +157,6 @@ function atualizarCompra(dados) {
 
   const itensAnteriores = getItensVenda(idPedido).map(item => ({
     produto: item[0],
-    tamanho: item[3] || "",
     quantidade: Number(item[1] || 0)
   }));
 
@@ -180,7 +175,7 @@ function atualizarCompra(dados) {
   let valorTotalPedido = 0;
   const linhasItens = dados.itens.map(item => {
     valorTotalPedido += item.valorTotal;
-    return [idPedido, item.produto, item.tamanho || "", item.quantidade, item.valorTotal];
+    return [idPedido, item.produto, item.quantidade, item.valorTotal];
   });
 
   // 2. Aplica apenas acréscimo/desconto avulso ao total bruto
@@ -228,7 +223,7 @@ function atualizarCompra(dados) {
     }
   }
   const startRow = sheetItens.getLastRow() + 1;
-  sheetItens.getRange(startRow, 1, linhasItens.length, 5).setValues(linhasItens);
+  sheetItens.getRange(startRow, 1, linhasItens.length, 4).setValues(linhasItens);
 
   // 6. Atualiza os custos na aba Custos (Deleta os antigos e insere os novos)
   if (sheetCustos) {

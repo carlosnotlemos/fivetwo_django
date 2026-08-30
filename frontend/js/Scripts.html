@@ -217,20 +217,17 @@
 
   function adicionarAoCarrinho() {
     const produtoNome = document.getElementById('compra-produto').value;
-    const tamanho = document.getElementById('compra-tamanho').value;
     const qtd = parseInt(document.getElementById('compra-qtd').value);
     const subtotalStr = document.getElementById('compra-subtotal').value;
     const subtotal = parseFloat(subtotalStr);
 
     if (!produtoNome || produtoNome === "") return showToast("Por favor, selecione um produto primeiro.", false);
-    if (!tamanho || tamanho === "") return showToast("Selecione o tamanho da peça antes de adicionar ao carrinho.", false);
     if (isNaN(subtotal) || subtotal <= 0) return showToast("Quantidade ou valor inválido.", false);
 
-    carrinhoDeCompras.push({ produto: produtoNome, tamanho: tamanho, quantidade: qtd, valorTotal: subtotal });
+    carrinhoDeCompras.push({ produto: produtoNome, quantidade: qtd, valorTotal: subtotal });
     atualizarInterfaceCarrinho();
 
     document.getElementById('compra-produto').selectedIndex = 0;
-    document.getElementById('compra-tamanho').selectedIndex = 0;
     document.getElementById('compra-qtd').value = 1;
     document.getElementById('compra-subtotal').value = '';
   }
@@ -255,10 +252,9 @@
 
     carrinhoDeCompras.forEach((item, index) => {
       totalGeral += item.valorTotal;
-      const tamanhoLabel = item.tamanho ? ` / ${item.tamanho}` : '';
       html += `
         <li style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed rgba(255,255,255,0.1);">
-          <span><strong style="color: var(--cyan);">${item.quantidade}x</strong> ${item.produto}${tamanhoLabel}</span>
+          <span><strong style="color: var(--cyan);">${item.quantidade}x</strong> ${item.produto}</span>
           <span>R$ ${item.valorTotal.toFixed(2)} <i class="fa-solid fa-trash" style="color: var(--error); cursor: pointer; margin-left: 15px;" onclick="removerDoCarrinho(${index})"></i></span>
         </li>`;
     });
@@ -504,14 +500,12 @@
 
     if (isEdit) {
       document.getElementById('titulo-pagina-estoque').innerHTML = 'Editar Item de Estoque';
-      document.getElementById('subtitulo-pagina-estoque').innerHTML = 'Atualize a quantidade disponível para esse produto e tamanho';
+      document.getElementById('subtitulo-pagina-estoque').innerHTML = 'Atualize a quantidade disponível para esse produto';
     } else {
       document.getElementById('titulo-pagina-estoque').innerHTML = 'Cadastrar Estoque';
-      document.getElementById('subtitulo-pagina-estoque').innerHTML = 'Defina a quantidade disponível por modelo e tamanho';
+      document.getElementById('subtitulo-pagina-estoque').innerHTML = 'Defina a quantidade disponível por produto';
       document.getElementById('estoque-produto-original').value = '';
-      document.getElementById('estoque-tamanho-original').value = '';
       document.getElementById('estoque-produto').value = '';
-      document.getElementById('estoque-tamanho').value = '';
       document.getElementById('estoque-quantidade').value = 0;
     }
   }
@@ -521,25 +515,23 @@
     document.getElementById('view-form-estoque').style.display = 'none';
     document.getElementById('btn-novo-estoque').style.display = 'block';
     document.getElementById('titulo-pagina-estoque').innerHTML = 'Controle de Estoque';
-    document.getElementById('subtitulo-pagina-estoque').innerHTML = 'Gerencie a quantidade por produto e tamanho';
+    document.getElementById('subtitulo-pagina-estoque').innerHTML = 'Gerencie a quantidade por produto';
     carregarListaEstoque();
   }
 
   function salvarEstoque() {
     const dados = {
       produto: document.getElementById('estoque-produto').value,
-      tamanho: document.getElementById('estoque-tamanho').value,
       quantidade: document.getElementById('estoque-quantidade').value,
-      produtoOriginal: document.getElementById('estoque-produto-original').value,
-      tamanhoOriginal: document.getElementById('estoque-tamanho-original').value
+      produtoOriginal: document.getElementById('estoque-produto-original').value
     };
 
-    if (!dados.produto || !dados.tamanho) return showToast('Selecione o produto e o tamanho.', false);
+    if (!dados.produto) return showToast('Selecione o produto.', false);
     if (isNaN(parseInt(dados.quantidade, 10)) || parseInt(dados.quantidade, 10) < 0) return showToast('Informe uma quantidade válida.', false);
 
     setLoading('btn-estoque', true, 'Salvar Estoque');
 
-    const metodoBackend = dados.produtoOriginal && dados.tamanhoOriginal ? 'atualizarEstoqueItem' : 'salvarEstoqueItem';
+    const metodoBackend = dados.produtoOriginal ? 'atualizarEstoqueItem' : 'salvarEstoqueItem';
 
     google.script.run.withSuccessHandler(res => {
       showToast(res.mensagem, res.sucesso);
@@ -555,23 +547,21 @@
     if (!item) return;
 
     document.getElementById('estoque-produto-original').value = item[0];
-    document.getElementById('estoque-tamanho-original').value = item[1];
 
     const selectProduto = document.getElementById('estoque-produto');
     selectProduto.innerHTML = '<option value="" selected disabled>Selecione um produto...</option>' +
       produtosGlobais.map(p => `<option value="${p[0]}" ${p[0] === item[0] ? 'selected' : ''}>${p[0]}</option>`).join('');
-    document.getElementById('estoque-tamanho').value = item[1];
-    document.getElementById('estoque-quantidade').value = item[2];
+    document.getElementById('estoque-quantidade').value = item[1];
 
     mostrarFormEstoque(true);
   }
 
-  function confirmarExcluirEstoque(produto, tamanho) {
-    if (confirm(`Tem certeza que deseja remover o item do estoque para ${produto} / ${tamanho}?`)) {
+  function confirmarExcluirEstoque(produto) {
+    if (confirm(`Tem certeza que deseja remover o item do estoque para ${produto}?`)) {
       google.script.run.withSuccessHandler(res => {
         showToast(res.mensagem, res.sucesso);
         carregarListaEstoque();
-      }).excluirEstoqueItem(produto, tamanho);
+      }).excluirEstoqueItem(produto);
     }
   }
 
@@ -580,7 +570,7 @@
     if (!tbody) return;
 
     if (estoque.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--text-muted); padding: 30px;">Nenhum item em estoque cadastrado.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color: var(--text-muted); padding: 30px;">Nenhum item em estoque cadastrado.</td></tr>';
       return;
     }
 
@@ -589,13 +579,12 @@
       html += `
         <tr>
           <td><strong style="color: var(--text-main);">${item[0]}</strong></td>
-          <td>${item[1]}</td>
-          <td style="font-weight: 700; color: ${parseInt(item[2], 10) > 0 ? 'var(--success)' : 'var(--error)'};">${item[2]}</td>
+          <td style="font-weight: 700; color: ${parseInt(item[1], 10) > 0 ? 'var(--success)' : 'var(--error)'};">${item[1]}</td>
           <td>
             <button class="btn-icon-action" onclick="abrirEdicaoEstoque(${index})" title="Editar">
               <i class="fa-solid fa-pen-to-square"></i>
             </button>
-            <button class="btn-icon-action" onclick="confirmarExcluirEstoque('${item[0]}', '${item[1]}')" title="Excluir" style="color: var(--error); margin-left: 10px;">
+            <button class="btn-icon-action" onclick="confirmarExcluirEstoque('${item[0]}')" title="Excluir" style="color: var(--error); margin-left: 10px;">
               <i class="fa-solid fa-trash"></i>
             </button>
           </td>
@@ -739,7 +728,6 @@
     // Limpa campos comuns
     document.getElementById('compra-cliente').selectedIndex = 0;
     document.getElementById('compra-pagamento').selectedIndex = 0;
-    document.getElementById('compra-tamanho').selectedIndex = 0;
     document.getElementById('compra-desc').value = '';
 
     carregarDadosCompra(); // Carrega selects de clientes/produtos
@@ -767,7 +755,6 @@
     // Limpa campos comuns
     document.getElementById('compra-cliente').selectedIndex = 0;
     document.getElementById('compra-pagamento').selectedIndex = 0;
-    document.getElementById('compra-tamanho').selectedIndex = 0;
     document.getElementById('compra-desc').value = '';
 
     carregarListaVendas();
@@ -1010,7 +997,6 @@
     google.script.run.withSuccessHandler(itens => {
       carrinhoDeCompras = itens.map(it => ({
         produto: it[0],
-        tamanho: it[3] || "",
         quantidade: parseInt(it[1]),
         valorTotal: parseFloat(it[2])
       }));
