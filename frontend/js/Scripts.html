@@ -152,7 +152,9 @@
     if (pageId === 'page-campanha') renderizarTabelaCampanhas(campanhasGlobais);
     if (pageId === 'page-cliente') renderizarTabelaClientes(clientesGlobais);
     if (pageId === 'page-produto') renderizarTabelaProdutos(produtosGlobais);
-    if (pageId === 'page-estoque') renderizarTabelaEstoque(estoqueGlobais);
+    if (pageId === 'page-estoque') {
+      carregarListaEstoque();
+    }
     if (pageId === 'page-compra') renderizarTabelaVendas(vendasGlobais);
   }
 
@@ -489,18 +491,21 @@
     }).getEstoque();
   }
 
-  function mostrarFormEstoque(isEdit = false) {
+  function mostrarFormEstoque(isEdit = false, produtoSelecionado = '') {
     document.getElementById('view-lista-estoque').style.display = 'none';
     document.getElementById('view-form-estoque').style.display = 'block';
     document.getElementById('btn-novo-estoque').style.display = 'none';
 
     const selectProduto = document.getElementById('estoque-produto');
     selectProduto.innerHTML = '<option value="" selected disabled>Selecione um produto...</option>' +
-      produtosGlobais.map(p => `<option value="${p[0]}">${p[0]}</option>`).join('');
+      produtosGlobais.map(p => `<option value="${p[0]}" ${p[0] === produtoSelecionado ? 'selected' : ''}>${p[0]}</option>`).join('');
 
     if (isEdit) {
       document.getElementById('titulo-pagina-estoque').innerHTML = 'Editar Item de Estoque';
       document.getElementById('subtitulo-pagina-estoque').innerHTML = 'Atualize a quantidade disponível para esse produto';
+      if (produtoSelecionado) {
+        selectProduto.value = produtoSelecionado;
+      }
     } else {
       document.getElementById('titulo-pagina-estoque').innerHTML = 'Cadastrar Estoque';
       document.getElementById('subtitulo-pagina-estoque').innerHTML = 'Defina a quantidade disponível por produto';
@@ -547,13 +552,9 @@
     if (!item) return;
 
     document.getElementById('estoque-produto-original').value = item[0];
-
-    const selectProduto = document.getElementById('estoque-produto');
-    selectProduto.innerHTML = '<option value="" selected disabled>Selecione um produto...</option>' +
-      produtosGlobais.map(p => `<option value="${p[0]}" ${p[0] === item[0] ? 'selected' : ''}>${p[0]}</option>`).join('');
     document.getElementById('estoque-quantidade').value = item[1];
 
-    mostrarFormEstoque(true);
+    mostrarFormEstoque(true, item[0]);
   }
 
   function confirmarExcluirEstoque(produto) {
@@ -631,6 +632,13 @@
         document.getElementById('compra-pagamento').selectedIndex = 0;
         document.getElementById('compra-desc').value = '';
         document.getElementById('venda-acrescimo').value = '';
+
+        // Atualiza o estoque imediatamente, sem exigir reload da página.
+        google.script.run.withSuccessHandler(estoque => {
+          estoqueGlobais = estoque || [];
+          renderizarTabelaEstoque(estoqueGlobais);
+        }).getEstoque();
+
         voltarParaListaVendas();
       }
     })[metodoBackend](dadosPayload);
