@@ -1,7 +1,16 @@
+function normalizarRegistrosEstoque(registros) {
+  return (registros || [])
+    .filter(row => row && (String(row[0] || "").trim() !== "" || String(row[1] || "").trim() !== ""))
+    .map(row => [String(row[0] || "").trim(), parseInt(row[1], 10) || 0])
+    .filter(row => row[0] !== "");
+}
+
 function getEstoque() {
   const sheet = getDb().getSheetByName("Estoque");
   if (!sheet || sheet.getLastRow() < 2) return [];
-  return sheet.getRange(2, 1, sheet.getLastRow() - 1, 2).getDisplayValues();
+
+  const dados = sheet.getDataRange().getValues();
+  return normalizarRegistrosEstoque(dados.slice(1)).map(([produto, quantidade]) => [produto, quantidade]);
 }
 
 function ajustarEstoquePorItens(itens, operacao) {
@@ -10,7 +19,7 @@ function ajustarEstoquePorItens(itens, operacao) {
     return { sucesso: false, mensagem: "Erro: a aba de estoque ainda não foi cadastrada." };
   }
 
-  const registros = sheet.getRange(2, 1, sheet.getLastRow() - 1, 2).getValues();
+  const registros = normalizarRegistrosEstoque(sheet.getDataRange().getValues().slice(1));
   const itensSemEstoque = [];
 
   itens.forEach(item => {
@@ -41,7 +50,11 @@ function ajustarEstoquePorItens(itens, operacao) {
     return { sucesso: false, mensagem: `Estoque insuficiente para: ${itensSemEstoque.join(', ')}.` };
   }
 
-  sheet.getRange(2, 1, registros.length, 2).setValues(registros);
+  if (registros.length > 0) {
+    sheet.getRange(2, 1, Math.max(sheet.getLastRow() - 1, 1), Math.max(sheet.getLastColumn(), 2)).clearContent();
+    sheet.getRange(2, 1, registros.length, 2).setValues(registros);
+  }
+
   return { sucesso: true, mensagem: "Estoque atualizado com sucesso." };
 }
 
@@ -65,7 +78,7 @@ function salvarEstoqueItem(dados) {
     return { sucesso: false, mensagem: "Erro: a aba de estoque não foi configurada." };
   }
 
-  const registros = sheet.getRange(2, 1, Math.max(sheet.getLastRow() - 1, 1), 2).getValues();
+  const registros = normalizarRegistrosEstoque(sheet.getDataRange().getValues().slice(1));
   const indice = registros.findIndex(row => String(row[0]).trim() === produto);
 
   if (indice !== -1) {

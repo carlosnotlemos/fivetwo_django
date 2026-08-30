@@ -27,6 +27,37 @@ function abrirPainel() {
   SpreadsheetApp.getUi().showModalDialog(html, ' ');
 }
 
+function normalizarEstruturaEstoque(sheet) {
+  if (!sheet) return;
+
+  const ultimaColuna = sheet.getLastColumn();
+  if (ultimaColuna > 2) {
+    sheet.deleteColumns(3, ultimaColuna - 2);
+  }
+
+  if (sheet.getLastColumn() < 2) {
+    sheet.insertColumnsAfter(1, 2 - sheet.getLastColumn());
+  }
+
+  const cabecalho = sheet.getRange(1, 1, 1, 2).getValues()[0];
+  if (String(cabecalho[0] || '').trim() !== 'Produto' || String(cabecalho[1] || '').trim() !== 'Quantidade em Estoque') {
+    sheet.getRange(1, 1, 1, 2).setValues([['Produto', 'Quantidade em Estoque']]);
+  }
+
+  const qtdLinhas = sheet.getLastRow();
+  if (qtdLinhas > 1) {
+    const dados = sheet.getRange(2, 1, qtdLinhas - 1, 2).getValues();
+    const dadosValidos = dados.filter(linha => linha.some(valor => String(valor || '').trim() !== ''));
+
+    if (dadosValidos.length !== dados.length) {
+      sheet.getRange(2, 1, qtdLinhas - 1, 2).clearContent();
+      if (dadosValidos.length > 0) {
+        sheet.getRange(2, 1, dadosValidos.length, 2).setValues(dadosValidos);
+      }
+    }
+  }
+}
+
 // 1. Configuração Inicial
 function configurarPlanilhas() {
   const ss = getDb();
@@ -50,6 +81,10 @@ function configurarPlanilhas() {
       sheet.appendRow(cabecalhos);
       sheet.getRange("A1:Z1").setFontWeight("bold").setBackground("#f3f3f3");
       sheet.setFrozenRows(1);
+    }
+
+    if (nome === 'Estoque') {
+      normalizarEstruturaEstoque(sheet);
     }
   }
   return "Banco de dados relacional atualizado com sucesso!";
