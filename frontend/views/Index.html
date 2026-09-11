@@ -315,9 +315,8 @@
           <div class="form-grid">
             <div class="form-group">
               <label>Produto</label>
-              <select id="estoque-produto">
-                <option value="" selected disabled>Selecione um produto...</option>
-              </select>
+              <input type="text" id="estoque-produto" list="lista-produtos-estoque" placeholder="Digite para pesquisar o produto..." autocomplete="off">
+              <datalist id="lista-produtos-estoque"></datalist>
             </div>
             <div class="form-group">
               <label>Quantidade em Estoque</label>

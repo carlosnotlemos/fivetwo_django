@@ -488,15 +488,18 @@
     tbody.innerHTML = html;
   }
 
+  function popularDatalistEstoque() {
+    const datalist = document.getElementById('lista-produtos-estoque');
+    if (datalist) {
+      datalist.innerHTML = (produtosGlobais || []).map(p => `<option value="${p[0]}">`).join('');
+    }
+  }
+
   function carregarListaEstoque() {
     google.script.run.withSuccessHandler(estoque => {
       estoqueGlobais = estoque;
       renderizarTabelaEstoque(estoque);
-      const select = document.getElementById('estoque-produto');
-      if (select) {
-        select.innerHTML = '<option value="" selected disabled>Selecione um produto...</option>' +
-          produtosGlobais.map(p => `<option value="${p[0]}">${p[0]}</option>`).join('');
-      }
+      popularDatalistEstoque();
     }).getEstoque();
   }
 
@@ -505,21 +508,28 @@
     document.getElementById('view-form-estoque').style.display = 'block';
     document.getElementById('btn-novo-estoque').style.display = 'none';
 
-    const selectProduto = document.getElementById('estoque-produto');
-    selectProduto.innerHTML = '<option value="" selected disabled>Selecione um produto...</option>' +
-      produtosGlobais.map(p => `<option value="${p[0]}" ${p[0] === produtoSelecionado ? 'selected' : ''}>${p[0]}</option>`).join('');
+    popularDatalistEstoque();
+
+    const inputProduto = document.getElementById('estoque-produto');
 
     if (isEdit) {
       document.getElementById('titulo-pagina-estoque').innerHTML = 'Editar Item de Estoque';
       document.getElementById('subtitulo-pagina-estoque').innerHTML = 'Atualize a quantidade disponível para esse produto';
-      if (produtoSelecionado) {
-        selectProduto.value = produtoSelecionado;
+      if (inputProduto) {
+        inputProduto.value = produtoSelecionado || '';
+        inputProduto.readOnly = true;
+        inputProduto.style.opacity = '0.7';
       }
     } else {
       document.getElementById('titulo-pagina-estoque').innerHTML = 'Cadastrar Estoque';
       document.getElementById('subtitulo-pagina-estoque').innerHTML = 'Defina a quantidade disponível por produto';
       document.getElementById('estoque-produto-original').value = '';
-      document.getElementById('estoque-produto').value = '';
+      if (inputProduto) {
+        inputProduto.value = '';
+        inputProduto.readOnly = false;
+        inputProduto.style.opacity = '1';
+        setTimeout(() => inputProduto.focus(), 100);
+      }
       document.getElementById('estoque-quantidade').value = 0;
     }
   }
@@ -534,13 +544,23 @@
   }
 
   function salvarEstoque() {
+    const produtoDigitado = (document.getElementById('estoque-produto').value || '').trim();
     const dados = {
-      produto: document.getElementById('estoque-produto').value,
+      produto: produtoDigitado,
       quantidade: document.getElementById('estoque-quantidade').value,
       produtoOriginal: document.getElementById('estoque-produto-original').value
     };
 
-    if (!dados.produto) return showToast('Selecione o produto.', false);
+    if (!dados.produto) return showToast('Selecione ou digite um produto.', false);
+
+    // Validação: garante que o produto existe no catálogo de produtos
+    const prodCatalogado = (produtosGlobais || []).find(p => p[0].trim().toLowerCase() === dados.produto.toLowerCase());
+    if (!prodCatalogado) {
+      return showToast(`O produto "${dados.produto}" não foi encontrado no catálogo. Cadastre-o primeiro na aba Produtos.`, false);
+    }
+    // Normaliza para o nome oficial cadastrado no catálogo
+    dados.produto = prodCatalogado[0];
+
     if (isNaN(parseInt(dados.quantidade, 10)) || parseInt(dados.quantidade, 10) < 0) return showToast('Informe uma quantidade válida.', false);
 
     setLoading('btn-estoque', true, 'Salvar Estoque');
