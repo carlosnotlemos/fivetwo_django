@@ -35,6 +35,9 @@
       <button class="nav-btn" onclick="showPage('page-estoque', this)">
         <i class="fa-solid fa-warehouse"></i> Estoque
       </button>
+      <button class="nav-btn" id="nav-btn-estoque-historico" onclick="showPage('page-estoque-historico', this)">
+        <i class="fa-solid fa-clock-rotate-left"></i> Histórico Estoque
+      </button>
       <button class="nav-btn" onclick="showPage('page-compra', this)">
         <i class="fa-solid fa-cart-shopping"></i> Vendas
       </button>
@@ -277,9 +280,14 @@
             <h1 id="titulo-pagina-estoque">Controle de Estoque</h1>
             <p class="page-subtitle" id="subtitulo-pagina-estoque">Gerencie a quantidade por produto</p>
           </div>
-          <button id="btn-novo-estoque" class="prime-btn" onclick="mostrarFormEstoque()">
-            <i class="fa-solid fa-plus"></i> Novo Item
-          </button>
+          <div style="display: flex; gap: 10px;">
+            <button class="prime-btn secondary" onclick="irParaHistoricoEstoque()">
+              <i class="fa-solid fa-clock-rotate-left"></i> Ver Histórico
+            </button>
+            <button id="btn-novo-estoque" class="prime-btn" onclick="mostrarFormEstoque()">
+              <i class="fa-solid fa-plus"></i> Novo Item
+            </button>
+          </div>
         </header>
 
         <div class="glass-card" id="view-lista-estoque">
@@ -323,6 +331,74 @@
               <div class="spinner"></div><i class="fa-solid fa-floppy-disk btn-icon"></i>
               <span class="btn-text">Salvar Estoque</span>
             </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="page-estoque-historico" class="tab-content">
+        <header class="page-header" style="display: flex; justify-content: space-between; align-items: flex-end;">
+          <div>
+            <h1 id="titulo-pagina-estoque-historico">Histórico de Movimentações</h1>
+            <p class="page-subtitle" id="subtitulo-pagina-estoque-historico">Extrato detalhado de entradas, saídas, vendas e ajustes</p>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button class="prime-btn secondary" id="btn-atualizar-historico-estoque" onclick="recarregarHistoricoEstoque(this)">
+              <i class="fa-solid fa-arrows-rotate"></i> Atualizar
+            </button>
+            <button class="prime-btn" onclick="voltarParaEstoquePrincipal()">
+              <i class="fa-solid fa-warehouse"></i> Saldo Atual
+            </button>
+          </div>
+        </header>
+
+        <!-- Filtros Rápidos -->
+        <div class="glass-card" style="margin-bottom: 20px; padding: 18px 24px;">
+          <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end;">
+            <div style="flex: 1; min-width: 200px;">
+              <label style="font-size: 12px; color: var(--text-muted); margin-bottom: 6px; display: block; font-weight: 500;">Filtrar por Produto</label>
+              <select id="filtro-historico-produto" onchange="filtrarHistoricoEstoque()" style="width: 100%;">
+                <option value="">Todos os Produtos</option>
+              </select>
+            </div>
+            <div style="flex: 1; min-width: 180px;">
+              <label style="font-size: 12px; color: var(--text-muted); margin-bottom: 6px; display: block; font-weight: 500;">Tipo de Operação</label>
+              <select id="filtro-historico-tipo" onchange="filtrarHistoricoEstoque()" style="width: 100%;">
+                <option value="">Todos os Tipos</option>
+                <option value="Entrada">Entradas / Reposições</option>
+                <option value="Saída">Saídas (Vendas)</option>
+                <option value="Estorno">Estornos / Devoluções</option>
+                <option value="Ajuste">Ajustes Manuais</option>
+                <option value="Exclusão">Exclusões</option>
+              </select>
+            </div>
+            <div style="flex: 1.5; min-width: 220px;">
+              <label style="font-size: 12px; color: var(--text-muted); margin-bottom: 6px; display: block; font-weight: 500;">Buscar (Pedido / Obs)</label>
+              <input type="text" id="filtro-historico-busca" oninput="filtrarHistoricoEstoque()" placeholder="Digite pedido ou termo..." style="width: 100%;">
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-card">
+          <div class="data-table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Data/Hora</th>
+                  <th>Produto</th>
+                  <th>Tipo</th>
+                  <th>Quantidade</th>
+                  <th>Saldo Anterior</th>
+                  <th>Saldo Novo</th>
+                  <th>Referência</th>
+                  <th>Observação</th>
+                </tr>
+              </thead>
+              <tbody id="corpo-tabela-estoque-historico">
+                <tr>
+                  <td colspan="8" style="text-align:center;">Carregando histórico...</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

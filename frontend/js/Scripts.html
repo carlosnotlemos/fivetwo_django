@@ -11,6 +11,7 @@
     clientesGlobais = state.clientes;
     produtosGlobais = state.produtos;
     estoqueGlobais = state.estoque || [];
+    historicoEstoqueGlobais = state.historicoEstoque || [];
     vendasGlobais = state.vendas;
     custosGlobais = state.custos || [];
     rentabilidadeGlobais = state.rentabilidade || [];
@@ -34,6 +35,8 @@
     renderizarTabelaClientes(clientesGlobais);
     renderizarTabelaProdutos(produtosGlobais);
     renderizarTabelaEstoque(estoqueGlobais);
+    renderizarTabelaHistoricoEstoque(historicoEstoqueGlobais);
+    atualizarSelectProdutosHistorico();
     renderizarTabelaVendas(vendasGlobais);
     renderizarTabelaCustos(custosGlobais);
     renderizarTabelaCampanhas(campanhasGlobais);
@@ -126,6 +129,7 @@
   let produtosGlobais = [];
   let clientesGlobais = [];
   let estoqueGlobais = [];
+  let historicoEstoqueGlobais = [];
   let vendasGlobais = [];
   let custosGlobais = [];
   let rentabilidadeGlobais = [];
@@ -143,8 +147,9 @@
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
 
-    document.getElementById(pageId).classList.add('active');
-    btnElement.classList.add('active');
+    const targetPage = document.getElementById(pageId);
+    if (targetPage) targetPage.classList.add('active');
+    if (btnElement) btnElement.classList.add('active');
 
     // Refresh das tabelas específicas se necessário ao trocar de aba
     if (pageId === 'page-dashboard') renderizarDashboard();
@@ -154,6 +159,10 @@
     if (pageId === 'page-produto') renderizarTabelaProdutos(produtosGlobais);
     if (pageId === 'page-estoque') {
       carregarListaEstoque();
+    }
+    if (pageId === 'page-estoque-historico') {
+      carregarHistoricoEstoque();
+      atualizarSelectProdutosHistorico();
     }
     if (pageId === 'page-compra') renderizarTabelaVendas(vendasGlobais);
   }
@@ -543,6 +552,7 @@
       setLoading('btn-estoque', false, 'Salvar Estoque');
       if (res.sucesso === true) {
         voltarParaListaEstoque();
+        carregarHistoricoEstoque();
       }
     })[metodoBackend](dados);
   }
@@ -562,6 +572,7 @@
       google.script.run.withSuccessHandler(res => {
         showToast(res.mensagem, res.sucesso);
         carregarListaEstoque();
+        carregarHistoricoEstoque();
       }).excluirEstoqueItem(produto);
     }
   }
@@ -582,6 +593,9 @@
           <td><strong style="color: var(--text-main);">${item[0]}</strong></td>
           <td style="font-weight: 700; color: ${parseInt(item[1], 10) > 0 ? 'var(--success)' : 'var(--error)'};">${item[1]}</td>
           <td>
+            <button class="btn-icon-action" onclick="irParaHistoricoEstoque('${item[0]}')" title="Ver Histórico deste Produto" style="margin-right: 8px;">
+              <i class="fa-solid fa-clock-rotate-left"></i>
+            </button>
             <button class="btn-icon-action" onclick="abrirEdicaoEstoque(${index})" title="Editar">
               <i class="fa-solid fa-pen-to-square"></i>
             </button>
@@ -592,6 +606,182 @@
         </tr>
       `;
     });
+    tbody.innerHTML = html;
+  }
+
+  // =========================================================
+  // MÓDULO: HISTÓRICO DE ESTOQUE DEDICADO
+  // =========================================================
+
+  function irParaHistoricoEstoque(produtoFiltro = '') {
+    const navBtn = document.getElementById('nav-btn-estoque-historico');
+    showPage('page-estoque-historico', navBtn);
+
+    setTimeout(() => {
+      if (produtoFiltro) {
+        const selectProd = document.getElementById('filtro-historico-produto');
+        if (selectProd) {
+          selectProd.value = produtoFiltro;
+          filtrarHistoricoEstoque();
+        }
+      }
+    }, 100);
+  }
+
+  function voltarParaEstoquePrincipal() {
+    const navButtons = document.querySelectorAll('.nav-btn');
+    let targetBtn = null;
+    navButtons.forEach(btn => {
+      const onclickAttr = btn.getAttribute('onclick') || '';
+      if (onclickAttr.includes("'page-estoque'")) {
+        targetBtn = btn;
+      }
+    });
+    showPage('page-estoque', targetBtn || document.querySelector('.nav-btn'));
+  }
+
+  function carregarHistoricoEstoque(callback) {
+    google.script.run.withSuccessHandler(historico => {
+      historicoEstoqueGlobais = historico || [];
+      filtrarHistoricoEstoque();
+      atualizarSelectProdutosHistorico();
+      if (typeof callback === 'function') callback();
+    }).withFailureHandler(err => {
+      showToast('Erro ao carregar histórico de estoque: ' + err, false);
+      if (typeof callback === 'function') callback();
+    }).getHistoricoEstoque();
+  }
+
+  function recarregarHistoricoEstoque(btn) {
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-arrows-rotate fa-spin"></i> Atualizando...';
+    }
+    carregarHistoricoEstoque(() => {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-arrows-rotate"></i> Atualizar';
+      }
+      showToast('Histórico de estoque atualizado!', true);
+    });
+  }
+
+  function atualizarSelectProdutosHistorico() {
+    const select = document.getElementById('filtro-historico-produto');
+    if (!select) return;
+    const valorAtual = select.value;
+    let html = '<option value="">Todos os Produtos</option>';
+
+    const nomes = new Set();
+    (produtosGlobais || []).forEach(p => { if (p && p[0]) nomes.add(p[0]); });
+    (historicoEstoqueGlobais || []).forEach(h => { if (h && h[1]) nomes.add(h[1]); });
+
+    Array.from(nomes).sort().forEach(nome => {
+      html += `<option value="${nome}" ${nome === valorAtual ? 'selected' : ''}>${nome}</option>`;
+    });
+    select.innerHTML = html;
+  }
+
+  function filtrarHistoricoEstoque() {
+    const prodFiltro = (document.getElementById('filtro-historico-produto')?.value || '').trim().toLowerCase();
+    const tipoFiltro = (document.getElementById('filtro-historico-tipo')?.value || '').trim().toLowerCase();
+    const buscaFiltro = (document.getElementById('filtro-historico-busca')?.value || '').trim().toLowerCase();
+
+    const filtrados = (historicoEstoqueGlobais || []).filter(item => {
+      const dataHora = String(item[0] || '').toLowerCase();
+      const produto = String(item[1] || '').toLowerCase();
+      const tipo = String(item[2] || '').toLowerCase();
+      const ref = String(item[6] || '').toLowerCase();
+      const obs = String(item[7] || '').toLowerCase();
+
+      if (prodFiltro && produto !== prodFiltro) return false;
+      if (tipoFiltro && !tipo.includes(tipoFiltro)) return false;
+      if (buscaFiltro) {
+        const achou = dataHora.includes(buscaFiltro) ||
+                      produto.includes(buscaFiltro) ||
+                      tipo.includes(buscaFiltro) ||
+                      ref.includes(buscaFiltro) ||
+                      obs.includes(buscaFiltro);
+        if (!achou) return false;
+      }
+      return true;
+    });
+
+    renderizarTabelaHistoricoEstoque(filtrados);
+  }
+
+  function renderizarTabelaHistoricoEstoque(dados) {
+    const tbody = document.getElementById('corpo-tabela-estoque-historico');
+    if (!tbody) return;
+
+    if (!dados || dados.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color: var(--text-muted); padding: 35px;">Nenhuma movimentação de estoque encontrada com os filtros atuais.</td></tr>';
+      return;
+    }
+
+    let html = '';
+    dados.forEach(item => {
+      const dataHora = item[0] || '-';
+      const produto = item[1] || '-';
+      const tipo = String(item[2] || 'Ajuste');
+      const qtdNum = Number(item[3]) || 0;
+      const saldoAnterior = item[4] !== undefined && item[4] !== '' ? item[4] : '-';
+      const saldoNovo = item[5] !== undefined && item[5] !== '' ? item[5] : '-';
+      const ref = item[6] || '-';
+      const obs = item[7] || '-';
+
+      let badgeStyle = 'background: rgba(99, 102, 241, 0.15); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.3);';
+      let icone = 'fa-sliders';
+      let qtdCor = 'var(--text-main)';
+      let sinalQtd = '';
+
+      const tipoLower = tipo.toLowerCase();
+      if (tipoLower.includes('entrada') || tipoLower.includes('reposição') || tipoLower.includes('inicial')) {
+        badgeStyle = 'background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3);';
+        icone = 'fa-arrow-down-long';
+        qtdCor = 'var(--success)';
+        sinalQtd = qtdNum > 0 ? '+' : '';
+      } else if (tipoLower.includes('saída') || tipoLower.includes('venda')) {
+        badgeStyle = 'background: rgba(239, 68, 68, 0.15); color: var(--error); border: 1px solid rgba(239, 68, 68, 0.3);';
+        icone = 'fa-arrow-up-long';
+        qtdCor = 'var(--error)';
+        sinalQtd = '';
+      } else if (tipoLower.includes('estorno')) {
+        badgeStyle = 'background: rgba(14, 165, 233, 0.15); color: var(--accent); border: 1px solid rgba(14, 165, 233, 0.3);';
+        icone = 'fa-rotate-left';
+        qtdCor = 'var(--accent)';
+        sinalQtd = qtdNum > 0 ? '+' : '';
+      } else if (tipoLower.includes('exclusão')) {
+        badgeStyle = 'background: rgba(239, 68, 68, 0.15); color: var(--error); border: 1px solid rgba(239, 68, 68, 0.3);';
+        icone = 'fa-trash';
+        qtdCor = 'var(--error)';
+      } else {
+        badgeStyle = 'background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3);';
+        icone = 'fa-sliders';
+        qtdCor = qtdNum > 0 ? 'var(--success)' : (qtdNum < 0 ? 'var(--error)' : 'var(--text-muted)');
+        sinalQtd = qtdNum > 0 ? '+' : '';
+      }
+
+      html += `
+        <tr>
+          <td style="white-space: nowrap; font-size: 13px; color: var(--text-muted);">${dataHora}</td>
+          <td><strong style="color: var(--text-main);">${produto}</strong></td>
+          <td>
+            <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 9999px; font-size: 12px; font-weight: 600; ${badgeStyle}">
+              <i class="fa-solid ${icone}"></i> ${tipo}
+            </span>
+          </td>
+          <td style="font-weight: 700; color: ${qtdCor}; font-size: 14px;">
+            ${sinalQtd}${qtdNum}
+          </td>
+          <td style="color: var(--text-muted);">${saldoAnterior}</td>
+          <td style="font-weight: 700; color: var(--text-main);">${saldoNovo}</td>
+          <td><code style="background: var(--bg-input); padding: 2px 6px; border-radius: 4px; font-size: 12px; color: var(--text-muted);">${ref}</code></td>
+          <td style="font-size: 13px; color: var(--text-muted); max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${obs}">${obs}</td>
+        </tr>
+      `;
+    });
+
     tbody.innerHTML = html;
   }
 
@@ -633,10 +823,11 @@
         document.getElementById('compra-desc').value = '';
         document.getElementById('venda-acrescimo').value = '';
 
-        // Atualiza o estoque imediatamente, sem exigir reload da página.
+        // Atualiza o estoque e histórico imediatamente, sem exigir reload da página.
         google.script.run.withSuccessHandler(estoque => {
           estoqueGlobais = estoque || [];
           renderizarTabelaEstoque(estoqueGlobais);
+          carregarHistoricoEstoque();
         }).getEstoque();
 
         voltarParaListaVendas();
@@ -1019,6 +1210,8 @@
       google.script.run.withSuccessHandler(res => {
         showToast(res.mensagem, res.sucesso);
         carregarListaVendas();
+        carregarListaEstoque();
+        carregarHistoricoEstoque();
       }).excluirVenda(idPedido);
     }
   }

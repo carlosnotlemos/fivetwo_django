@@ -10,13 +10,17 @@ function salvarCompra(dados) {
     return { sucesso: false, mensagem: "Erro: O carrinho está vazio." };
   }
 
-  const resultadoEstoque = debitarEstoquePorVenda(dados.itens);
+  const idPedido = "PED-" + new Date().getTime();
+  const dataCompra = new Date().toLocaleDateString('pt-BR');
+
+  const resultadoEstoque = debitarEstoquePorVenda(
+    dados.itens,
+    idPedido,
+    `Venda realizada (${dados.emailCliente || 'Cliente Balcão'})`
+  );
   if (!resultadoEstoque.sucesso) {
     return { sucesso: false, mensagem: resultadoEstoque.mensagem };
   }
-
-  const idPedido = "PED-" + new Date().getTime();
-  const dataCompra = new Date().toLocaleDateString('pt-BR');
 
   let valorTotalPedido = 0;
   const linhasItens = dados.itens.map(item => {
@@ -103,7 +107,12 @@ function excluirVenda(idPedido) {
     quantidade: Number(item[1] || 0)
   }));
 
-  const restaurado = restaurarEstoquePorVenda(itensDaVenda);
+  const restaurado = restaurarEstoquePorVenda(
+    itensDaVenda,
+    idPedido,
+    `Estorno por cancelamento/exclusão do pedido ${idPedido}`,
+    "Estorno (Cancelamento Venda)"
+  );
   if (!restaurado.sucesso) {
     return { sucesso: false, mensagem: restaurado.mensagem };
   }
@@ -160,12 +169,21 @@ function atualizarCompra(dados) {
     quantidade: Number(item[1] || 0)
   }));
 
-  const restaurado = restaurarEstoquePorVenda(itensAnteriores);
+  const restaurado = restaurarEstoquePorVenda(
+    itensAnteriores,
+    idPedido,
+    `Estorno para edição do pedido ${idPedido}`,
+    "Estorno (Edição Venda)"
+  );
   if (!restaurado.sucesso) {
     return { sucesso: false, mensagem: restaurado.mensagem };
   }
 
-  const estoqueResultado = debitarEstoquePorVenda(dados.itens);
+  const estoqueResultado = debitarEstoquePorVenda(
+    dados.itens,
+    idPedido,
+    `Re-débito com novos itens na edição do pedido ${idPedido}`
+  );
   if (!estoqueResultado.sucesso) {
     return { sucesso: false, mensagem: estoqueResultado.mensagem };
   }
